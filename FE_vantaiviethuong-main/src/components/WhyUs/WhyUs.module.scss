@@ -1,0 +1,163 @@
+@use '../../styles/variables' as *;
+
+.whyUs {
+  padding: $section-py 0;
+  background: $white;
+}
+
+.inner {
+  display: grid;
+  grid-template-columns: 1fr 420px;
+  gap: clamp(40px, 6vw, 100px);
+  align-items: start;
+}
+
+.intro {
+  font-size: 16px;
+  color: $gray-600;
+  line-height: 1.8;
+  margin: 20px 0 40px;
+  max-width: 480px;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.item {
+  display: flex;
+  gap: 20px;
+  padding: 20px 0;
+  border-bottom: 1px solid $gray-100;
+  transition: padding-left 0.3s $ease-out;
+
+  &:hover {
+    padding-left: 8px;
+
+    .num {
+      color: $red;
+    }
+  }
+}
+
+.num {
+  font-family: $font-display;
+  font-size: 13px;
+  font-weight: 700;
+  color: $gray-200;
+  letter-spacing: 0.1em;
+  min-width: 32px;
+  flex-shrink: 0;
+  padding-top: 2px;
+  transition: color 0.3s;
+}
+
+.itemTitle {
+  font-family: $font-display;
+  font-size: 18px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: $black;
+  margin-bottom: 4px;
+  letter-spacing: -0.01em;
+}
+
+.itemDesc {
+  font-size: 14px;
+  color: $gray-600;
+  line-height: 1.6;
+}
+
+// Right side
+.right {
+  position: sticky;
+  top: 100px;
+  background: $black;
+  border-radius: 4px;
+  padding: clamp(32px, 4vw, 56px);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  overflow: hidden;
+}
+
+.bigNumber {
+  font-family: $font-display;
+  font-size: clamp(80px, 10vw, 120px);
+  font-weight: 800;
+  color: $white;
+  line-height: 1;
+  letter-spacing: -0.04em;
+
+  span {
+    color: $red;
+    font-size: 0.6em;
+  }
+}
+
+.bigLabel {
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba($white, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  margin-top: -16px;
+}
+
+.circleStats {
+  display: flex;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.circleStat {
+  flex: 1;
+  background: rgba($white, 0.05);
+  border: 1px solid rgba($white, 0.1);
+  border-radius: 4px;
+  padding: 16px 12px;
+  text-align: center;
+  transition: border-color 0.3s;
+
+  &:hover {
+    border-color: $red;
+  }
+
+  strong {
+    display: block;
+    font-family: $font-display;
+    font-size: 24px;
+    font-weight: 800;
+    color: $red;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  span {
+    font-size: 11px;
+    color: rgba($white, 0.5);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+}
+
+.redAccent {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 120px;
+  height: 4px;
+  background: $red;
+}
+
+@media (max-width: 1024px) {
+  .inner {
+    grid-template-columns: 1fr;
+  }
+
+  .right {
+    position: static;
+  }
+}

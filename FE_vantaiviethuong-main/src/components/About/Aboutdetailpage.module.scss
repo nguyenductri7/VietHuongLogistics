@@ -1,0 +1,1674 @@
+// ═══════════════════════════════════════════════════════════════════════════
+// AboutDetailPage.module.scss — ĐỎ CHỦ ĐẠO · Shimmer 1 màu đỏ ánh nắng
+// ═══════════════════════════════════════════════════════════════════════════
+
+// ─── Tokens ─────────────────────────────────────────────────────────────────
+$red:        #cc1a1a;
+$red-deep:   #9e1414;
+$red-mid:    #b81818;
+$red-glow:   rgba(204, 26, 26, 0.20);
+$red-subtle: rgba(204, 26, 26, 0.07);
+$red-border: rgba(204, 26, 26, 0.22);
+
+$navy-950:   rgb(8,  14,  44);
+$navy-900:   rgb(12, 22,  64);
+$navy-800:   rgb(18, 32,  88);
+$navy-700:   rgb(26, 46, 112);
+$navy-600:   rgb(38, 62, 138);
+$navy-500:   rgb(56, 84, 168);
+$navy-400:   rgb(90,118, 196);
+$navy-300:   rgb(140,164,220);
+$navy-200:   rgb(188,204,238);
+$navy-100:   rgb(224,230,248);
+$navy-50:    rgb(240,243,252);
+
+$white:      #ffffff;
+$gray-50:    #f8f9fb;
+$gray-100:   #f0f2f7;
+$gray-200:   #e2e6f0;
+$gray-300:   #c8cedf;
+$gray-400:   #9aa3bc;
+$gray-500:   #6b7494;
+
+$ink:        $navy-950;
+$ink-soft:   $navy-700;
+$ink-muted:  $navy-400;
+
+$bg-root:    $white;
+$bg-soft:    $gray-50;
+$bg-dark:    $navy-950;
+
+$font:       'Be Vietnam Pro', 'Inter', sans-serif;
+
+$r-xs:  6px;
+$r-sm:  10px;
+$r-md:  16px;
+$r-lg:  22px;
+$r-xl:  32px;
+$r-pill:999px;
+
+$sh-sm: 0 1px 4px rgba(8,14,44,.06), 0 1px 2px rgba(8,14,44,.04);
+$sh-md: 0 4px 18px rgba(8,14,44,.08), 0 2px 6px rgba(8,14,44,.05);
+$sh-lg: 0 12px 40px rgba(8,14,44,.12), 0 4px 12px rgba(8,14,44,.07);
+$sh-xl: 0 24px 60px rgba(8,14,44,.16), 0 8px 20px rgba(8,14,44,.09);
+
+$sh-red:    0 4px 18px rgba(204,26,26,.30);
+$sh-red-lg: 0 10px 36px rgba(204,26,26,.38);
+$sh-red-xl: 0 16px 48px rgba(204,26,26,.45);
+
+$sm: 540px;
+$md: 768px;
+$lg: 1024px;
+$xl: 1280px;
+
+// ─── Mixins ─────────────────────────────────────────────────────────────────
+@mixin container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 clamp(20px, 5vw, 72px);
+}
+
+@mixin section-pad {
+  padding: clamp(64px, 8vw, 112px) 0;
+}
+
+@mixin eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.67rem;
+  font-weight: 700;
+  letter-spacing: 0.20em;
+  text-transform: uppercase;
+  color: $red;
+}
+
+// ─── SHIMMER ────────────────────────────────────────────────────────────────
+@keyframes shimmerSlide {
+  0%   { background-position: -200% center; }
+  100% { background-position: 300% center; }
+}
+
+@mixin shimmer-dark {
+  background: linear-gradient(
+    100deg,
+    $ink 0%, $ink 38%,
+    #e05c00 46%, #ff8c42 50%, #e05c00 54%,
+    $ink 62%, $ink 100%
+  );
+  background-size: 220% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmerSlide 3.8s linear infinite;
+}
+
+@mixin shimmer-red {
+  background: linear-gradient(
+    100deg,
+    $red 0%, $red 32%,
+    #ff7d3b 44%, #ffb347 50%, #ff7d3b 56%,
+    $red 68%, $red 100%
+  );
+  background-size: 220% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmerSlide 3.8s linear infinite;
+  animation-delay: 0.4s;
+}
+
+@mixin shimmer-white {
+  background: linear-gradient(
+    100deg,
+    $white 0%, $white 36%,
+    #ffb347 45%, #ffd580 50%, #ffb347 55%,
+    $white 64%, $white 100%
+  );
+  background-size: 220% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmerSlide 3.8s linear infinite;
+}
+
+// ─── FLAG WAVE (tự động bay bay như lá cờ) ──────────────────────────────────
+@keyframes flagWave {
+  0%   { transform: skewX(0deg)   skewY(0deg)   translateY(0px);   }
+  15%  { transform: skewX(-1.5deg) skewY(0.4deg) translateY(-3px);  }
+  30%  { transform: skewX(1deg)   skewY(-0.3deg) translateY(-1px);  }
+  45%  { transform: skewX(-2deg)  skewY(0.5deg) translateY(-4px);  }
+  60%  { transform: skewX(1.5deg) skewY(-0.4deg) translateY(-2px);  }
+  75%  { transform: skewX(-1deg)  skewY(0.3deg) translateY(-3px);  }
+  100% { transform: skewX(0deg)   skewY(0deg)   translateY(0px);   }
+}
+
+@keyframes flagWaveSlow {
+  0%   { transform: skewX(0deg)    skewY(0deg)    translateY(0px);  }
+  20%  { transform: skewX(-1deg)   skewY(0.3deg)  translateY(-2px); }
+  40%  { transform: skewX(0.8deg)  skewY(-0.2deg) translateY(-1px); }
+  60%  { transform: skewX(-1.2deg) skewY(0.4deg)  translateY(-3px); }
+  80%  { transform: skewX(0.6deg)  skewY(-0.3deg) translateY(-1px); }
+  100% { transform: skewX(0deg)    skewY(0deg)    translateY(0px);  }
+}
+
+// ─── CARD FLOAT (bay nhẹ lên xuống) ─────────────────────────────────────────
+@keyframes cardFloat {
+  0%, 100% { transform: translateY(0px);   }
+  50%       { transform: translateY(-6px);  }
+}
+
+@keyframes cardFloat2 {
+  0%, 100% { transform: translateY(0px);   }
+  50%       { transform: translateY(-8px);  }
+}
+
+@keyframes cardFloat3 {
+  0%, 100% { transform: translateY(0px);   }
+  50%       { transform: translateY(-5px);  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// GLOBAL
+// ═══════════════════════════════════════════════════════════════════════════
+.page {
+  background: $bg-root;
+  font-family: $font;
+  color: $ink;
+  overflow-x: hidden;
+}
+
+.accent { @include shimmer-red; }
+
+.sectionEyebrow {
+  @include eyebrow;
+  margin-bottom: 10px;
+}
+
+.eyebrowLine {
+  display: inline-block;
+  width: 22px;
+  height: 2px;
+  background: $red;
+  border-radius: $r-pill;
+  flex-shrink: 0;
+  transform-origin: left center;
+}
+
+.sectionTitle {
+  font-family: $font;
+  font-size: clamp(2rem, 3.2vw, 2.6rem);
+  font-weight: 800;
+  line-height: 1.18;
+  letter-spacing: -0.03em;
+  margin: 0 0 0.75rem;
+  @include shimmer-dark;
+  .accent { @include shimmer-red; }
+}
+
+.sectionSub {
+  font-size: 0.95rem;
+  color: $ink-soft;
+  line-height: 1.8;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// HERO
+// ═══════════════════════════════════════════════════════════════════════════
+.hero {
+  position: relative;
+  width: 100%;
+  min-height: 100svh;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+.heroBg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 40%;
+    will-change: transform;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      118deg,
+      rgba($navy-950, 0.90) 0%,
+      rgba($navy-900, 0.74) 48%,
+      rgba($navy-800, 0.46) 100%
+    );
+  }
+}
+
+.heroInner {
+  @include container;
+  position: relative;
+  z-index: 2;
+  padding-top: clamp(32px, 4vw, 48px);
+  padding-bottom: clamp(80px, 10vw, 120px);
+  max-width: 860px;
+}
+
+.heroEyebrow {
+  @include eyebrow;
+  color: rgba(255,255,255,.52);
+  margin-bottom: 24px;
+  .eyebrowLine { background: $red; }
+}
+
+.heroTitle {
+  font-family: $font;
+  font-size: clamp(2.8rem, 6vw, 4.8rem);
+  font-weight: 900;
+ line-height: 1.10; 
+  display: block;
+  margin: 0 0 1.2rem;
+  letter-spacing: -0.032em;
+  padding-bottom: 0.08em;   
+  @include shimmer-white;
+  animation-delay: 0.8s;
+  white-space: normal;
+  word-break: keep-all;
+}
+
+.heroAccent {
+  display: inline;
+  @include shimmer-red;
+}
+
+.heroSub {
+  font-size: clamp(0.95rem, 1.6vw, 1.1rem);
+  color: rgba(255,255,255,.68);
+  line-height: 1.9;
+  margin: 0 0 2.2rem;
+  max-width: 500px;
+}
+
+.heroCtas {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.ctaPrimary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: $red;
+  color: $white;
+  font-weight: 700;
+  font-size: 0.84rem;
+  letter-spacing: 0.04em;
+  padding: 13px 28px;
+  border-radius: $r-pill;
+  text-decoration: none;
+  box-shadow: $sh-red;
+  transition: background .2s, transform .18s, box-shadow .2s;
+  &:hover {
+    background: $red-deep;
+    transform: translateY(-2px);
+    box-shadow: $sh-red-lg;
+  }
+}
+
+.ctaOutline {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(255,255,255,.32);
+  color: $white;
+  font-weight: 600;
+  font-size: 0.84rem;
+  letter-spacing: 0.04em;
+  padding: 13px 28px;
+  border-radius: $r-pill;
+  text-decoration: none;
+  backdrop-filter: blur(8px);
+  transition: background .2s, border-color .2s;
+  &:hover {
+    background: rgba(255,255,255,.10);
+    border-color: rgba(255,255,255,.65);
+  }
+}
+
+.heroScrollHint {
+  position: absolute;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  color: rgba(255,255,255,.32);
+  font-size: 0.62rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+.heroWave {
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  width: 100%;
+  line-height: 0;
+  z-index: 5;
+  pointer-events: none;
+
+  svg {
+    display: block;
+    width: 100%;
+    height: clamp(48px, 6vw, 80px);
+  }
+}
+.scrollLine {
+  width: 1px;
+  height: 40px;
+  background: linear-gradient(to bottom, rgba(255,255,255,.4), transparent);
+  animation: scrollPulse 2s ease-in-out infinite;
+}
+
+@keyframes scrollPulse {
+  0%, 100% { opacity: .4; }
+  50%       { opacity: 1;  }
+}
+
+.heroBadgeRow {
+  position: absolute;
+  bottom: 40px;
+  right: clamp(20px, 5vw, 72px);
+  z-index: 2;
+  display: flex;
+  gap: 10px;
+  @media (max-width: $md) { display: none; }
+}
+
+.heroBadge {
+  background: rgba(255,255,255,.07);
+  border: 1px solid rgba(255,255,255,.14);
+  backdrop-filter: blur(14px);
+  padding: 12px 18px;
+  border-radius: $r-md;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 84px;
+  transition: background .22s;
+  &:hover { background: rgba(255,255,255,.12); }
+}
+
+.badgeNum {
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: $white;
+  line-height: 1;
+}
+
+.badgeLabel {
+  font-size: 0.62rem;
+  color: rgba(255,255,255,.52);
+  letter-spacing: .05em;
+  margin-top: 4px;
+  text-align: center;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// STATS
+// ═══════════════════════════════════════════════════════════════════════════
+.statsSection {
+  background: $white;
+  border-top: 1px solid $gray-100;
+  border-bottom: 1px solid $gray-100;
+  padding: clamp(48px, 6vw, 72px) 0;
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 60%; height: 200%;
+    background: radial-gradient(ellipse, rgba($red, 0.04) 0%, transparent 70%);
+    pointer-events: none;
+  }
+}
+
+.statsContainer {
+  @include container;
+  position: relative;
+}
+
+.statsTrack {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  position: relative;
+  padding-bottom: 56px;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 36px;
+    left: 12.5%; right: 12.5%;
+    height: 2px;
+    background: linear-gradient(to right, rgba($red,.25), $red, $red-mid, $red, rgba($red,.25));
+  }
+
+  @media (max-width: $md) {
+    flex-direction: column;
+    align-items: center;
+    gap: 32px;
+    padding-bottom: 0;
+    &::after { display: none; }
+  }
+}
+
+.statPole {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  flex: 1;
+  gap: 0;
+
+&:nth-child(1) { animation-delay: 0s; }
+&:nth-child(2) { animation-delay: 0.6s; }
+&:nth-child(3) { animation-delay: 1.2s; }
+&:nth-child(4) { animation-delay: 1.8s; }
+
+&:hover {
+  animation: flagWave 4.2s ease-in-out infinite;
+}
+
+  @media (max-width: $md) {
+    flex-direction: row;
+    gap: 20px;
+    width: 100%;
+    max-width: 280px;
+    animation: none; // tắt wave trên mobile
+  }
+}
+
+.statNumWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 10px;
+
+  @media (max-width: $md) {
+    margin-bottom: 0;
+    align-items: flex-start;
+  }
+}
+
+.statNum {
+  font-family: $font;
+  font-size: clamp(2.4rem, 4vw, 3.2rem);
+  font-weight: 900;
+  line-height: 1;
+  @include shimmer-red;
+  animation-delay: 0s;
+}
+
+.statLabel {
+  font-size: 0.73rem;
+  letter-spacing: .06em;
+  text-align: center;
+  margin-top: 4px;
+  font-weight: 500;
+  color: #b81818;
+  @media (max-width: $md) { text-align: left; }
+}
+
+.statDot {
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: $white;
+  border: 2.5px solid $red;
+  box-shadow: 0 0 0 4px rgba($red, 0.10), 0 0 10px rgba($red, 0.18);
+  position: relative;
+  z-index: 2;
+  flex-shrink: 0;
+  transition: transform .3s, box-shadow .3s;
+
+  .statPole:hover & {
+    transform: scale(1.4);
+    box-shadow: 0 0 0 6px rgba($red, 0.15), 0 0 18px rgba($red, 0.35);
+  }
+
+  @media (max-width: $md) { order: -1; margin-top: 4px; }
+}
+
+.statHook {
+  width: 2px; height: 14px;
+  background: $red;
+  opacity: 0.35;
+  flex-shrink: 0;
+  @media (max-width: $md) { display: none; }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// IDENTITY
+// ═══════════════════════════════════════════════════════════════════════════
+.identitySection {
+  padding: clamp(28px, 4vw, 56px) 0 clamp(64px, 8vw, 112px);
+  background: $bg-root;
+  position: relative;
+  overflow: hidden;
+}
+
+.identityBgImg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+
+  img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    object-position: center;
+    filter: blur(2px) saturate(0.4);
+    opacity: 0.12;
+    transform: scale(1.05);
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(to right, rgba($white, 0.97) 0%, rgba($white, 0.88) 50%, rgba($white, 0.75) 100%),
+      linear-gradient(to bottom, rgba($white, 0.5) 0%, transparent 30%, transparent 70%, rgba($white, 0.5) 100%);
+  }
+}
+
+.identitySection::before {
+  content: '';
+  position: absolute;
+  top: -80px; left: -80px;
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba($red, 0.08) 0%, transparent 65%);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.identityInner {
+  @include container;
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: 1.2fr 1.55fr;
+  gap: clamp(40px, 7vw, 88px);
+  align-items: start;
+  @media (max-width: $md) { grid-template-columns: 1fr; }
+}
+
+.identityLeft {
+  position: static;
+  top: 80px;
+  border-left: 4px solid $red;
+  padding-left: 18px;
+  .sectionEyebrow { margin-bottom: 6px; }
+  .sectionTitle   { margin-bottom: 0; }
+  @media (max-width: $md) { position: static; }
+}
+
+.identityLeft::before { display: none; }
+
+.identityRight { position: relative; }
+
+.identityImgWrap {
+  position: relative;
+  margin-bottom: 28px;
+  border-radius: $r-lg;
+  overflow: hidden;
+  height: 220px;
+  box-shadow: $sh-lg;
+  transition: transform .4s ease, box-shadow .4s ease;
+
+  img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s ease;
+  }
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: $sh-xl;
+    img { transform: scale(1.04); }
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(to right, $red, $red-deep);
+  }
+
+  @media (max-width: $md) { height: 180px; }
+}
+
+.identityBody {
+  font-size: 0.97rem;
+  color: $ink-soft;
+  line-height: 1.9;
+  margin: 0 0 1rem;
+  strong { color: $ink; font-weight: 700; }
+}
+
+.certBadges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 1.6rem;
+}
+
+.cert {
+  font-size: 0.71rem;
+  font-weight: 700;
+  letter-spacing: .07em;
+  color: $red;
+  background: $red-subtle;
+  border: 1px solid $red-border;
+  padding: 5px 13px;
+  border-radius: $r-pill;
+  transition: background .2s, color .2s, transform .2s;
+  &:hover {
+    background: $red;
+    color: $white;
+    transform: translateY(-2px);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// TICKER
+// ═══════════════════════════════════════════════════════════════════════════
+.tickerSection {
+  background: $gray-50;
+  border-top: 1px solid $gray-200;
+  border-bottom: 1px solid $gray-200;
+  padding: 16px 0;
+  overflow: hidden;
+  z-index: 2;
+}
+
+.tickerTrack {
+  display: flex;
+  width: max-content;
+  animation: tickerScroll 28s linear infinite;
+  &:hover { animation-play-state: paused; }
+}
+
+.tickerItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 32px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: .06em;
+  color: $navy-700;
+  text-transform: uppercase;
+  white-space: nowrap;
+  border-right: 1px solid $gray-200;
+  svg { color: $red; flex-shrink: 0; }
+}
+
+@keyframes tickerScroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SERVICES — Grid 6 cột, 2 card wide + 3 card tall
+// ═══════════════════════════════════════════════════════════════════════════
+.servicesSection {
+  @include section-pad;
+  background: $bg-soft;
+}
+
+.servicesInner {
+  @include container;
+}
+
+.servicesHeader {
+  margin-bottom: clamp(32px, 4.5vw, 52px);
+}
+
+.servicesHeader .sectionTitle {
+  white-space: nowrap;
+}
+
+// ── Grid container duy nhất 6 cột ──────────────────────────────────────────
+.servicesGrid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 16px;
+  width: 100%;
+}
+
+// ── 2 card đầu: mỗi card = 3/6 cột (50%) — layout ngang ──────────────────
+.serviceCardWide {
+  grid-column: span 3;
+  background: $navy-950;
+  border-radius: $r-lg;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: clamp(140px, 35%, 220px) 1fr;
+  min-height: 220px;
+  box-shadow: $sh-md;
+  position: relative;
+  cursor: pointer;
+
+  // Red left accent
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: linear-gradient(to bottom, $red, $red-deep);
+    z-index: 3;
+  }
+
+  // Hover — dừng wave, lift lên
+  &:hover {
+    animation-play-state: paused;
+    transform: translateY(-6px) scale(1.01);
+    box-shadow: $sh-xl, 0 0 0 1px rgba($red, 0.25), 0 0 30px rgba($red, 0.12);
+    transition: transform .3s cubic-bezier(.34,1.56,.64,1), box-shadow .3s;
+  }
+
+  // Transition khi không hover
+  transition: transform .3s cubic-bezier(.34,1.56,.64,1), box-shadow .3s;
+}
+
+// ── 3 card sau: mỗi card = 2/6 cột (33%) — layout dọc ───────────────────
+.serviceCardTall {
+  grid-column: span 2;
+  background: $white;
+  border-radius: $r-lg;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: $sh-md;
+  border: 1px solid $gray-200;
+  position: relative;
+  cursor: pointer;
+
+
+
+  // Red top accent
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(to right, $red, $red-deep);
+    z-index: 3;
+    transform: scaleX(0.4);
+    transform-origin: left;
+    transition: transform .35s ease;
+  }
+
+  // Hover
+  &:hover {
+    animation-play-state: paused;
+    transform: translateY(-8px) scale(1.015);
+    box-shadow: $sh-xl, 0 0 0 1px rgba($red, 0.18), 0 0 24px rgba($red, 0.10);
+    border-color: rgba($red, 0.25);
+    transition: transform .3s cubic-bezier(.34,1.56,.64,1), box-shadow .3s, border-color .25s;
+
+    &::before { transform: scaleX(1); }
+  }
+
+  transition: transform .3s cubic-bezier(.34,1.56,.64,1), box-shadow .3s, border-color .25s;
+}
+
+// ── Ảnh card wide ──────────────────────────────────────────────────────────
+.serviceCardWide .serviceCardImg {
+  position: relative;
+  overflow: hidden;
+  height: 100%;
+  min-height: 180px;
+
+  img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    transition: transform .5s ease, filter .5s ease;
+    filter: brightness(0.82);
+  }
+
+  &::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(to right, rgba($navy-950, 0.50) 0%, transparent 65%);
+    transition: opacity .3s;
+  }
+
+  .serviceCardWide:hover & img {
+    transform: scale(1.08);
+    filter: brightness(0.96);
+  }
+
+  .serviceCardWide:hover &::after { opacity: 0.6; }
+}
+
+// ── Ảnh card tall ──────────────────────────────────────────────────────────
+.serviceCardTall .serviceCardImg {
+  position: relative;
+  overflow: hidden;
+  height: 180px;
+  flex-shrink: 0;
+
+  img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    transition: transform .5s ease;
+  }
+
+  &::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(to bottom, transparent 55%, rgba($ink, 0.15) 100%);
+    transition: opacity .3s;
+  }
+
+  .serviceCardTall:hover & img { transform: scale(1.07); }
+  .serviceCardTall:hover &::after { opacity: 1.5; }
+}
+
+// ── Content wide ───────────────────────────────────────────────────────────
+.serviceCardWide .serviceCardContent {
+  padding: clamp(20px, 2.5vw, 28px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 14px;
+  background: $navy-950;
+}
+
+// ── Content tall ───────────────────────────────────────────────────────────
+.serviceCardTall .serviceCardContent {
+  padding: clamp(18px, 2vw, 24px);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+  background: $white;
+}
+
+// ── Icon wide ──────────────────────────────────────────────────────────────
+.serviceCardWide .serviceCardIcon {
+  width: 40px; height: 40px;
+  border-radius: $r-sm;
+  background: rgba($red, 0.15);
+  border: 1px solid rgba($red, 0.28);
+  display: flex; align-items: center; justify-content: center;
+  color: $red; flex-shrink: 0;
+  transition: background .25s, transform .25s, box-shadow .25s;
+
+  .serviceCardWide:hover & {
+    background: rgba($red, 0.30);
+    transform: scale(1.12) rotate(-4deg);
+    box-shadow: 0 4px 14px rgba($red, 0.30);
+  }
+}
+
+// ── Icon tall ──────────────────────────────────────────────────────────────
+.serviceCardTall .serviceCardIcon {
+  width: 38px; height: 38px;
+  border-radius: $r-sm;
+  background: $red-subtle;
+  border: 1px solid $red-border;
+  display: flex; align-items: center; justify-content: center;
+  color: $red; flex-shrink: 0;
+  transition: background .25s, transform .25s, box-shadow .25s;
+
+  .serviceCardTall:hover & {
+    background: rgba($red, 0.16);
+    transform: scale(1.12) rotate(-4deg);
+    box-shadow: 0 4px 12px rgba($red, 0.22);
+  }
+}
+
+// ── Title ──────────────────────────────────────────────────────────────────
+.serviceCardWide .serviceCardTitle {
+  font-size: 1rem; font-weight: 800;
+  color: $white; letter-spacing: -.02em; margin: 0; line-height: 1.3;
+  transition: color .2s;
+  .serviceCardWide:hover & { color: rgba(255,255,255,0.95); }
+}
+
+.serviceCardTall .serviceCardTitle {
+  font-size: 0.97rem; font-weight: 800;
+  color: $ink; letter-spacing: -.02em; margin: 0; line-height: 1.3;
+  transition: color .2s;
+  .serviceCardTall:hover & { color: $red; }
+}
+
+// ── Desc ───────────────────────────────────────────────────────────────────
+.serviceCardWide .serviceCardDesc {
+  font-size: 0.82rem; color: rgba(255,255,255,0.55);
+  line-height: 1.75; margin: 0; flex: 1;
+  transition: color .2s;
+  .serviceCardWide:hover & { color: rgba(255,255,255,0.75); }
+}
+
+.serviceCardTall .serviceCardDesc {
+  font-size: 0.82rem; color: $ink-soft;
+  line-height: 1.75; margin: 0; flex: 1;
+}
+
+// ── Link ───────────────────────────────────────────────────────────────────
+.serviceCardWide .serviceCardLink {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 0.72rem; font-weight: 700; letter-spacing: .08em;
+  color: rgba(255,255,255,0.30); text-transform: uppercase; text-decoration: none;
+  transition: color .2s, gap .25s, letter-spacing .2s;
+
+  .serviceCardWide:hover & {
+    color: $red;
+    gap: 12px;
+    letter-spacing: .12em;
+  }
+}
+
+.serviceCardTall .serviceCardLink {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 0.72rem; font-weight: 700; letter-spacing: .08em;
+  color: rgba($ink, 0.30); text-transform: uppercase; text-decoration: none;
+  margin-top: auto;
+  transition: color .2s, gap .25s, letter-spacing .2s;
+
+
+  .serviceCardTall:hover & {
+    color: $red;
+    gap: 12px;
+    letter-spacing: .12em;
+  }
+}
+
+// ── Header wrapper ─────────────────────────────────────────────────────────
+.serviceCardHeader {
+  display: flex; align-items: center; gap: 12px;
+}
+
+// ── Fallback ───────────────────────────────────────────────────────────────
+.serviceCard {  position: relative; cursor: pointer; }
+.serviceCardImg {}
+.serviceCardContent {}
+.serviceCardIcon {}
+.serviceCardTitle {}
+.serviceCardDesc {}
+.serviceCardLink {}
+
+// ── Responsive ─────────────────────────────────────────────────────────────
+@media (max-width: $lg) {
+  .serviceCardWide { grid-column: span 3; }
+  .serviceCardTall { grid-column: span 3; }
+}
+
+@media (max-width: $md) {
+  .servicesGrid { grid-template-columns: 1fr 1fr; }
+  .serviceCardWide {
+    grid-column: span 2;
+    grid-template-columns: clamp(120px, 38%, 160px) 1fr;
+    min-height: 160px;
+    animation: none; // tắt wave trên tablet
+  }
+  .serviceCardTall {
+    grid-column: span 1;
+    animation: none;
+  }
+}
+
+@media (max-width: $sm) {
+  .servicesGrid { grid-template-columns: 1fr; }
+  .serviceCardWide {
+    grid-column: span 1;
+    grid-template-columns: 1fr;
+    grid-template-rows: 160px 1fr;
+    &::before { left:0; top:0; right:0; bottom:auto; width:auto; height:3px; }
+  }
+  .serviceCardTall { grid-column: span 1; }
+}
+
+.timelineSection {
+ padding: clamp(24px, 3vw, 48px) 0 clamp(64px, 8vw, 112px);   
+  background: $bg-root;
+}
+
+.timelineHeader {
+  @include container;
+  max-width: 900px;
+  margin-bottom: clamp(48px, 6vw, 80px);
+  text-align: center;  
+  .sectionTitle { display: block; -webkit-line-clamp: unset; overflow: visible; }
+}
+@keyframes timelineLineShimmer {
+  0%   { background-position: 0% -120%; }
+  100% { background-position: 0% 220%; }
+}
+
+.timelineTree {
+  @include container;
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 50%; transform: translateX(-50%);
+    top: 0; bottom: 0;
+    width: 4px;
+    background: linear-gradient(to bottom, $red 0%, $red-mid 40%, rgba($red, 0.5) 85%, transparent 100%);
+    border-radius: $r-pill;
+    @media (max-width: $md) { left: clamp(20px, 4vw, 40px); transform: none; }
+  }
+}
+.timelineEntry {
+  display: grid;
+  grid-template-columns: 1fr 72px 1fr;   // ← từ 40px → 72px cho vừa vòng tròn 64px
+  gap: 0 24px;
+  padding-bottom: clamp(40px, 5.5vw, 64px);
+  position: relative;
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity .55s ease, transform .55s ease;
+
+  &.inView { opacity: 1; transform: translateY(0); }
+
+  @media (max-width: $md) {
+    grid-template-columns: 56px 1fr;   // ← từ 4px → 56px cho vừa vòng tròn 52px
+    gap: 0 16px;
+  }
+}
+
+.timelineEntry:nth-child(odd) {
+  .timelineCard   { grid-column: 1; grid-row: 1; }
+  .timelineCenter { grid-column: 2; grid-row: 1; }
+  .timelineEmpty  { grid-column: 3; grid-row: 1; display: block; }
+  @media (max-width: $md) {
+    .timelineCard   { grid-column: 2; grid-row: 1; }
+    .timelineCenter { grid-column: 1; grid-row: 1; }
+    .timelineEmpty  { display: none; }
+  }
+}
+
+.timelineEntry:nth-child(even) {
+  .timelineCard   { grid-column: 3; grid-row: 1; }
+  .timelineCenter { grid-column: 2; grid-row: 1; }
+  .timelineEmpty  { grid-column: 1; grid-row: 1; display: block; }
+  @media (max-width: $md) {
+    .timelineCard   { grid-column: 2; grid-row: 1; }
+    .timelineCenter { grid-column: 1; grid-row: 1; }
+    .timelineEmpty  { display: none; }
+  }
+}
+
+.timelineEmpty {}
+
+.timelineCenter {
+  display: flex; flex-direction: column; align-items: center; position: relative; justify-content: center;   
+}
+.timelineCard {
+  background: $white;
+  border: 1px solid $gray-200;
+  border-radius: $r-lg;
+  overflow: hidden;
+  box-shadow: $sh-sm;
+  transition: box-shadow .28s, transform .28s, border-color .22s;
+
+  .timelineEntry:hover & {
+    box-shadow: $sh-lg;
+    border-color: rgba($red, .18);
+    transform: translateY(-3px);
+  }
+}
+
+.timelineCardImg {
+  width: 100%; height: 160px; overflow: hidden;
+  img {
+    width: 100%; height: 100%; object-fit: cover;
+    transition: transform .4s ease;
+  }
+  .timelineEntry:hover & img { transform: scale(1.05); }
+}
+
+.timelineCardBody {
+  padding: 18px 20px 20px;
+  border-top: 3px solid $red;
+}
+
+.timelineCardYear {
+  font-size: 0.68rem; font-weight: 900; letter-spacing: .16em;
+  color: $red; margin-bottom: 6px; text-transform: uppercase; display: none;
+  @media (max-width: $md) { display: block; }
+}
+@keyframes timelineNodeShimmer {
+  0%   { background-position: -120% -120%; }
+  100% { background-position: 220% 220%; }
+}
+
+.timelineNode {
+  position: relative;
+  z-index: 2;
+  flex-shrink: 0;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-family: $font;
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: .01em;
+  color: $white;
+  white-space: nowrap;
+
+  background: radial-gradient(circle at 32% 28%, #ff8c42 0%, $red 52%, $red-deep 100%);
+  box-shadow:
+    0 0 0 8px rgba($red, 0.10),
+    0 0 0 16px rgba($red, 0.05),
+    0 10px 26px rgba($red, 0.35);
+
+  transition: transform .3s, box-shadow .3s;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 1;
+    background: linear-gradient(
+      115deg,
+      transparent 35%,
+      rgba(255, 213, 128, 0) 45%,
+      rgba(255, 213, 128, 0.95) 50%,
+      rgba(255, 213, 128, 0) 55%,
+      transparent 65%
+    );
+    background-size: 280% 280%;
+    animation: timelineNodeShimmer 3s linear infinite;
+  }
+
+  > span {
+    position: relative;
+    z-index: 2;
+  }
+
+  .timelineEntry.inView & {
+    box-shadow:
+      0 0 0 8px rgba($red, 0.14),
+      0 0 0 18px rgba($red, 0.07),
+      0 12px 32px rgba($red, 0.5);
+  }
+
+  .timelineEntry:hover & {
+    transform: scale(1.08);
+    box-shadow:
+      0 0 0 10px rgba($red, 0.16),
+      0 0 0 22px rgba($red, 0.08),
+      0 14px 36px rgba($red, 0.55);
+  }
+
+  @media (max-width: $md) {
+    width: 52px;
+    height: 52px;
+    font-size: 0.66rem;
+  }
+}
+.timelineCardTitle {
+  font-size: 1rem; font-weight: 700; color: $ink;
+  letter-spacing: -.015em; margin: 0 0 6px;
+}
+
+.timelineCardDesc {
+  font-size: 0.82rem; color: $ink-soft; line-height: 1.8; margin: 0;
+}
+.valuesSection {
+  padding: clamp(56px, 7vw, 88px) 0 clamp(72px, 9vw, 112px);
+  background: rgb(14, 5, 5);
+  position: relative;
+  overflow: hidden;
+}
+
+.valuesBg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    filter: blur(3px) saturate(0.5) brightness(0.45);
+    transform: scale(1.06);
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      135deg,
+      rgba($red-deep, 0.70) 0%,
+      rgba(14, 4, 4, 0.74) 45%,
+      rgba(20, 6, 6, 0.80) 100%
+    );
+  }
+}
+
+.valuesInner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 clamp(20px, 5vw, 72px);
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(36px, 5vw, 56px);
+}
+
+.valuesHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  .sectionEyebrow {
+    color: rgba(255, 255, 255, 0.42);
+    .eyebrowLine { background: $red; }
+  }
+}
+
+.valuesBigTitle {
+  font-family: $font;
+  font-size: clamp(2rem, 3.4vw, 2.8rem);
+  font-weight: 900;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  margin: 0;
+  @include shimmer-white;
+  animation-delay: 0.2s;
+
+  .accent { @include shimmer-red; }
+}
+
+.valuesGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+
+  @media (max-width: $md) {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+}
+
+.valueCard {
+  position: relative;
+  border-radius: $r-xl;
+  padding: clamp(28px, 3.5vw, 40px) clamp(24px, 3vw, 36px) clamp(24px, 3vw, 32px);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  cursor: default;
+  background: linear-gradient(145deg, rgba($red-deep, 0.55) 0%, rgba(24, 5, 5, 0.72) 100%);
+  min-height: 260px;
+  will-change: transform;
+  transition: border-color 0.25s, box-shadow 0.25s;
+
+  &:hover {
+    border-color: rgba($red, 0.35);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.40), 0 0 0 1px rgba($red, 0.16);
+  }
+}
+
+.valueShimmer {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    105deg,
+    transparent 20%,
+    rgba(255, 160, 40, 0.13) 40%,
+    rgba(255, 200, 80, 0.22) 50%,
+    rgba(255, 160, 40, 0.13) 60%,
+    transparent 80%
+  );
+  transform: translateX(-110%);
+  border-radius: inherit;
+}
+
+.valueNum {
+  position: absolute;
+  top: 12px;
+  right: 18px;
+  font-size: clamp(4rem, 6vw, 6.5rem);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.05em;
+  color: rgba(255, 255, 255, 0.06);
+  z-index: 0;
+  user-select: none;
+  pointer-events: none;
+  font-family: $font;
+  transition: color 0.3s;
+
+  .valueCard:hover & { color: rgba(255, 255, 255, 0.10); }
+}
+
+.valueCardTop {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 8px;
+  position: relative;
+  z-index: 2;
+}
+
+.valueIconWrap {
+  width: 46px;
+  height: 46px;
+  border-radius: $r-sm;
+  background: rgba($red, 0.16);
+  border: 1px solid rgba($red, 0.28);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $red;
+  flex-shrink: 0;
+  transition: background 0.2s, transform 0.25s, box-shadow 0.2s;
+
+  .valueCard:hover & {
+    background: rgba($red, 0.30);
+    transform: scale(1.10) rotate(-4deg);
+    box-shadow: 0 4px 14px rgba($red, 0.28);
+  }
+}
+
+.valueTitle {
+  font-size: 0.80rem;
+  font-weight: 800;
+  color: $white;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.valueText {
+  font-size: 0.90rem;
+  color: rgba(255, 255, 255, 0.58);
+  line-height: 1.88;
+  margin: 0;
+  flex: 1;
+  position: relative;
+  z-index: 2;
+  transition: color 0.25s;
+
+  .valueCard:hover & { color: rgba(255, 255, 255, 0.72); }
+}
+
+.valueCardFooter {
+  margin-top: auto;
+  padding-top: 4px;
+  position: relative;
+  z-index: 2;
+}
+
+.valueCardLine {
+  display: block;
+  height: 2px;
+  width: 32px;
+  border-radius: $r-pill;
+  background: linear-gradient(to right, $red, transparent);
+  transition: width 0.35s ease;
+
+  .valueCard:hover & { width: 64px; }
+}
+
+
+.teamSection {
+  @include section-pad;
+  background: $bg-soft;
+}
+
+.teamHeader {
+  @include container;
+  margin-bottom: clamp(32px, 4.5vw, 52px);
+}
+
+.teamGrid {
+  @include container;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  @media (max-width: $lg) { grid-template-columns: repeat(2, 1fr); }
+  @media (max-width: $sm) { grid-template-columns: 1fr; }
+}
+
+.teamCard {
+  background: $white;
+  border: 1px solid $gray-200;
+  border-radius: $r-lg;
+  padding: 24px 18px;
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+  gap: 12px;
+  box-shadow: $sh-sm;
+  transition: transform .25s cubic-bezier(.34,1.56,.64,1), box-shadow .25s, border-color .22s;
+  position: relative; overflow: hidden;
+
+  // Float tự động
+  &:nth-child(1) { animation: cardFloat  4.2s ease-in-out infinite 0s; }
+  &:nth-child(2) { animation: cardFloat2 4.5s ease-in-out infinite 0.6s; }
+  &:nth-child(3) { animation: cardFloat3 4.0s ease-in-out infinite 1.2s; }
+  &:nth-child(4) { animation: cardFloat  4.3s ease-in-out infinite 1.8s; }
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px; background: $red;
+    transform: scaleX(0); transform-origin: left;
+    transition: transform .3s ease;
+  }
+
+  &:hover {
+    animation-play-state: paused;
+    transform: translateY(-6px) scale(1.02);
+    box-shadow: $sh-lg, 0 0 20px rgba($red, 0.10);
+    border-color: rgba($red, .18);
+    &::before { transform: scaleX(1); }
+  }
+}
+
+.teamAvatar {
+  width: 66px; height: 66px; border-radius: 50%;
+  background: linear-gradient(135deg, $red-deep 0%, $red 100%);
+  color: $white; font-size: 1.1rem; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; box-shadow: $sh-red;
+  transition: transform .25s, box-shadow .25s;
+  .teamCard:hover & { transform: scale(1.08); box-shadow: $sh-red-lg; }
+}
+
+.teamInfo { display: flex; flex-direction: column; gap: 4px; }
+.teamName  { font-size: 0.93rem; font-weight: 700; color: $ink; margin: 0; }
+.teamRole  { font-size: 0.76rem; color: $red; font-weight: 600; margin: 0; }
+.teamYears { font-size: 0.71rem; color: $ink-muted; margin: 0; }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CTA BANNER
+// ═══════════════════════════════════════════════════════════════════════════
+.ctaBanner {
+  position: relative; overflow: hidden;
+  background: linear-gradient(118deg, $red-deep 0%, $red 50%, $red-mid 100%);
+  padding: clamp(56px, 8vw, 100px) 0;
+}
+
+.ctaBanner::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse at 8% 50%,   rgba(255, 160, 100, 0.18) 0%, transparent 50%),
+    radial-gradient(ellipse at 88% 20%,  rgba(180, 10, 10, 0.22) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 100%, rgba(100, 0, 0, 0.14) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.ctaBanner::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(to right, transparent, rgba(255,255,255,0.18), transparent);
+}
+
+.ctaBannerInner {
+  @include container;
+  position: relative; z-index: 2;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 36px; align-items: center;
+  @media (max-width: $md) { grid-template-columns: 1fr; }
+}
+
+.ctaBannerTitle {
+  font-family: $font;
+  font-size: clamp(1.85rem, 3.8vw, 3rem);
+  font-weight: 900; color: $white;
+  line-height: 1.12; margin: 0 0 0.7rem;
+  letter-spacing: -.026em;
+  @include shimmer-white;
+  animation-delay: 0.5s;
+}
+
+.ctaBannerSub {
+  font-size: 0.95rem; color: rgba(255,255,255,.72);
+  line-height: 1.8; margin: 0; max-width: 440px;
+}
+
+.ctaBannerBtns {
+  display: flex; flex-direction: column; gap: 10px; flex-shrink: 0;
+  @media (max-width: $md) { flex-direction: row; flex-wrap: wrap; }
+}
+
+.ctaBannerPrimary {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  background: $white; color: $red;
+  font-weight: 700; font-size: 0.84rem; letter-spacing: .04em;
+  padding: 13px 26px; border-radius: $r-pill; text-decoration: none;
+  box-shadow: 0 6px 20px rgba(0,0,0,.18);
+  transition: background .2s, transform .18s, color .2s, box-shadow .2s;
+  white-space: nowrap;
+  &:hover {
+    background: rgba(255,255,255,.92);
+    transform: translateY(-3px);
+    color: $red-deep;
+    box-shadow: 0 10px 28px rgba(0,0,0,.22);
+  }
+}
+
+.ctaBannerOutline {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  border: 1px solid rgba(255,255,255,.45); color: $white;
+  font-weight: 600; font-size: 0.84rem; letter-spacing: .04em;
+  padding: 13px 26px; border-radius: $r-pill; text-decoration: none;
+  backdrop-filter: blur(8px);
+  transition: background .2s, border-color .2s, transform .18s;
+  white-space: nowrap;
+  &:hover {
+    background: rgba(255,255,255,.14);
+    border-color: rgba(255,255,255,.70);
+    transform: translateY(-2px);
+  }
+}
+
+// ─── Wave divider ────────────────────────────────────────────────────────────
+.waveDivider {
+  width: 100%; overflow: hidden; line-height: 0;
+  position: relative; z-index: 1; margin: -1px 0;
+  svg { display: block; width: 100%; height: auto; }
+  &.waveUp svg { transform: scaleY(-1); }
+}
+
+// ─── Reduced motion ──────────────────────────────────────────────────────────
+@media (prefers-reduced-motion: reduce) {
+  .scrollLine, .tickerTrack { animation: none; }
+  .statNum, .sectionTitle, .heroTitle, .heroAccent, .ctaBannerTitle { animation: none; }
+  .statPole, .serviceCardWide, .serviceCardTall, .teamCard { animation: none; }
+  * { transition-duration: .01ms !important; }
+}
+
+.serviceRibbon {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  z-index: 3;
+  background: $red;
+  transition: background 0.4s ease;
+}
+
+.serviceCardWide:hover .serviceRibbon,
+.serviceCardTall:hover .serviceRibbon {
+  background: linear-gradient(
+    90deg,
+    #9e1414 0%, #cc1a1a 18%, #e8420a 32%,
+    #f59c00 50%, #ffd580 62%, #f59c00 72%,
+    #e8420a 82%, #cc1a1a 92%, #9e1414 100%
+  );
+}
+
+.serviceCornerRibbon {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 90px;
+  height: 90px;
+  z-index: 5;
+  pointer-events: none;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 14px;
+    right: -28px;
+    width: 110px;
+    height: 26px;
+    background: $red-deep;
+    transform: rotate(45deg);
+    box-shadow: 0 3px 12px rgba(204, 26, 26, 0.45);
+    transition: background 0.4s ease;
+  }
+}
+
+.serviceCardWide:hover .serviceCornerRibbon::before,
+.serviceCardTall:hover .serviceCornerRibbon::before {
+  background: linear-gradient(
+    to right,
+    #9e1414 0%, #cc1a1a 25%, #f59c00 55%,
+    #ffd580 72%, #f59c00 85%, #cc1a1a 100%
+  );
+}

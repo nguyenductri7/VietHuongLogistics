@@ -1,0 +1,246 @@
+@use '../../styles/variables' as *;
+
+.wrapper {
+  border: 1px solid $gray-100;
+  border-radius: 10px;
+  overflow: visible;
+  background: $white;
+
+  &:focus-within {
+    border-color: $red;
+  }
+}
+
+.toolbar {
+    border-radius: 10px 10px 0 0; // ← thêm dòng này để toolbar vẫn có bo góc trên
+  overflow: visible;             
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 10px;
+  border-bottom: 1px solid $gray-100;
+  background: rgba($black, 0.015);
+  flex-wrap: wrap;
+
+  button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: transparent;
+    border-radius: 7px;
+    color: $gray-600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+
+    &:hover:not(:disabled) {
+      background: rgba($red, 0.08);
+      color: $red;
+    }
+
+    &:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.active {
+  background: rgba($red, 0.12) !important;
+  color: $red !important;
+}
+
+.divider {
+  width: 1px;
+  height: 20px;
+  background: $gray-100;
+  margin: 0 4px;
+}
+
+.editorArea {
+  min-height: 320px;
+  max-height: 600px;
+  overflow-y: auto;
+  padding: 16px 18px;
+  font-size: 13.5px;
+  line-height: 1.7;
+  color: $black;
+
+  &:focus {
+    outline: none;
+  }
+
+  p {
+    margin: 0 0 12px;
+  }
+
+  h2 {
+    font-family: $font-display;
+    font-size: 18px;
+    font-weight: 700;
+    color: $black;
+    margin: 18px 0 10px;
+    padding-left: 12px;
+    border-left: 3px solid $red;
+  }
+
+  ul, ol {
+    margin: 0 0 12px;
+    padding-left: 22px;
+  }
+
+  strong {
+    font-weight: 700;
+  }
+
+  // placeholder khi rỗng
+  p.is-editor-empty:first-child::before {
+    content: attr(data-placeholder);
+    color: $gray-400;
+    float: left;
+    height: 0;
+    pointer-events: none;
+  }
+}
+// ════════════════════════════════════════════════════════
+// PHẦN THÊM MỚI vào RichTextEditor.module.scss
+// (giữ nguyên .wrapper, .toolbar, .editorArea, .active, .divider cũ của bạn)
+// ════════════════════════════════════════════════════════
+
+.hiddenFileInput {
+  display: none;
+}
+
+.spin {
+  animation: rte-spin 0.8s linear infinite;
+}
+
+@keyframes rte-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.colorPickerWrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.colorMenu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  background: #fff;
+  border: 1px solid #e2e2e2;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  padding: 6px;
+  min-width: 150px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.colorMenuItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  border: none;
+  background: none;
+  border-radius: 6px;
+  font-size: 13.5px;
+  color: #333;
+  cursor: pointer;
+  text-align: left;
+  white-space: nowrap;
+
+  &:hover {
+    background: #f3f3f3;
+  }
+}
+
+.swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.swatch_red { background: #e6332f; }
+.swatch_blue { background: #1d6fd6; }
+.swatch_yellow { background: #f0ad1f; }
+.swatch_green { background: #2f9e44; }
+
+// ── Style nội dung bên trong editor: ảnh + callout box ──
+// Đặt :global vì nội dung TipTap render ra thẻ thuần (img, div.callout-box),
+// không phải class module nên cần :global để CSS module áp dụng được.
+.editorArea {
+  :global(img.blog-content-image) {
+    max-width: 100%;
+    border-radius: 10px;
+    display: block;
+    margin: 14px 0;
+  }
+
+  :global(.callout-box) {
+    border-radius: 10px;
+    padding: 16px 18px;
+    margin: 16px 0;
+    border-left: 4px solid;
+
+    p:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  :global(.callout-red) {
+    background: #fdecec;
+    border-color: #e6332f;
+  }
+
+  :global(.callout-blue) {
+    background: #e8f1fc;
+    border-color: #1d6fd6;
+  }
+
+  :global(.callout-yellow) {
+    background: #fef6e7;
+    border-color: #f0ad1f;
+  }
+
+  :global(.callout-green) {
+    background: #e9f7ed;
+    border-color: #2f9e44;
+  }
+}
+// ════════════════════════════════════════════════════════
+// PHẦN THÊM MỚI (lần 2) vào RichTextEditor.module.scss
+// Thêm vào CUỐI file, sau các class đã thêm lần trước
+// (.hiddenFileInput, .spin, .colorPickerWrap, .colorMenu, .swatch...)
+// ════════════════════════════════════════════════════════
+
+// Toolbar giờ có nhiều nút hơn → cho phép xuống dòng khi không đủ chỗ
+.toolbar {
+  flex-wrap: wrap;
+}
+
+// Nút dropdown "Cỡ chữ" — có chữ + mũi tên, khác nút icon thường
+.sizeBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  padding: 0 8px;
+  white-space: nowrap;
+  min-width: 76px;
+  justify-content: space-between;
+}
+
+
+ 

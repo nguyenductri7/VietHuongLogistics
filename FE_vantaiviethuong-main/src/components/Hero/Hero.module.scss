@@ -1,0 +1,264 @@
+@use '../../styles/variables' as *;
+
+/* ══ Shell ══════════════════════════════════════ */
+.hero {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  min-height: 640px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #080808;
+}
+
+/* ══ Slideshow ══════════════════════════════════ */
+.slideshowWrap  { position: absolute; inset: 0; z-index: 0; }
+.slideshowLayer { position: absolute; inset: 0; will-change: opacity; }
+
+/* ══ Overlays ═══════════════════════════════════ */
+.gradTop {
+  position: absolute; inset: 0; z-index: 2;
+  background: linear-gradient(180deg,
+    rgba($black,.45) 0%, rgba($black,.08) 20%, transparent 45%);
+}
+.gradBottom {
+  position: absolute; inset: 0; z-index: 2;
+  background: linear-gradient(0deg,
+    rgba($black,.65) 0%, rgba($black,.25) 25%, transparent 55%);
+}
+.gradCenter {
+  position: absolute; inset: 0; z-index: 2;
+  background: radial-gradient(ellipse 70% 60% at 50% 50%,
+    rgba($black,.18) 0%, transparent 100%);
+}
+.redTint {
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 3px; background: $red; z-index: 3;
+  box-shadow: 0 0 20px rgba($red,.6);
+}
+
+.skipVideoBtn {
+  position: absolute;
+  right: clamp(18px, 4vw, 52px);
+  bottom: clamp(24px, 5vh, 52px);
+  z-index: 30;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0 18px;
+  border: 1px solid rgba($white, .35);
+  border-radius: 2px;
+  background: rgba($black, .42);
+  color: $white;
+  font-family: $font-body;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 12px 34px rgba($black, .28);
+  transition: background .2s ease, border-color .2s ease, transform .2s ease;
+
+  &:hover {
+    background: rgba($red, .9);
+    border-color: rgba($red, .9);
+    transform: translateY(-2px);
+  }
+}
+
+/* ══ Content ════════════════════════════════════ */
+.content {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 0 clamp(20px, 5vw, 80px);
+  width: 100%;
+  /* Ẩn toàn bộ cho đến khi phase='text' */
+  pointer-events: none;
+  visibility: hidden;
+}
+.contentVisible {
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.heroTitle {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0;
+  margin: 0;
+  line-height: 1;
+  perspective: 700px;
+  perspective-origin: 50% 40%;
+}
+/* Mỗi ký tự */
+.char {
+  display: inline-block;
+  font-family: $font-display;
+  font-size: clamp(60px, 10vw, 140px);
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+  line-height: 0.9;
+  will-change: transform, opacity;
+  transform-style: preserve-3d;
+  position: relative;
+
+  /* ── Màu mặt trước: TRẮNG SÁNG ── */
+  color: #ffffff; 
+ text-shadow:
+    /* Lớp highlight trên cùng — trắng nhạt tạo cảm giác mặt sáng */
+    0   -1px 0   rgba(255,255,255,0.6),
+    /* Cạnh hông đỏ vừa — 10 lớp gradient đỏ tươi → đỏ tối */
+    1px  1px  0  #cc1a1a,
+    2px  2px  0  #be1818,
+    3px  3px  0  #b01616,
+    4px  4px  0  #a01414,
+    5px  5px  0  #901212,
+    6px  6px  0  #801010,
+    7px  7px  0  #700e0e,
+    8px  8px  0  #600c0c,
+    9px  9px  0  #500a0a,
+    10px 10px 0  #400808,
+    /* Ambient glow đỏ nhẹ phía sau */
+    0 0 60px  rgba(200, 0, 30, 0.20),
+    0 0 120px rgba(200, 0, 30, 0.08);
+}
+
+
+.charSpace {
+  /* khoảng cách giữa VIỆT và HƯƠNG */
+  width: 0.35em;
+}
+
+.logisticsRow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 16px;
+  font-family: $font-display;
+  font-size: clamp(15px, 4vw, 35px);
+  font-weight: 900;
+  letter-spacing: 0.44em;
+  text-indent: 0.44em;
+  text-transform: uppercase;
+  will-change: transform;
+
+  /* Chữ đỏ + viền trắng — không 3D */
+  color: $red;
+  background: transparent;
+  -webkit-text-stroke: 1.5px #ffffff;
+  text-shadow: none;
+}
+
+.logLine { display: none; }
+/* ══ Desc ═══════════════════════════════════════ */
+.desc {
+  font-family: $font-body;
+  font-size: clamp(14px, 1.4vw, 17px);
+  color: rgba($white,.7);
+  line-height: 1.8;
+  margin-top: 24px;
+  max-width: 500px;
+}
+
+/* ══ CTAs ═══════════════════════════════════════ */
+.ctas {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-top: 34px;
+}
+
+.btnRed {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: $red; color: $white;
+  font-family: $font-body; font-weight: 700;
+  font-size: 13px; letter-spacing: .08em; text-transform: uppercase;
+  padding: 15px 36px; border-radius: 2px;
+  border: 1.5px solid $red;
+  box-shadow: 0 4px 24px rgba($red,.4);
+  transition: background .25s, border-color .25s, transform .25s, box-shadow .25s;
+  svg { width: 15px; height: 15px; transition: transform .25s; }
+  &:hover {
+    background: $red-dark; border-color: $red-dark;
+    transform: translateY(-3px); box-shadow: 0 10px 32px rgba($red,.5);
+    svg { transform: translateX(5px); }
+  }
+}
+
+.btnGhost {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba($white,.07); color: rgba($white,.9);
+  font-family: $font-body; font-weight: 600;
+  font-size: 13px; letter-spacing: .08em; text-transform: uppercase;
+  padding: 14px 32px; border-radius: 2px;
+  border: 1.5px solid rgba($white,.28);
+  backdrop-filter: blur(8px);
+  transition: background .25s, border-color .25s, transform .25s;
+  svg { width: 14px; height: 14px; transition: transform .25s; }
+  &:hover {
+    background: rgba($white,.13); border-color: rgba($white,.55);
+    transform: translateY(-3px);
+    svg { transform: translateX(4px); }
+  }
+}
+
+/* ══ Scroll hint ════════════════════════════════ */
+.scrollHint {
+  position: absolute; bottom: 28px; left: 50%;
+  transform: translateX(-50%); z-index: 10;
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  color: rgba($white,.3);
+  opacity: 0; visibility: hidden;
+  transition: opacity .6s ease .4s, visibility .6s ease .4s;
+}
+.scrollVisible {
+  opacity: 1; visibility: visible;
+}
+.scrollLine {
+  display: block; width: 1px; height: 32px;
+  background: rgba($white,.22);
+  transform: scaleY(0); transform-origin: top;
+  animation: scrollGrow 1.4s ease-out 1s both;
+}
+@keyframes scrollGrow { to { transform: scaleY(1); } }
+.scrollHint svg {
+  width: 18px; height: 18px;
+  animation: scrollBounce 2s ease-in-out infinite;
+}
+@keyframes scrollBounce {
+  0%,100% { transform: translateY(0); }
+  50%     { transform: translateY(6px); }
+}
+
+.hero {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  min-height: 640px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #080808;
+  will-change: transform;
+ 
+
+}
+
+/* ══ Responsive ══════════════════════════════════ */
+@media (max-width: 768px) {
+  .char         { font-size: clamp(46px, 16vw, 78px); }
+  .logisticsRow { font-size: clamp(12px, 4vw, 18px); letter-spacing: .28em; gap: 12px; }
+  .logLine      { max-width: 50px; }
+}

@@ -1,0 +1,43 @@
+// Colors
+$red:      #f40c0c;
+$red-dark: #c20a0a;
+$red-light:#ff3333;
+$red-pale: #fff0f0;
+$black:    #0a0a0a;
+$gray-900: #111111;
+$gray-800: #1e1e1e;
+$gray-600: #444444;
+$gray-400: #888888;
+$gray-200: #cccccc;
+$gray-100: #f0f0f0;
+$white:    #ffffff;
+// ─── Gray scale ────────────────────────────────────────────────
+$gray-50:  #f9fafb;
+$gray-100: #f3f4f6;
+$gray-200: #e5e7eb;
+$gray-300: #d1d5db;
+$gray-400: #9ca3af;
+$gray-500: #6b7280;
+$gray-600: #4b5563;
+$gray-700: #374151;
+$gray-800: #1f2937;
+$gray-900: #111827;
+
+// Typography
+// UTM Avo: drop UTMAvo.ttf + UTMAvo-Bold.ttf vào public/fonts/
+$font-display: 'Be Vietnam Pro', sans-serif;
+$font-body:    'Be Vietnam Pro', sans-serif;
+
+// Spacing
+$section-py:    clamp(60px, 8vw, 120px);
+$container-max: 1280px;
+$container-px:  clamp(20px, 5vw, 80px);
+
+// Transitions
+$ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
+$ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+// Z-index
+$z-nav:     1000;
+$z-hero:    1;
+$z-overlay: 500;

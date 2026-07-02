@@ -1,0 +1,431 @@
+// ── Tokens (mirrored from AdminDashboard) ──────────────────────
+$red:        #DC2626;
+$red-hover:  #B91C1C;
+$red-light:  #FEF2F2;
+$red-border: #FECACA;
+
+$bg:         #F4F6F9;
+$white:      #FFFFFF;
+$gray-50:    #F9FAFB;
+$gray-100:   #F3F4F6;
+$gray-200:   #E5E7EB;
+$gray-300:   #D1D5DB;
+$gray-400:   #9CA3AF;
+$gray-500:   #6B7280;
+$gray-600:   #4B5563;
+$gray-800:   #1F2937;
+$gray-900:   #111827;
+
+$radius:     14px;
+$radius-sm:  9px;
+$shadow-sm:  0 1px 3px rgba(0,0,0,.07), 0 1px 2px rgba(0,0,0,.04);
+$shadow-md:  0 4px 16px rgba(0,0,0,.09);
+$transition: 160ms ease;
+
+// ── Page wrapper ───────────────────────────────────────────────
+// Settings mounts inside .main of AdminDashboard, so we don't
+// re-declare a full-page layout; we just scope to the content area.
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  font-family: 'Be Vietnam Pro', 'Inter', sans-serif;
+  min-height: 100%;
+  padding: 32px 36px 48px;
+  background: #F4F6F9;
+}
+
+// ── Toast ──────────────────────────────────────────────────────
+.toast {
+  position: fixed;
+  top: 20px;
+  right: 24px;
+  z-index: 9999;
+  padding: 11px 20px;
+  border-radius: $radius-sm;
+  font-size: 13.5px;
+  font-weight: 600;
+  font-family: inherit;
+  box-shadow: $shadow-md;
+  animation: slideIn 200ms ease;
+
+  &.success {
+    background: #ECFDF5;
+    color: #065F46;
+    border: 1px solid #A7F3D0;
+  }
+
+  &.error {
+    background: $red-light;
+    color: $red;
+    border: 1px solid $red-border;
+  }
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(16px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+// ── Header ─────────────────────────────────────────────────────
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 32px;
+}
+
+.backBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: $gray-400;
+  font-size: 12.5px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  margin-bottom: 6px;
+  transition: color $transition;
+
+  &:hover { color: $red; }
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 800;
+  color: $gray-900;
+  margin: 0;
+  letter-spacing: -.02em;
+}
+
+// ── Save button (header) ───────────────────────────────────────
+.saveBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 18px;
+  background: $red;
+  color: $white;
+  border: none;
+  border-radius: $radius-sm;
+  font-size: 13.5px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background $transition, box-shadow $transition;
+  box-shadow: $shadow-sm;
+
+  &:hover:not(:disabled) {
+    background: $red-hover;
+    box-shadow: $shadow-md;
+  }
+
+  &:disabled {
+    opacity: .65;
+    cursor: not-allowed;
+  }
+}
+
+// ── Loading state ──────────────────────────────────────────────
+.loadingBox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 40px 0;
+  color: $gray-400;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+// ── Two-column layout ──────────────────────────────────────────
+.layout {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+  width: 100%;
+}
+
+// ── Tab sidebar ────────────────────────────────────────────────
+.tabs {
+  width: 210px;
+  flex-shrink: 0;
+  background: $white;
+  border: 1.5px solid $gray-200;
+  border-radius: $radius;
+  box-shadow: $shadow-sm;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  position: sticky;
+  top: 24px;
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 9px 12px;
+  border: none;
+  border-radius: $radius-sm;
+  background: transparent;
+  color: $gray-600;
+  font-size: 13.5px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
+  transition: background $transition, color $transition;
+
+  svg { flex-shrink: 0; }
+
+  &:hover {
+    background: $red-light;
+    color: $red;
+  }
+
+  &.tabActive {
+    background: $red;
+    color: $white;
+  }
+}
+
+// ── Fields panel ───────────────────────────────────────────────
+.fields {
+  flex: 1;
+  min-width: 0;
+  background: $white;
+  border: 1.5px solid $gray-200;
+  border-radius: $radius;
+  box-shadow: $shadow-sm;
+  padding: 24px 28px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.sectionTitle {
+  font-size: 15px;
+  font-weight: 800;
+  color: $gray-900;
+  letter-spacing: -.01em;
+  margin: 0 0 22px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid $gray-100;
+}
+
+// ── Individual field ───────────────────────────────────────────
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 20px;
+
+  &:last-of-type { margin-bottom: 0; }
+}
+
+.label {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: $gray-600;
+  letter-spacing: .01em;
+  text-transform: uppercase;
+}
+
+.input {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1.5px solid $gray-200;
+  border-radius: $radius-sm;
+  background: $gray-50;
+  color: $gray-900;
+  font-size: 13.5px;
+  font-family: inherit;
+  transition: border-color $transition, box-shadow $transition;
+  box-sizing: border-box;
+
+  &:focus {
+    outline: none;
+    border-color: $red;
+    box-shadow: 0 0 0 3px rgba($red, .1);
+    background: $white;
+  }
+
+  &::placeholder { color: $gray-300; }
+}
+
+.textarea {
+  @extend .input;
+  resize: vertical;
+  line-height: 1.6;
+  min-height: 90px;
+}
+
+// ── Image field ────────────────────────────────────────────────
+.imageField {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.imagePreview {
+  position: relative;
+  width: 100%;
+  max-width: 340px;
+  aspect-ratio: 16 / 9;
+  border: 1.5px dashed $gray-200;
+  border-radius: $radius-sm;
+  overflow: hidden;
+  cursor: pointer;
+  background: $gray-50;
+  transition: border-color $transition;
+
+  &:hover {
+    border-color: $red;
+    border-style: solid;
+  }
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+}
+
+.imagePlaceholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 8px;
+  color: $gray-300;
+
+  p {
+    font-size: 12.5px;
+    font-weight: 500;
+    margin: 0;
+    color: $gray-400;
+  }
+}
+
+.uploadingOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: rgba($white, .85);
+  color: $red;
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.imageUrl {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: $gray-400;
+
+  span { font-weight: 600; }
+}
+
+.urlLink {
+  color: $red;
+  text-decoration: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 280px;
+
+  &:hover { text-decoration: underline; }
+}
+
+.changeImgBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+  padding: 7px 14px;
+  border: 1.5px solid $red-border;
+  border-radius: $radius-sm;
+  background: $red-light;
+  color: $red;
+  font-size: 12.5px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background $transition, border-color $transition;
+
+  &:hover:not(:disabled) {
+    background: $red;
+    color: $white;
+    border-color: $red;
+  }
+
+  &:disabled {
+    opacity: .6;
+    cursor: not-allowed;
+  }
+}
+
+// ── Save row at bottom of fields ───────────────────────────────
+.saveRow {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid $gray-100;
+}
+
+// ── Spinner ────────────────────────────────────────────────────
+.spinner {
+  animation: spin 700ms linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+// ── Responsive ─────────────────────────────────────────────────
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+
+  .layout {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .tabs {
+    width: 100%;
+    position: static;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .tab {
+    flex: 1;
+    min-width: 120px;
+    justify-content: center;
+  }
+
+  .fields {
+    padding: 18px 16px 22px;
+  }
+
+  .imagePreview {
+    max-width: 100%;
+  }
+}

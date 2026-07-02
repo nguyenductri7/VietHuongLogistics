@@ -1,0 +1,109 @@
+@use './variables' as *;
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; font-size: 16px; }
+
+body {
+  font-family: $font-body;
+  color: $black;
+  background: $white;
+  line-height: 1.6;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,h2,h3,h4,h5,h6 {
+  font-family: $font-display;
+  line-height: 1.1;
+}
+
+a { text-decoration: none; color: inherit; }
+img, video { max-width: 100%; display: block; }
+ul { list-style: none; }
+button { border: none; cursor: pointer; font-family: $font-body; }
+
+.container {
+  max-width: $container-max;
+  margin: 0 auto;
+  padding: 0 $container-px;
+}
+
+.section-label {
+  font-family: $font-body;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: $red;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  &::before {
+    content: '';
+    display: block;
+    width: 24px; height: 2px;
+    background: $red;
+    flex-shrink: 0;
+  }
+}
+
+.section-title {
+  font-family: $font-display;
+  font-size: clamp(36px, 5vw, 64px);
+  font-weight: 700;
+  text-transform: uppercase;
+  color: $black;
+  line-height: 1;
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: $red;
+  color: $white;
+  font-family: $font-body;
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.05em;
+  padding: 14px 32px;
+  border-radius: 2px;
+  transition: background .3s $ease-out, transform .2s $ease-out;
+  text-transform: uppercase;
+  &:hover { background: $red-dark; transform: translateY(-2px); }
+  svg { width: 16px; height: 16px; transition: transform .3s $ease-out; }
+  &:hover svg { transform: translateX(4px); }
+}
+
+.btn-outline {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: transparent;
+  color: $red;
+  border: 1.5px solid $red;
+  font-family: $font-body;
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.05em;
+  padding: 13px 32px;
+  border-radius: 2px;
+  transition: all .3s $ease-out;
+  text-transform: uppercase;
+  &:hover { background: $red; color: $white; transform: translateY(-2px); }
+}
+
+.anim-underline {
+  position: relative;
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -2px; left: 0;
+    width: 0; height: 2px;
+    background: $red;
+    transition: width .4s $ease-out;
+  }
+  &:hover::after { width: 100%; }
+}

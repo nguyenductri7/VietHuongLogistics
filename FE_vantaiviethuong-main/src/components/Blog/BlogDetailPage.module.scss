@@ -1,0 +1,578 @@
+@use '../../styles/variables' as *;
+
+// ─── Page wrapper ──────────────────────────────────────────────────────────
+.page {
+  .container {
+    max-width: 1400px !important;
+    padding: 0 clamp(24px, 4vw, 80px);
+  }
+}
+
+// ─── Breadcrumb ────────────────────────────────────────────────────────────
+.breadcrumb {
+  position: absolute;
+  top: calc(50px + 0px); // navbar + offset
+  left: 0;
+  right: 0;
+  z-index: 10;
+
+  .container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+}
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(#fff, 0.75);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  transition: color 0.2s;
+   border: 1px solid rgba(#fff, 0.35);
+  border-radius: 5px;
+  background: $red;
+  border: none;
+  padding: 5px 14px;
+
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  &:hover {
+    color: #fff;
+  }
+}
+
+.sep {
+  color: rgba(#fff, 0.35);
+  font-size: 12px;
+}
+
+.breadCat {
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(#fff, 0.5);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+// ─── Hero Banner ───────────────────────────────────────────────────────────
+.heroBanner {
+  position: relative;
+  padding-top: calc(80px + clamp(32px, 5vh, 56px));
+  padding-bottom: 0;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(160deg, rgba(5, 30, 46, 0.72) 0%, rgba(2, 13, 24, 0.88) 100%);
+    z-index: 1;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 30% 50%, rgba(0, 212, 200, 0.09) 0%, transparent 65%);
+    pointer-events: none;
+    z-index: 1;
+  }
+}
+
+.bannerOverlay {
+  display: none;
+}
+
+.bannerContent {
+  position: relative;
+  z-index: 2;
+  padding-bottom: 0;
+}
+
+.catBadge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #00d4c8;
+  border: 1px solid rgba(0, 212, 200, 0.35);
+  border-radius: 5px;
+  padding: 5px 14px;
+  margin-bottom: 20px;
+}
+
+.title {
+  font-family: $font-display;
+  font-size: clamp(28px, 4vw, 52px);
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.15;
+  margin: 0 0 20px;
+  letter-spacing: -0.02em;
+  max-width: 900px;
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: rgba(#fff, 0.5);
+  margin-bottom: 0;
+}
+
+.dot {
+  color: rgba(#fff, 0.25);
+  font-size: 10px;
+}
+
+.heroWave {
+  position: relative;
+  z-index: 2;
+  line-height: 0;
+  margin-top: clamp(40px, 5vh, 64px);
+
+  svg {
+    display: block;
+    width: 100%;
+    height: clamp(50px, 6vw, 80px);
+  }
+}
+
+// ─── Layout (article + sidebar) ────────────────────────────────────────────
+// Cột bài viết ~70%, sidebar ~30% — dùng minmax để sidebar không bị bóp quá nhỏ
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 380px);
+ gap: 40px; 
+  padding: 56px 0 80px;
+  align-items: start;
+  max-width: 1400px;
+  margin: 0 auto; 
+
+  @media (max-width: 1024px) {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+}
+
+// ─── Article ───────────────────────────────────────────────────────────────
+.article {
+  min-width: 0;
+}
+
+.lead {
+  font-size: 17px;
+  color: $gray-600;
+  line-height: 1.75;
+  font-weight: 400;
+  margin-bottom: 36px;
+  padding-bottom: 32px;
+  border-bottom: 1px solid $gray-100;
+}
+
+.content {
+  :global(h2) {
+    font-family: $font-display;
+    font-size: clamp(19px, 2.2vw, 24px);
+    font-weight: 700;
+    color: $black;
+    margin: 40px 0 16px;
+    padding-left: 16px;
+    border-left: 3px solid $red;
+    line-height: 1.3;
+  }
+
+  // ← thêm đoạn này để reset h2 bên trong callout
+  :global(.callout-box h2),
+  :global(.callout-box p) {
+    border-left: none !important;
+    padding-left: 0 !important;
+    margin: 0 0 8px !important;
+  }
+
+
+  .h2 {
+    font-family: $font-display;
+    font-size: clamp(19px, 2.2vw, 24px);
+    font-weight: 700;
+    color: $black;
+    margin: 40px 0 16px;
+    padding-left: 16px;
+    border-left: 3px solid $red;
+    line-height: 1.3;
+  }
+
+  .bold {
+    font-weight: 700;
+    color: $black;
+    margin: 0 0 8px;
+  }
+
+  .para {
+    margin: 0 0 16px;
+    color: $gray-600;
+  }
+
+  // Heading/đoạn văn render trực tiếp từ HTML (TipTap) chứ không qua class module
+  :global(h2) {
+    font-family: $font-display;
+    font-size: clamp(19px, 2.2vw, 24px);
+    font-weight: 700;
+    color: $black;
+    margin: 40px 0 16px;
+    padding-left: 16px;
+    border-left: 3px solid $red;
+    line-height: 1.3;
+  }
+
+  :global(p) {
+    margin: 0 0 16px;
+    color: $gray-600;
+  }
+
+  :global(strong),
+  :global(b) {
+    font-weight: 700;
+    color: $black;
+  }
+
+  :global(em),
+  :global(i) {
+    font-style: italic;
+  }
+
+  :global(u) {
+    text-decoration: underline;
+  }
+
+  :global(mark) {
+    padding: 0.05em 0.2em;
+    border-radius: 3px;
+  }
+
+  // Căn lề (TipTap TextAlign xuất ra style="text-align: ...")
+  :global([style*="text-align: center"]) { text-align: center; }
+  :global([style*="text-align: right"])  { text-align: right; }
+  :global([style*="text-align: justify"]) { text-align: justify; }
+
+  // Danh sách — fix bug mất bullet/số thứ tự
+  :global(ul) {
+    margin: 0 0 18px;
+    padding-left: 22px;
+    list-style: disc outside;
+  }
+
+  :global(ol) {
+    margin: 0 0 18px;
+    padding-left: 22px;
+    list-style: decimal outside;
+  }
+
+  :global(li) {
+    margin-bottom: 8px;
+    color: $gray-600;
+    line-height: 1.75;
+
+    &::marker {
+      color: $red;
+      font-weight: 700;
+    }
+  }
+
+  :global(li > p) {
+    margin: 0;
+    display: inline;
+  }
+
+  // Ảnh chèn giữa bài viết
+  :global(img) {
+    max-width: 100%;
+    height: auto;
+    border-radius: 12px;
+    display: block;
+    margin: 28px auto;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  }
+
+:global(.callout-box) {
+  border-radius: 12px;
+  padding: 18px 22px 18px 26px;  // ← tăng padding-left để nhường chỗ cho line
+  margin: 24px 0;
+  border: none !important;
+  border-left: none !important;
+  font-size: 15px;
+  line-height: 1.65;
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 16px;
+    bottom: 16px;
+    width: 3px;
+    border-radius: 2px;
+    background: currentColor;
+    opacity: 0.4;
+  }
+
+  p, :global(p) { margin: 0 0 10px; color: inherit; }
+  p:last-child, :global(p:last-child) { margin-bottom: 0; }
+}
+:global(.callout-red) {
+  background: #fdf0f0;
+  color: #7a1614;
+  border: none;
+}
+
+:global(.callout-blue) {
+  background: #eef4fd;
+  color: #103a6b;
+  border: none;
+}
+
+:global(.callout-yellow) {
+  background: #fef8ec;
+  color: #7a5208;
+  border: none;
+}
+
+:global(.callout-green) {
+  background: #edf7f0;
+  color: #1c5e2c;
+  border: none;
+}
+}
+
+// ─── Sidebar ───────────────────────────────────────────────────────────────
+// Sticky: dính trong viewport khi cuộn bài viết dài, dừng lại khi tới cuối .layout
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  position: sticky;
+  top: 96px;
+  align-self: start;
+  max-height: calc(100vh - 120px);
+
+  @media (max-width: 1024px) {
+    position: static;
+    max-height: none;
+  }
+}
+
+.sideCard {
+  background: #fafafa;
+  border: 1px solid $gray-100;
+  border-radius: 18px;
+  padding: 26px;
+}
+
+.sideLabel {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: $gray-400;
+  margin-bottom: 20px;
+}
+
+.relatedList {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+// Card "Bài viết liên quan" to hơn, nổi bật hơn
+.relatedItem {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  text-decoration: none;
+  transition: opacity 0.2s;
+
+  &:hover { opacity: 0.75; }
+}
+
+.relatedImg {
+  width: 84px;
+  height: 84px;
+  border-radius: 12px;
+  flex-shrink: 0;
+}
+
+.relatedBody {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding-top: 2px;
+}
+
+.relatedCat {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: $red;
+}
+
+.relatedTitle {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: $black;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.relatedTime {
+  font-size: 12px;
+  color: $gray-400;
+}
+
+.sideText {
+  font-size: 14px;
+  color: $gray-600;
+  line-height: 1.65;
+  margin-bottom: 18px;
+}
+
+.ctaBtn {
+  display: inline-block;
+  background: $red;
+  color: #fff;
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 11px 24px;
+  border-radius: 8px;
+  transition: opacity 0.2s;
+  text-decoration: none;
+
+  &:hover { opacity: 0.85; }
+}
+
+// ─── More Posts ────────────────────────────────────────────────────────────
+.morePosts {
+  background: #f8f8f8;
+  padding: 64px 0;
+}
+
+.moreLabel {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: $gray-400;
+  margin-bottom: 28px;
+}
+
+.moreGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+
+  @media (max-width: 1024px) { grid-template-columns: repeat(2, 1fr); }
+  @media (max-width: 640px)  { grid-template-columns: 1fr; }
+}
+
+.moreCard {
+  border-radius: 16px;
+  overflow: hidden;
+  background: $white;
+  border: 1px solid $gray-100;
+  text-decoration: none;
+  transition: transform 0.3s $ease-out, box-shadow 0.3s $ease-out;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 36px rgba($black, 0.08);
+  }
+}
+
+.moreImg {
+  position: relative;
+  height: 160px;
+}
+
+.moreCatBadge {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: $white;
+  background: $red;
+  padding: 3px 9px;
+  border-radius: 4px;
+}
+
+.moreBody {
+  padding: 16px 18px;
+}
+
+.moreTitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: $black;
+  line-height: 1.4;
+  margin-bottom: 6px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.moreTime {
+  font-size: 11.5px;
+  color: $gray-400;
+}
+
+// ─── Not found ─────────────────────────────────────────────────────────────
+.notFound {
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+
+  h1 {
+    font-family: $font-display;
+    font-size: 28px;
+    margin-bottom: 24px;
+    color: $black;
+  }
+}
+
+.backBtn {
+  background: $red;
+  color: #fff;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+
+  &:hover { opacity: 0.85; }
+}
+.page {
+  :global(.container) {
+    max-width: 1440px;
+    padding: 0 clamp(20px, 3vw, 48px);
+  }
+}

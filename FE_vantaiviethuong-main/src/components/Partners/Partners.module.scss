@@ -1,0 +1,291 @@
+// Partners.module.scss
+@use '../../styles/variables' as *;
+
+// ─── Section ───────────────────────────────────────────────────────────────
+.partners {
+  padding: 56px 0 112px;
+  background: #051e2e;
+  overflow: hidden;
+}
+
+// ─── Header ────────────────────────────────────────────────────────────────
+.header {
+  max-width: 600px;
+  margin-bottom: 56px;
+}
+
+.eyebrow {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: #28e285;
+ padding: 6px 18px;       // ← thêm padding trong
+  border: 1px solid #64c18b;
+  border-radius: 6px;
+
+}
+
+.title {
+  font-family: $font-display;
+  font-size: clamp(2rem, 4vw, 2.8rem);
+  font-weight: 800;
+  line-height: 1.35;
+  letter-spacing: -.03em;
+  color: #ffffff;
+  margin: 0 0 16px;
+}
+
+@keyframes partnersShimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position:  300% center; }
+}
+
+.accent {
+  font-style: normal;
+  background: linear-gradient(
+    100deg,
+    #cc1a1a  0%,  #cc1a1a 22%,
+    #e8420a 36%,  #f59c00 50%,
+    #ffd580 58%,  #f59c00 65%,
+    #e8420a 75%,  #cc1a1a 88%,
+    #cc1a1a 100%
+  );
+  background-size: 220% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: partnersShimmer 3.2s linear infinite;
+}
+
+.sub {
+  font-size: 15.5px;
+  color: rgba(255, 255, 255, 0.52);
+  line-height: 1.7;
+  max-width: 480px;
+  margin: 0;
+}
+
+// ─── Ticker ────────────────────────────────────────────────────────────────
+.tickerWrap {
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 64px;
+  padding: 4px 0;
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 120px;
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  &::before {
+    left: 0;
+    background: linear-gradient(90deg, #020d18, transparent);
+  }
+
+  &::after {
+    right: 0;
+    background: linear-gradient(-90deg, #020d18, transparent);
+  }
+}
+
+.tickerTrack {
+  display: flex;
+  gap: 16px;
+  width: max-content;
+  will-change: transform;
+}
+
+.logoPill {
+  flex-shrink: 0;
+  height: 128px;        // tăng từ 108px → 128px
+  padding: 0 56px;      // tăng padding ngang từ 48px → 56px
+  background: #ffffff;
+  border: 1px solid rgba(255, 255, 255, .12);
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color .3s, transform .25s;
+
+  &:hover {
+    border-color: rgba(255, 255, 255, .28);
+    transform: translateY(-3px);
+  }
+
+  img {
+    height: 84px;         // tăng từ 68px → 84px
+    width: auto;
+    object-fit: contain;
+    font-size: 50px;
+  }
+}
+
+// ─── Bento grid ────────────────────────────────────────────────────────────
+.bento {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  gap: 16px;
+
+  @media (max-width: 860px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.rightCol {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.topRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+
+  @media (max-width: 560px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// ─── Card base ─────────────────────────────────────────────────────────────
+// Màu card đậm hơn: gradient từ màu accent đến trắng kem thay vì trắng thuần
+%card {
+ background: linear-gradient(135deg, var(--grad-from, #dce8ff) 50%, #ede8e0 100%);
+  border: 1px solid rgba($black, .12);   // border rõ hơn (.07 → .12)
+  border-radius: 24px;
+  padding: 28px 26px;
+  will-change: transform;
+  transition: border-color .3s, box-shadow .3s;
+
+  &:hover {
+    border-color: rgba($black, .22);
+    box-shadow: 0 8px 28px rgba($black, .10);
+  }
+}
+
+// ─── Tall card ─────────────────────────────────────────────────────────────
+.cardTall {
+  @extend %card;
+  display: flex;
+  flex-direction: column;
+  min-height: 390px;
+}
+
+.openQuote {
+  font-family: Georgia, serif;
+  font-size: 64px;
+  line-height: .85;
+  color: rgba($black, .18);   // đậm hơn (.09 → .18)
+  display: block;
+  margin: 12px 0 6px;
+}
+
+.quoteLg {
+  font-size: 15.5px;
+  line-height: 1.8;
+  color: #1a1a2e;             // đậm hơn ($gray-800 → gần đen)
+  font-style: italic;
+  flex: 1;
+  margin-bottom: 0;
+}
+
+.cardFooter {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid rgba($black, .10);  // rõ hơn (.06 → .10)
+}
+
+// ─── Small card ────────────────────────────────────────────────────────────
+.cardSmall {
+  @extend %card;
+  display: flex;
+  flex-direction: column;
+}
+
+.quoteSm {
+  font-size: 13.5px;
+  line-height: 1.74;
+  color: #3d3d5c;             // đậm hơn ($gray-400 → tím xám đậm)
+  font-style: italic;
+  margin-top: 12px;
+}
+
+// ─── Wide card ─────────────────────────────────────────────────────────────
+.cardWide {
+  @extend %card;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 20px;
+  align-items: center;
+
+  @media (max-width: 560px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.wideLeft {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-shrink: 0;
+}
+
+.wideQuote {
+  font-size: 13.5px;
+  line-height: 1.74;
+  color: #3d3d5c;             // đậm hơn ($gray-400 → tím xám đậm)
+  font-style: italic;
+  border-left: 1px solid rgba($black, .14);  // rõ hơn (.08 → .14)
+  padding-left: 20px;
+  margin: 0;
+
+  @media (max-width: 560px) {
+    border-left: none;
+    border-top: 1px solid rgba($black, .14);
+    padding: 16px 0 0;
+  }
+}
+
+// ─── Shared atoms ──────────────────────────────────────────────────────────
+.stars {
+  display: flex;
+  gap: 2px;
+  margin-bottom: 12px;
+}
+
+.avatar {
+  flex-shrink: 0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  user-select: none;
+  border: 1px solid rgba($black, .12);  // rõ hơn (.08 → .12)
+}
+
+.name {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+  color: #1a1a2e;             // đậm hơn ($black → gần đen đậm)
+}
+
+.role {
+  display: block;
+  font-size: 12px;
+  color: #555577;             // đậm hơn ($gray-400 → xám tím đậm)
+  margin-top: 2px;
+}

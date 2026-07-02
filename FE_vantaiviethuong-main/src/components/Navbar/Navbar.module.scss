@@ -1,0 +1,221 @@
+@use '../../styles/variables' as *;
+
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: $z-nav;
+  transition: background 0.5s $ease-out, box-shadow 0.5s $ease-out;
+  // Mặc định: có nền mờ để text navbar không bị lẫn vào hero
+  background: linear-gradient(180deg, rgba($black, 0.65) 0%, transparent 100%);
+
+  &.scrolled {
+    background: rgba($white, 0.97);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: 0 1px 0 rgba($black, 0.1);
+
+    .navLink {
+      color: $gray-800;
+      &:hover { color: $red; }
+    }
+    .logoMain { color: $red; }
+    .logoSub  { color: $gray-600; }
+    .ctaBtn   { background: $red; border-color: $red; color: $white; }
+    .logoMark { background: $red; }
+    .hamburger span { background: $gray-800; }
+  }
+}
+
+.inner {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  height: 56px;
+}
+
+/* ── Logo ─────────────────────────────────────────── */
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  text-decoration: none;
+}
+
+.logoMark {
+  width: 42px;
+  height: 42px;
+  background: $red;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  flex-shrink: 0;
+  transition: background 0.3s;
+}
+.logoVH {
+  font-family: $font-display;
+  font-weight: 900;
+  font-size: 17px;
+  color: $white;
+  letter-spacing: 1px;
+}
+.logoText {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.logoMain {
+  font-family: $font-display;
+  font-weight: 800;
+  font-size: 19px;
+  color: $white;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  text-transform: uppercase;
+  transition: color 0.3s;
+}
+.logoSub {
+  font-family: $font-body;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba($white, 0.55);
+  transition: color 0.3s;
+}
+
+/* ── Desktop nav ─────────────────────────────────── */
+.nav { flex: 1; }
+
+.navList {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.navLink {
+  font-family: $font-body;
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba($white, 0.92);
+  padding: 7px 11px;
+  border-radius: 3px;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  transition: color 0.2s, background 0.2s;
+
+  &:hover {
+    color: $white;
+    background: rgba($white, 0.08);
+  }
+  &::after { background: $red !important; }
+}
+
+/* ── CTA button ──────────────────────────────────── */
+.ctaBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: $red;
+  border: 1.5px solid $red;
+  color: $white;
+  font-family: $font-body;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  padding: 9px 22px;
+  border-radius: 3px;
+  text-transform: uppercase;
+  transition: all 0.3s $ease-out;
+  white-space: nowrap;
+  cursor: pointer;
+  text-decoration: none;
+  flex-shrink: 0;
+
+  svg { width: 14px; height: 14px; }
+  &:hover { background: $red-dark; border-color: $red-dark; transform: translateY(-1px); }
+}
+
+/* ── Hamburger ───────────────────────────────────── */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: transparent;
+  padding: 8px;
+  margin-left: auto;
+
+  span {
+    display: block;
+    width: 24px;
+    height: 2px;
+    background: $white;
+    transition: all 0.3s $ease-out;
+    transform-origin: center;
+  }
+
+  &.open {
+    span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+    span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+    span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+  }
+}
+
+/* ── Mobile menu ─────────────────────────────────── */
+.mobileMenu {
+  display: none;
+  background: $white;
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 0.4s $ease-in-out;
+
+  &.mobileOpen { max-height: 520px; }
+
+  nav {
+    padding: 16px clamp(20px,5vw,80px) 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  ul { display: flex; flex-direction: column; }
+  a {
+    display: block;
+    padding: 13px 0;
+    font-size: 15px;
+    font-weight: 500;
+    color: $gray-800;
+    border-bottom: 1px solid $gray-100;
+    transition: color 0.2s;
+    &:hover { color: $red; }
+  }
+  .btnPrimary { margin-top: 16px; width: fit-content; }
+}
+
+/* ── Responsive ──────────────────────────────────── */
+@media (max-width: 1100px) {
+  .navLink { font-size: 12px; padding: 6px 8px; }
+  .inner { gap: 16px; }
+}
+
+@media (max-width: 820px) {
+  .nav, .ctaBtn { display: none; }
+  .hamburger { display: flex; }
+  .mobileMenu { display: block; }
+}
+/* Logo image */
+.logoImg {
+  height: 52px;          // điều chỉnh cao thấp tùy logo
+  width: auto;
+  object-fit: contain;
+  display: block;
+}
+
+/* Chữ navbar to hơn */
+.navLink {
+  font-size: 15px;       // tăng từ mặc định lên 15px
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
