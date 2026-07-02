@@ -11,6 +11,7 @@ const PORT = process.env.PORT || 5000;
 app.use(cors({
   origin: [
     'https://vantaiviethuong.onrender.com',
+    'https://viet-huong-logistics.vercel.app',
     'https://viethuonglogistics.com',
     'http://viethuonglogistics.com',      // ← thêm dòng này
     'www.viethuonglogistics.com',
