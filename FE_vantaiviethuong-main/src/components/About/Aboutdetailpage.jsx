@@ -316,9 +316,9 @@ export default function AboutDetailPage() {
           <p className={styles.heroSub}>{hero.subtitle}</p>
 
           <div className={styles.heroCtas}>
-            <a href="#contact" className={styles.ctaPrimary}>
+            <Link to="/lien-he" className={styles.ctaPrimary}>
               <Phone size={14} /> Liên Hệ Ngay
-            </a>
+            </Link>
             <a href="#services" className={styles.ctaOutline}>
               Xem Dịch Vụ <ArrowRight size={14} />
             </a>

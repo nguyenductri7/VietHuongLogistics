@@ -1,10 +1,19 @@
-import { useRef, useEffect } from 'react'
+import { useRef, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { blogApi, resolveApiMediaUrl } from '../../services/api'
+import { FALLBACK_BLOG_POSTS } from './blogFallback'
 import styles from './Blog.module.scss'
 
 gsap.registerPlugin(ScrollTrigger)
+
+function formatDate(value) {
+  if (!value) return ''
+  return new Date(value).toLocaleDateString('vi-VN', {
+    day: 'numeric', month: 'long', year: 'numeric',
+  })
+}
 
 const posts = [
   {
@@ -61,26 +70,32 @@ const posts = [
 
 function BlogCard({ post }) {
   const navigate = useNavigate()
+  const imageUrl = resolveApiMediaUrl(post.thumbnail_url)
+  const detailPath = `/tin-tuc/${post.slug || post.id}`
   return (
     <article
       className={styles.card}
-      onClick={() => navigate(`/tin-tuc/${post.id}`)}
+      onClick={() => navigate(detailPath)}
+      onKeyDown={(event) => event.key === 'Enter' && navigate(detailPath)}
+      tabIndex={0}
+      role="link"
+      aria-label={`Đọc bài: ${post.title}`}
       style={{ cursor: 'pointer' }}
     >
       <div
         className={styles.cardImg}
-        style={{ background: `linear-gradient(145deg, ${post.gradFrom}, ${post.gradTo})` }}
+        style={imageUrl
+          ? { backgroundImage: `url("${imageUrl}")`, backgroundSize: 'cover', backgroundPosition: 'center' }
+          : { background: 'linear-gradient(145deg, #0f3460, #16213e)' }}
       >
-        <span className={styles.catBadge}>{post.cat}</span>
+        <span className={styles.catBadge}>{post.category}</span>
         <div className={styles.imgOverlay} />
       </div>
       <div className={styles.cardBody}>
         <div className={styles.meta}>
-          <span className={styles.cat}>{post.cat}</span>
+          <span className={styles.cat}>{post.category}</span>
           <span className={styles.dot}>·</span>
-          <time>{post.date}</time>
-          <span className={styles.dot}>·</span>
-          <span>{post.readTime}</span>
+          <time>{formatDate(post.published_at || post.created_at)}</time>
         </div>
         <h3 className={styles.title}>{post.title}</h3>
         <p className={styles.excerpt}>{post.excerpt}</p>
@@ -100,6 +115,22 @@ export default function Blog() {
   const trackRef   = useRef(null)
   const tickerTl   = useRef(null)
   const navigate   = useNavigate()
+  const [posts, setPosts] = useState(FALLBACK_BLOG_POSTS)
+
+  // Dùng cùng nguồn bài đã xuất bản với trang /tin-tuc.
+  useEffect(() => {
+    let ignore = false
+
+    blogApi.getList({ status: 'published', limit: 10 })
+      .then((response) => {
+        if (!ignore) setPosts(response.data || [])
+      })
+      .catch(() => {
+        if (!ignore) setPosts(FALLBACK_BLOG_POSTS)
+      })
+
+    return () => { ignore = true }
+  }, [])
 
   // Header reveal
   useEffect(() => {
@@ -127,7 +158,7 @@ export default function Blog() {
       repeat: -1,
     })
     return () => { if (tickerTl.current) tickerTl.current.kill() }
-  }, [])
+  }, [posts])
 
   return (
     <section id="blog" ref={sectionRef} className={styles.blog}>

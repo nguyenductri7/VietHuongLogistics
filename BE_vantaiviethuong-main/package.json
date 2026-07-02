@@ -5,7 +5,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "import:blogs": "node scripts/import-blogs.js"
   },
   "dependencies": {
     "@tiptap/extension-image": "^3.27.0",
