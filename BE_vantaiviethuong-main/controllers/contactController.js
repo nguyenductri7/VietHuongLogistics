@@ -48,14 +48,23 @@ const submitContact = async (req, res) => {
 // GET /api/admin/contacts - Admin xem tin nhắn
 const getContacts = async (req, res) => {
   try {
-    const { status, page = 1, limit = 20 } = req.query;
-    const offset = (parseInt(page) - 1) * parseInt(limit);
+    const { status, search = '' } = req.query;
+    const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit, 10) || 20));
+    const offset = (page - 1) * limit;
     let conditions = [];
     let params = [];
 
-    if (status) {
+    if (['new', 'read', 'replied', 'archived'].includes(status)) {
       conditions.push('status = ?');
       params.push(status);
+    }
+
+    const searchTerm = String(search).trim();
+    if (searchTerm) {
+      conditions.push('(full_name LIKE ? OR phone LIKE ? OR email LIKE ? OR company LIKE ? OR message LIKE ?)');
+      const keyword = `%${searchTerm}%`;
+      params.push(keyword, keyword, keyword, keyword, keyword);
     }
 
     const whereClause = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
@@ -64,13 +73,13 @@ const getContacts = async (req, res) => {
 
     const [rows] = await pool.query(
       `SELECT * FROM contact_messages ${whereClause} ORDER BY created_at DESC LIMIT ? OFFSET ?`,
-      [...params, parseInt(limit), offset]
+      [...params, limit, offset]
     );
 
     res.json({
       success: true,
       data: rows,
-      pagination: { total, page: parseInt(page), limit: parseInt(limit), total_pages: Math.ceil(total / parseInt(limit)) },
+      pagination: { total, page, limit, total_pages: Math.ceil(total / limit) },
     });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Lỗi server.' });
@@ -113,7 +122,8 @@ const getContactStats = async (req, res) => {
         COUNT(*) as total,
         SUM(status = 'new') as new_count,
         SUM(status = 'read') as read_count,
-        SUM(status = 'replied') as replied_count
+        SUM(status = 'replied') as replied_count,
+        SUM(status = 'archived') as archived_count
        FROM contact_messages`
     );
     res.json({ success: true, data: rows[0] });

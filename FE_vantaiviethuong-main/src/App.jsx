@@ -30,6 +30,7 @@ import ContactDetail from './components/Contact/ContactDetail'
 import FaqPage from './components/FAG/Faqpage'
 import AdminFaq from './components/Admin/AdminFaq'
 import AdminFaqContent from './components/Admin/AdminFaqContent'
+import AdminContacts from './components/Admin/AdminContacts'
 gsap.registerPlugin(ScrollTrigger)
 
 // ─── Helpers ─────────────────────────────────────────────────
@@ -199,6 +200,14 @@ function AppInner() {
     </ProtectedRoute>
   }
 />
+        <Route
+          path="/admin/contacts"
+          element={
+            <ProtectedRoute>
+              <AdminContacts />
+            </ProtectedRoute>
+          }
+        />
         {/* Fallback admin */}
         <Route
           path="/admin/*"
