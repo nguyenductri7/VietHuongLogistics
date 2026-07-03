@@ -3,6 +3,67 @@ const { pool } = require('../config/database');
 
 const JSON_FIELDS = ['banner', 'process_steps', 'contact_info'];
 
+const DEFAULT_SERVICES_PAGE = {
+  banner: {
+    title_line1: 'Vận Chuyển',
+    title_accent: 'Đáng Tin Cậy',
+    title_line3: '— Mọi Hành Trình',
+    subtitle: 'Từ nội địa đến quốc tế, từ kho bãi đến chuyển phát nhanh — chúng tôi đảm bảo hàng hóa của bạn đến đúng nơi, đúng lúc.',
+  },
+  process_steps: [
+    { step_order: 1, icon_key: 'Phone', title: 'Tiếp Nhận', desc: 'Ghi nhận yêu cầu, khảo sát hàng hóa và xác nhận thông tin vận chuyển.' },
+    { step_order: 2, icon_key: 'Zap', title: 'Báo Giá', desc: 'Đề xuất phương án tối ưu chi phí, phù hợp loại hàng và tuyến đường.' },
+    { step_order: 3, icon_key: 'ShieldCheck', title: 'Đóng Gói', desc: 'Đóng gói theo quy chuẩn, dán nhãn và lập chứng từ đầy đủ.' },
+    { step_order: 4, icon_key: 'Truck', title: 'Vận Chuyển', desc: 'Khởi hành đúng lịch và cập nhật tiến độ vận chuyển liên tục.' },
+    { step_order: 5, icon_key: 'CheckCircle2', title: 'Bàn Giao', desc: 'Kiểm tra hàng hóa, xác nhận chứng từ và bàn giao tận nơi.' },
+  ],
+  contact_info: {
+    company_name: 'Việt Hương Logistics',
+    tagline: 'Uy Tín · Nhanh Chóng · Tận Tâm',
+    left_image: '',
+    items: [
+      { icon_key: 'MapPin', label: 'Trụ sở chính', value: '58 Phước Lý 9, Phường Hòa Khánh, TP. Đà Nẵng' },
+      { icon_key: 'Phone', label: 'Hotline 24/7', value: '0905 386 888' },
+      { icon_key: 'Mail', label: 'Email', value: 'info@vantaiviethuong.com' },
+      { icon_key: 'Clock', label: 'Giờ làm việc', value: 'Thứ 2 – Thứ 7: 8:00 – 17:00' },
+    ],
+  },
+};
+
+function parseJson(value, fallback) {
+  try {
+    if (value === null || value === undefined) return fallback;
+    return typeof value === 'string' ? JSON.parse(value) : value;
+  } catch {
+    return fallback;
+  }
+}
+
+function normalizeServicesPage(row = {}) {
+  const banner = parseJson(row.banner, {});
+  const processSteps = parseJson(row.process_steps, []);
+  const contactInfo = parseJson(row.contact_info, {});
+
+  return {
+    id: row.id || null,
+    banner: {
+      ...DEFAULT_SERVICES_PAGE.banner,
+      ...(banner && typeof banner === 'object' && !Array.isArray(banner) ? banner : {}),
+    },
+    process_steps: Array.isArray(processSteps) && processSteps.length
+      ? processSteps
+      : DEFAULT_SERVICES_PAGE.process_steps,
+    contact_info: {
+      ...DEFAULT_SERVICES_PAGE.contact_info,
+      ...(contactInfo && typeof contactInfo === 'object' && !Array.isArray(contactInfo) ? contactInfo : {}),
+      items: Array.isArray(contactInfo?.items) && contactInfo.items.length
+        ? contactInfo.items
+        : DEFAULT_SERVICES_PAGE.contact_info.items,
+    },
+    updated_at: row.updated_at || null,
+  };
+}
+
 // ── Tạo slug không dấu từ tiếng Việt, dùng cho service_items.slug ──
 function slugify(str) {
   return str
@@ -22,14 +83,9 @@ const getServicesPage = async (req, res) => {
   try {
     const [rows] = await pool.query('SELECT * FROM services_page ORDER BY id DESC LIMIT 1');
     if (!rows.length) {
-      return res.status(404).json({ success: false, message: 'Chưa có nội dung Services.' });
+      return res.json({ success: true, data: normalizeServicesPage() });
     }
-    const row = rows[0];
-    const parsed = {};
-    for (const field of JSON_FIELDS) {
-      parsed[field] = typeof row[field] === 'string' ? JSON.parse(row[field]) : row[field];
-    }
-    res.json({ success: true, data: { id: row.id, ...parsed, updated_at: row.updated_at } });
+    res.json({ success: true, data: normalizeServicesPage(rows[0]) });
   } catch (err) {
     console.error('Get services_page error:', err);
     res.status(500).json({ success: false, message: 'Lỗi server.' });
@@ -39,9 +95,17 @@ const getServicesPage = async (req, res) => {
 // PUT /api/services-page  (admin)
 const updateServicesPage = async (req, res) => {
   try {
-    const [rows] = await pool.query('SELECT id FROM services_page ORDER BY id DESC LIMIT 1');
+    let [rows] = await pool.query('SELECT id FROM services_page ORDER BY id DESC LIMIT 1');
     if (!rows.length) {
-      return res.status(404).json({ success: false, message: 'Chưa có nội dung để cập nhật.' });
+      const [result] = await pool.query(
+        'INSERT INTO services_page (banner, process_steps, contact_info) VALUES (?, ?, ?)',
+        [
+          JSON.stringify(DEFAULT_SERVICES_PAGE.banner),
+          JSON.stringify(DEFAULT_SERVICES_PAGE.process_steps),
+          JSON.stringify(DEFAULT_SERVICES_PAGE.contact_info),
+        ]
+      );
+      rows = [{ id: result.insertId }];
     }
     const pageId = rows[0].id;
 

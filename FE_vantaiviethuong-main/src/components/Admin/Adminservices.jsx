@@ -12,7 +12,7 @@ import { CSS } from '@dnd-kit/utilities'
 import { GripVertical, Plus, Trash2, Eye, EyeOff, X, ArrowLeft } from 'lucide-react'
 import styles from './Adminservices.module.scss'
 
-const API_BASE = import.meta.env.VITE_API_URL || ''
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
 
 const ICON_OPTIONS = [
   'Truck', 'Globe', 'Warehouse', 'Zap', 'ShieldCheck', 'CheckCircle2',
@@ -20,6 +20,78 @@ const ICON_OPTIONS = [
 ]
 
 const EMPTY_ITEM = { title: '', subtitle: '', description: '', icon_key: 'Truck', image: '', tags: [] }
+
+const DEFAULT_PAGE = {
+  banner: {
+    title_line1: 'Vận Chuyển',
+    title_accent: 'Đáng Tin Cậy',
+    title_line3: '— Mọi Hành Trình',
+    subtitle: 'Từ nội địa đến quốc tế, từ kho bãi đến chuyển phát nhanh — chúng tôi đảm bảo hàng hóa của bạn đến đúng nơi, đúng lúc.',
+  },
+  process_steps: [
+    { step_order: 1, icon_key: 'Phone', title: 'Tiếp Nhận', desc: 'Ghi nhận yêu cầu, khảo sát hàng hóa và xác nhận thông tin vận chuyển.' },
+    { step_order: 2, icon_key: 'Zap', title: 'Báo Giá', desc: 'Đề xuất phương án tối ưu chi phí, phù hợp loại hàng và tuyến đường.' },
+    { step_order: 3, icon_key: 'ShieldCheck', title: 'Đóng Gói', desc: 'Đóng gói theo quy chuẩn, dán nhãn và lập chứng từ đầy đủ.' },
+    { step_order: 4, icon_key: 'Truck', title: 'Vận Chuyển', desc: 'Khởi hành đúng lịch và cập nhật tiến độ vận chuyển liên tục.' },
+    { step_order: 5, icon_key: 'CheckCircle2', title: 'Bàn Giao', desc: 'Kiểm tra hàng hóa, xác nhận chứng từ và bàn giao tận nơi.' },
+  ],
+  contact_info: {
+    company_name: 'Việt Hương Logistics',
+    tagline: 'Uy Tín · Nhanh Chóng · Tận Tâm',
+    left_image: '',
+    items: [
+      { icon_key: 'MapPin', label: 'Trụ sở chính', value: '58 Phước Lý 9, Phường Hòa Khánh, TP. Đà Nẵng' },
+      { icon_key: 'Phone', label: 'Hotline 24/7', value: '0905 386 888' },
+      { icon_key: 'Mail', label: 'Email', value: 'info@vantaiviethuong.com' },
+      { icon_key: 'Clock', label: 'Giờ làm việc', value: 'Thứ 2 – Thứ 7: 8:00 – 17:00' },
+    ],
+  },
+}
+
+function normalizePage(data = {}) {
+  const banner = data.banner && typeof data.banner === 'object' && !Array.isArray(data.banner)
+    ? data.banner
+    : {}
+  const contactInfo = data.contact_info && typeof data.contact_info === 'object' && !Array.isArray(data.contact_info)
+    ? data.contact_info
+    : {}
+
+  const processSteps = Array.isArray(data.process_steps) && data.process_steps.length
+    ? data.process_steps.map((step, index) => ({
+        step_order: step?.step_order || step?.id || index + 1,
+        icon_key: step?.icon_key || DEFAULT_PAGE.process_steps[index]?.icon_key || 'Truck',
+        title: step?.title || '',
+        desc: step?.desc || '',
+      }))
+    : structuredClone(DEFAULT_PAGE.process_steps)
+
+  const contactItems = Array.isArray(contactInfo.items) && contactInfo.items.length
+    ? contactInfo.items.map(item => ({
+        icon_key: item?.icon_key || 'MapPin',
+        label: item?.label || '',
+        value: item?.value || '',
+      }))
+    : structuredClone(DEFAULT_PAGE.contact_info.items)
+
+  return {
+    ...data,
+    banner: { ...DEFAULT_PAGE.banner, ...banner },
+    process_steps: processSteps,
+    contact_info: {
+      ...DEFAULT_PAGE.contact_info,
+      ...contactInfo,
+      items: contactItems,
+    },
+  }
+}
+
+function normalizeServiceItems(items) {
+  if (!Array.isArray(items)) return []
+  return items.map(item => ({
+    ...item,
+    tags: Array.isArray(item.tags) ? item.tags : [],
+  }))
+}
 
 export default function AdminServices() {
   const navigate = useNavigate()
@@ -44,15 +116,20 @@ export default function AdminServices() {
   }
 
   const loadAll = useCallback(() => {
+    setLoading(true)
     Promise.all([
       axios.get(`${API_BASE}/services-page`),
       axios.get(`${API_BASE}/services-page/items/admin`, authHeaders),
     ])
       .then(([pageRes, itemsRes]) => {
-        setPage(pageRes.data.data)
-        setItems(itemsRes.data.data)
+        setPage(normalizePage(pageRes.data?.data))
+        setItems(normalizeServiceItems(itemsRes.data?.data))
       })
-      .catch(() => showMessage('error', 'Không thể tải dữ liệu trang Services.'))
+      .catch((err) => {
+        setPage(normalizePage())
+        setItems([])
+        showMessage('error', err.response?.data?.message || 'Không thể tải dữ liệu trang Dịch vụ.')
+      })
       .finally(() => setLoading(false))
   }, [])
 
@@ -108,7 +185,7 @@ export default function AdminServices() {
 
   const openEditForm = (item) => {
     setEditingItem(item)
-    setFormData({ ...item })
+    setFormData({ ...item, tags: Array.isArray(item.tags) ? item.tags : [] })
     setTagInput('')
     setShowForm(true)
   }
@@ -410,7 +487,7 @@ function TextField({ label, value, onChange }) {
   return (
     <label className={styles.field}>
       <span>{label}</span>
-      <input type="text" value={value} onChange={e => onChange(e.target.value)} />
+      <input type="text" value={value ?? ''} onChange={e => onChange(e.target.value)} />
     </label>
   )
 }
@@ -419,7 +496,7 @@ function TextAreaField({ label, value, onChange }) {
   return (
     <label className={styles.field}>
       <span>{label}</span>
-      <textarea value={value} onChange={e => onChange(e.target.value)} rows={3} />
+      <textarea value={value ?? ''} onChange={e => onChange(e.target.value)} rows={3} />
     </label>
   )
 }
@@ -428,7 +505,7 @@ function SelectField({ label, value, options, onChange }) {
   return (
     <label className={styles.field}>
       <span>{label}</span>
-      <select value={value} onChange={e => onChange(e.target.value)}>
+      <select value={value ?? options[0] ?? ''} onChange={e => onChange(e.target.value)}>
         {options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
       </select>
     </label>
