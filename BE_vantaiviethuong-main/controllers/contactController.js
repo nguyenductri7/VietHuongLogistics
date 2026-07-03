@@ -5,13 +5,37 @@ const submitContact = async (req, res) => {
   try {
     const { full_name, email, phone, company, message } = req.body;
 
-    if (!full_name || !message) {
-      return res.status(400).json({ success: false, message: 'Vui lòng nhập họ tên và nội dung tin nhắn.' });
+    const contact = {
+      full_name: String(full_name || '').trim(),
+      email: String(email || '').trim(),
+      phone: String(phone || '').trim(),
+      company: String(company || '').trim(),
+      message: String(message || '').trim(),
+    };
+
+    if (!contact.full_name || !contact.phone || !contact.message) {
+      return res.status(400).json({
+        success: false,
+        message: 'Vui lòng nhập họ tên, số điện thoại và nội dung tin nhắn.',
+      });
+    }
+
+    if (contact.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email)) {
+      return res.status(400).json({ success: false, message: 'Địa chỉ email chưa đúng định dạng.' });
+    }
+
+    if (
+      contact.full_name.length > 100 ||
+      contact.email.length > 100 ||
+      contact.phone.length > 20 ||
+      contact.company.length > 150
+    ) {
+      return res.status(400).json({ success: false, message: 'Thông tin liên hệ vượt quá độ dài cho phép.' });
     }
 
     await pool.query(
       'INSERT INTO contact_messages (full_name, email, phone, company, message) VALUES (?, ?, ?, ?, ?)',
-      [full_name, email || '', phone || '', company || '', message]
+      [contact.full_name, contact.email, contact.phone, contact.company, contact.message]
     );
 
     res.status(201).json({ success: true, message: 'Gửi tin nhắn thành công! Chúng tôi sẽ liên hệ sớm.' });

@@ -1,6 +1,7 @@
 import { useRef, useEffect, useState } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { contactApi } from '../../services/api'
 import styles from './Contact.module.scss'
 
 gsap.registerPlugin(ScrollTrigger)
@@ -11,6 +12,8 @@ export default function Contact() {
     name: '', phone: '', email: '', service: '', message: ''
   })
   const [sent, setSent] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState('')
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -30,16 +33,55 @@ export default function Contact() {
 
   const handleChange = (e) => {
     setFormData(p => ({ ...p, [e.target.name]: e.target.value }))
+    if (submitError) setSubmitError('')
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    // TODO: Connect to backend/email service
-    setSent(true)
-    gsap.fromTo('.success-msg',
-      { scale: 0.8, opacity: 0 },
-      { scale: 1, opacity: 1, duration: 0.5, ease: 'back.out(1.7)' }
-    )
+
+    const name = formData.name.trim()
+    const phone = formData.phone.trim()
+    const email = formData.email.trim()
+
+    if (!name || !phone) {
+      setSubmitError('Vui lòng nhập đầy đủ họ tên và số điện thoại.')
+      return
+    }
+
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setSubmitError('Địa chỉ email chưa đúng định dạng.')
+      return
+    }
+
+    const message = [
+      formData.service && `Dịch vụ quan tâm: ${formData.service}`,
+      formData.message.trim() || 'Khách hàng yêu cầu tư vấn và báo giá.',
+    ].filter(Boolean).join('\n')
+
+    setSubmitting(true)
+    setSubmitError('')
+
+    try {
+      await contactApi.submit({
+        full_name: name,
+        phone,
+        email,
+        company: '',
+        message,
+      })
+      setSent(true)
+      setFormData({ name: '', phone: '', email: '', service: '', message: '' })
+      requestAnimationFrame(() => {
+        gsap.fromTo('.success-msg',
+          { scale: 0.8, opacity: 0 },
+          { scale: 1, opacity: 1, duration: 0.5, ease: 'back.out(1.7)' }
+        )
+      })
+    } catch (error) {
+      setSubmitError(error.message || 'Không thể gửi yêu cầu. Vui lòng thử lại sau.')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   const contactItems = [
@@ -201,8 +243,17 @@ export default function Contact() {
                 />
               </div>
 
-              <button type="submit" className={`btn-primary ${styles.submit}`}>
-                Gửi Yêu Cầu Ngay
+              {submitError && (
+                <p className={styles.formError} role="alert">{submitError}</p>
+              )}
+
+              <button
+                type="submit"
+                className={`btn-primary ${styles.submit}`}
+                disabled={submitting}
+                aria-busy={submitting}
+              >
+                {submitting ? 'Đang Gửi...' : 'Gửi Yêu Cầu Ngay'}
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                   <path d="M5 12h14M12 5l7 7-7 7" />
                 </svg>

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import { Link, useLocation } from 'react-router-dom';
+import { contactApi } from '../../services/api';
 
 const API_BASE = import.meta.env.VITE_API_URL || ''
 
@@ -435,6 +436,8 @@ export const ContactSection = ({ contactData }) => {
     name: '', phone: '', email: '', service: '', cargo: '', note: '',
   });
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -475,12 +478,52 @@ export const ContactSection = ({ contactData }) => {
     return () => ctx.revert();
   }, [contactData]);
 
-  const handleChange = (e) => setForm(f => ({ ...f, [e.target.name]: e.target.value }));
+  const handleChange = (e) => {
+    setForm(f => ({ ...f, [e.target.name]: e.target.value }));
+    if (submitError) setSubmitError('');
+  };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // TODO: gọi API backend
-    setSubmitted(true);
+
+    const name = form.name.trim();
+    const phone = form.phone.trim();
+    const email = form.email.trim();
+
+    if (!name || !phone || !form.service) {
+      setSubmitError('Vui lòng nhập họ tên, số điện thoại và chọn dịch vụ cần tư vấn.');
+      return;
+    }
+
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setSubmitError('Địa chỉ email chưa đúng định dạng.');
+      return;
+    }
+
+    const message = [
+      `Dịch vụ quan tâm: ${form.service}`,
+      form.cargo.trim() && `Loại hàng hóa: ${form.cargo.trim()}`,
+      form.note.trim() || 'Khách hàng yêu cầu tư vấn và báo giá.',
+    ].filter(Boolean).join('\n');
+
+    setSubmitting(true);
+    setSubmitError('');
+
+    try {
+      await contactApi.submit({
+        full_name: name,
+        phone,
+        email,
+        company: '',
+        message,
+      });
+      setSubmitted(true);
+      setForm({ name: '', phone: '', email: '', service: '', cargo: '', note: '' });
+    } catch (error) {
+      setSubmitError(error.message || 'Không thể gửi yêu cầu. Vui lòng thử lại sau.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -639,8 +682,17 @@ export const ContactSection = ({ contactData }) => {
                         />
                       </div>
 
-                      <button type="submit" className={s.contactSubmit}>
-                        <Send size={16} /> Gửi Yêu Cầu Ngay
+                      {submitError && (
+                        <p className={s.formError} role="alert">{submitError}</p>
+                      )}
+
+                      <button
+                        type="submit"
+                        className={s.contactSubmit}
+                        disabled={submitting}
+                        aria-busy={submitting}
+                      >
+                        <Send size={16} /> {submitting ? 'Đang Gửi...' : 'Gửi Yêu Cầu Ngay'}
                       </button>
                     </form>
                   </>

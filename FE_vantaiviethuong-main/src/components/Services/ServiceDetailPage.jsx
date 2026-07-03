@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { contactApi } from '../../services/api';
 import { TIMELINE_SERVICES } from './ServicesDetailPage';
 import s from './ServiceDetailPage.module.scss';
 
@@ -318,6 +319,8 @@ const ServiceDetailCTA = ({ service }) => {
     name: '', phone: '', email: '', cargo: '', note: '',
   });
   const [submitted, setSubmitted] = React.useState(false);
+  const [submitting, setSubmitting] = React.useState(false);
+  const [submitError, setSubmitError] = React.useState('');
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -329,8 +332,53 @@ const ServiceDetailCTA = ({ service }) => {
     return () => ctx.revert();
   }, []);
 
-  const handleChange = e => setForm(f => ({ ...f, [e.target.name]: e.target.value }));
-  const handleSubmit = e => { e.preventDefault(); setSubmitted(true); };
+  const handleChange = e => {
+    setForm(f => ({ ...f, [e.target.name]: e.target.value }));
+    if (submitError) setSubmitError('');
+  };
+
+  const handleSubmit = async e => {
+    e.preventDefault();
+
+    const name = form.name.trim();
+    const phone = form.phone.trim();
+    const email = form.email.trim();
+
+    if (!name || !phone) {
+      setSubmitError('Vui lòng nhập đầy đủ họ tên và số điện thoại.');
+      return;
+    }
+
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setSubmitError('Địa chỉ email chưa đúng định dạng.');
+      return;
+    }
+
+    const message = [
+      `Dịch vụ quan tâm: ${service.title}`,
+      form.cargo.trim() && `Loại hàng hóa: ${form.cargo.trim()}`,
+      form.note.trim() || 'Khách hàng yêu cầu tư vấn và báo giá.',
+    ].filter(Boolean).join('\n');
+
+    setSubmitting(true);
+    setSubmitError('');
+
+    try {
+      await contactApi.submit({
+        full_name: name,
+        phone,
+        email,
+        company: '',
+        message,
+      });
+      setSubmitted(true);
+      setForm({ name: '', phone: '', email: '', cargo: '', note: '' });
+    } catch (error) {
+      setSubmitError(error.message || 'Không thể gửi yêu cầu. Vui lòng thử lại sau.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <section ref={sectionRef} className={s.ctaSection} id="lien-he">
@@ -399,8 +447,17 @@ const ServiceDetailCTA = ({ service }) => {
                       value={form.note} onChange={handleChange} />
                   </div>
 
-                  <button type="submit" className={s.ctaSubmit}>
-                    <Send size={16} /> Gửi Yêu Cầu Ngay
+                  {submitError && (
+                    <p className={s.formError} role="alert">{submitError}</p>
+                  )}
+
+                  <button
+                    type="submit"
+                    className={s.ctaSubmit}
+                    disabled={submitting}
+                    aria-busy={submitting}
+                  >
+                    <Send size={16} /> {submitting ? 'Đang Gửi...' : 'Gửi Yêu Cầu Ngay'}
                   </button>
                 </form>
               )}
