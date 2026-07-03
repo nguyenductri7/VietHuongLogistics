@@ -21,6 +21,9 @@ router.get('/admin/list', authMiddleware, (req, res, next) => {
   next();
 }, getBlogs);
 
+// GET /api/blogs/admin/:id - Lấy đầy đủ nội dung để chỉnh sửa
+router.get('/admin/:slugOrId', authMiddleware, getBlog);
+
 // POST /api/admin/blogs/upload-content-image - upload ảnh chèn giữa nội dung bài (RichTextEditor)
 // Đặt TRƯỚC route '/admin/:id' để không bị Express hiểu "upload-content-image" là 1 :id
 router.post('/admin/upload-content-image', authMiddleware, uploadBlogContent.single('image'), uploadContentImage);

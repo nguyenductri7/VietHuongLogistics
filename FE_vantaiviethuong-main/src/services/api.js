@@ -100,6 +100,7 @@ export const blogApi = {
     const qs = new URLSearchParams(params).toString()
     return request(`/blogs/admin/list${qs ? '?' + qs : ''}`)
   },
+  adminGetOne: (id) => request(`/blogs/admin/${id}`),
   create: (formData) =>
     requestForm('/blogs/admin', { method: 'POST', body: formData }),
 

@@ -4,7 +4,6 @@ import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import styles from './Hero.module.scss'
 import heroSlide1 from '../../assets/hero-slide-1.png'
-import logoVietHuong from '../../assets/logo viet huong.png'
 gsap.registerPlugin(ScrollTrigger)
 
 // FIX: Tắt lag compensation — animation đều hơn ở mọi frame rate
@@ -32,7 +31,6 @@ export default function Hero() {
   const heroRef    = useRef(null)
   const taglineRef = useRef(null)
   const stRef        = useRef(null)
-const logoOverlayRef = useRef(null)
   const contentRef   = useRef(null)
   const floatTlRef   = useRef(null)
   const textShownRef = useRef(false)
@@ -223,9 +221,8 @@ const logoOverlayRef = useRef(null)
         videoDoneRef.current = null
         videoElRef.current = null
         setShowSkipVideo(false)
-        gsap.killTweensOf([taglineRef.current, logoOverlayRef.current])
+        gsap.killTweensOf(taglineRef.current)
         gsap.set(taglineRef.current, { opacity: 0 })
-        gsap.set(logoOverlayRef.current, { opacity: 0, display: 'none' })
         try { vid.pause() } catch (_) {}
         onReady(layerEl)
       }
@@ -236,13 +233,6 @@ vid.oncanplay = () => {
   clearTimeout(videoTimerRef.current)
   videoTimerRef.current = setTimeout(completeVideo, VIDEO_INTRO_MAX_MS)
   
-  // Hiện logo che watermark trong 5 giây đầu
-  gsap.timeline()
-    .set(logoOverlayRef.current, { opacity: 0, display: 'flex' })
-    .to(logoOverlayRef.current, { opacity: 1, duration: 0.5, ease: 'power2.out' })
-    .to(logoOverlayRef.current, { opacity: 0, duration: 0.8, ease: 'power2.in', delay: 5.0 })
-    .set(logoOverlayRef.current, { display: 'none' })
-
   const tl = gsap.timeline()
   tl.to(taglineRef.current, { opacity: 1, y: 0, duration: 1.2, ease: 'power2.out', delay: 0.8 })
     .to(taglineRef.current, { opacity: 0, y: -20, duration: 0.8, ease: 'power2.in' }, '+=2.5')
@@ -408,29 +398,6 @@ useEffect(() => {
   <div className={styles.gradBottom} />
   <div className={styles.gradCenter} />
   <div className={styles.redTint}    />
-
-<div
-  ref={logoOverlayRef}
-  style={{
-    display: 'none',
-    position: 'absolute',
-    top: '40px',
-    right: '45px',
-    width: '350px',
-    height: '90px',
-    zIndex: 20,
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    background: 'linear-gradient(to left, rgb(244, 243, 243) 80%, transparent 100%)',
-    padding: '0 20px 0 0',
-  }}
->
-<img
-  src={logoVietHuong}
-  alt="Viet Huong Logistics"
-  style={{ width: '320px', height: 'auto', objectFit: 'contain' }}
-/>
-</div>
 </div>
 
       <div ref={contentRef} className={`${styles.content} ${phase === 'text' ? styles.contentVisible : ''}`}>

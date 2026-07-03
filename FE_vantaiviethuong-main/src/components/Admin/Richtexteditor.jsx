@@ -129,6 +129,14 @@ export default function RichTextEditor({ value, onChange, placeholder }) {
     editorProps: { attributes: { class: styles.editorArea } },
   })
 
+  useEffect(() => {
+    if (!editor) return
+    const nextContent = value || ''
+    if (editor.getHTML() !== nextContent) {
+      editor.commands.setContent(nextContent, { emitUpdate: false })
+    }
+  }, [editor, value])
+
   if (!editor) return null
 
   const handlePickImage = () => fileInputRef.current?.click()

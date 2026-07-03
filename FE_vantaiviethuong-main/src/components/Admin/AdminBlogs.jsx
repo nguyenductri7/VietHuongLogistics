@@ -31,6 +31,7 @@ export default function AdminBlogs() {
   const [editing, setEditing]   = useState(null)
   const [deleting, setDeleting] = useState(null)
   const [saving, setSaving]     = useState(false)
+  const [loadingEdit, setLoadingEdit] = useState(null)
   const [toast, setToast]       = useState(null)
 
   // Form state
@@ -88,20 +89,30 @@ export default function AdminBlogs() {
     setView('form')
   }
 
-  const openEdit = (blog) => {
-    setEditing(blog)
-    setForm({
-      title:       blog.title,
-      excerpt:     blog.excerpt || '',
-      content:     blog.content || '',
-      category:    blog.category || DEFAULT_BLOG_CATEGORY,
-      tags:        blog.tags || '',
-      status:      blog.status,
-      is_featured: !!blog.is_featured,
-    })
-    setThumbnail(null)
-    setPreview(blog.thumbnail_url || '')
-    setView('form')
+  const openEdit = async (blog) => {
+    setLoadingEdit(blog.id)
+    try {
+      const res = await blogApi.adminGetOne(blog.id)
+      const detail = res.data || res
+
+      setEditing(detail)
+      setForm({
+        title:       detail.title || '',
+        excerpt:     detail.excerpt || '',
+        content:     detail.content || '',
+        category:    detail.category || DEFAULT_BLOG_CATEGORY,
+        tags:        detail.tags || '',
+        status:      detail.status || 'draft',
+        is_featured: !!detail.is_featured,
+      })
+      setThumbnail(null)
+      setPreview(detail.thumbnail_url || '')
+      setView('form')
+    } catch (err) {
+      showToast(err.message || 'Không thể tải nội dung bài viết.', 'error')
+    } finally {
+      setLoadingEdit(null)
+    }
   }
 
   const closeForm = () => {
@@ -403,8 +414,15 @@ export default function AdminBlogs() {
                   </td>
                   <td>
                     <div className={styles.actions}>
-                      <button className={styles.editBtn} onClick={() => openEdit(b)}>
-                        <Pencil size={13} /> Sửa
+                      <button
+                        className={styles.editBtn}
+                        onClick={() => openEdit(b)}
+                        disabled={loadingEdit === b.id}
+                      >
+                        {loadingEdit === b.id
+                          ? <><Loader2 size={13} className={styles.spinIcon} /> Đang tải</>
+                          : <><Pencil size={13} /> Sửa</>
+                        }
                       </button>
                       <button className={styles.delBtn} onClick={() => setDeleting(b)}>
                         <Trash2 size={13} /> Xóa
