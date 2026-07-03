@@ -5,7 +5,7 @@ const router = express.Router();
 const {
   getServicesPage, updateServicesPage,
   listServiceItems, listServiceItemsAdmin,
-  createServiceItem, updateServiceItem, deleteServiceItem, reorderServiceItems,
+  createServiceItem, seedDefaultServiceItems, updateServiceItem, deleteServiceItem, reorderServiceItems,
   uploadImage,
 } = require('../controllers/servicesPageController');
 
@@ -21,6 +21,7 @@ router.put('/', authMiddleware, updateServicesPage);
 
 // ── Admin: CRUD danh sách dịch vụ ──
 router.get('/items/admin', authMiddleware, listServiceItemsAdmin);
+router.post('/items/seed', authMiddleware, seedDefaultServiceItems);
 router.post('/items', authMiddleware, createServiceItem);
 router.put('/items/reorder', authMiddleware, reorderServiceItems);
 router.put('/items/:id', authMiddleware, updateServiceItem);

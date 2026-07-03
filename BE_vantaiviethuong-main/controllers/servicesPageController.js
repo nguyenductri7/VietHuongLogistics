@@ -30,6 +30,45 @@ const DEFAULT_SERVICES_PAGE = {
   },
 };
 
+const DEFAULT_SERVICE_ITEMS = [
+  {
+    slug: 'van-chuyen-noi-dia',
+    title: 'Vận Chuyển Nội Địa',
+    subtitle: 'Phủ khắp 63 tỉnh thành',
+    description: 'Đội xe đa tải trọng từ 500kg đến 20 tấn, GPS tracking 24/7, cam kết giao đúng hẹn. Lịch trình cố định hằng ngày trên tuyến TP.HCM – Đà Nẵng và toàn quốc.',
+    icon_key: 'Truck',
+    image: 'https://images.unsplash.com/photo-1519003722824-194d4455a60c?q=80&w=1200&auto=format&fit=crop',
+    tags: ['GPS 24/7', 'Đa tải trọng', 'Toàn quốc'],
+  },
+  {
+    slug: 'van-chuyen-quoc-te',
+    title: 'Vận Chuyển Quốc Tế',
+    subtitle: 'Đường biển & hàng không',
+    description: 'Kết nối Đông Nam Á, Trung Quốc và châu Âu qua đối tác đại lý toàn cầu. Xử lý thủ tục hải quan nhanh, tư vấn phân loại HS Code chuyên nghiệp.',
+    icon_key: 'Globe',
+    image: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?q=80&w=1200&auto=format&fit=crop',
+    tags: ['FCL / LCL', 'Hải quan', 'Door to Door'],
+  },
+  {
+    slug: 'logistics-kho-bai',
+    title: 'Logistics & Kho Bãi',
+    subtitle: 'Lưu trữ thông minh',
+    description: 'Hệ thống kho bãi đạt chuẩn, trang bị xe nâng và băng tải hiện đại. Quản lý hàng hóa bằng phần mềm, kiểm kê định kỳ minh bạch và chính xác.',
+    icon_key: 'Warehouse',
+    image: 'https://images.unsplash.com/photo-1553413077-190dd305871c?q=80&w=1200&auto=format&fit=crop',
+    tags: ['WMS', 'Kiểm kê định kỳ', 'Bảo hiểm hàng'],
+  },
+  {
+    slug: 'chuyen-phat-nhanh',
+    title: 'Chuyển Phát Nhanh',
+    subtitle: 'Giao hỏa tốc trong ngày',
+    description: 'Cam kết giao hàng nội thành trong 4 giờ, liên tỉnh trong 24 giờ. Dịch vụ COD thu hộ tiền, hỗ trợ sàn thương mại điện tử Shopee, Lazada và TikTok Shop.',
+    icon_key: 'Zap',
+    image: 'https://images.unsplash.com/photo-1616401784845-180882ba9ba8?q=80&w=1200&auto=format&fit=crop',
+    tags: ['COD', '4h nội thành', 'E-commerce'],
+  },
+];
+
 function parseJson(value, fallback) {
   try {
     if (value === null || value === undefined) return fallback;
@@ -198,6 +237,49 @@ const createServiceItem = async (req, res) => {
   }
 };
 
+// POST /api/services-page/items/seed - Tạo bộ dịch vụ đang dùng trên giao diện
+const seedDefaultServiceItems = async (req, res) => {
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+    let created = 0;
+
+    for (const [index, item] of DEFAULT_SERVICE_ITEMS.entries()) {
+      const [result] = await connection.query(
+        `INSERT IGNORE INTO service_items
+          (slug, title, subtitle, description, icon_key, image, tags, sort_order, is_active)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)`,
+        [
+          item.slug,
+          item.title,
+          item.subtitle,
+          item.description,
+          item.icon_key,
+          item.image,
+          JSON.stringify(item.tags),
+          index + 1,
+        ]
+      );
+      created += result.affectedRows;
+    }
+
+    await connection.commit();
+    return res.status(created ? 201 : 200).json({
+      success: true,
+      created,
+      message: created
+        ? `Đã khởi tạo ${created} dịch vụ mặc định.`
+        : 'Các dịch vụ mặc định đã tồn tại.',
+    });
+  } catch (err) {
+    await connection.rollback();
+    console.error('Seed service_items error:', err);
+    return res.status(500).json({ success: false, message: 'Không thể khởi tạo dịch vụ mặc định.' });
+  } finally {
+    connection.release();
+  }
+};
+
 // PUT /api/services-page/items/:id  (admin) — sửa nội dung, KHÔNG cho sửa slug
 const updateServiceItem = async (req, res) => {
   try {
@@ -279,6 +361,7 @@ module.exports = {
   listServiceItems,
   listServiceItemsAdmin,
   createServiceItem,
+  seedDefaultServiceItems,
   updateServiceItem,
   deleteServiceItem,
   reorderServiceItems,

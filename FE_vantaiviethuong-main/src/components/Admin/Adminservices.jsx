@@ -106,6 +106,7 @@ export default function AdminServices() {
   const [editingItem, setEditingItem] = useState(null)
   const [formData, setFormData] = useState(EMPTY_ITEM)
   const [tagInput, setTagInput] = useState('')
+  const [seeding, setSeeding] = useState(false)
 
   const token = localStorage.getItem('vh_token')
   const authHeaders = { headers: { Authorization: `Bearer ${token}` } }
@@ -181,6 +182,19 @@ export default function AdminServices() {
     setFormData(EMPTY_ITEM)
     setTagInput('')
     setShowForm(true)
+  }
+
+  const seedDefaultServices = async () => {
+    setSeeding(true)
+    try {
+      const res = await axios.post(`${API_BASE}/services-page/items/seed`, {}, authHeaders)
+      showMessage('success', res.data?.message || 'Đã khởi tạo các dịch vụ mặc định.')
+      loadAll()
+    } catch (err) {
+      showMessage('error', err.response?.data?.message || 'Không thể khởi tạo dịch vụ mặc định.')
+    } finally {
+      setSeeding(false)
+    }
   }
 
   const openEditForm = (item) => {
@@ -314,7 +328,14 @@ export default function AdminServices() {
               </div>
             </SortableContext>
           </DndContext>
-          {!items.length && <p className={styles.emptyState}>Chưa có dịch vụ nào. Bấm "Thêm dịch vụ" để bắt đầu.</p>}
+          {!items.length && (
+            <div className={styles.emptyState}>
+              <p>Database chưa có dịch vụ nào.</p>
+              <button className={styles.addBtn} onClick={seedDefaultServices} disabled={seeding}>
+                <Plus size={16} /> {seeding ? 'Đang khởi tạo...' : 'Tạo 4 dịch vụ hiện tại'}
+              </button>
+            </div>
+          )}
         </div>
       </section>
 

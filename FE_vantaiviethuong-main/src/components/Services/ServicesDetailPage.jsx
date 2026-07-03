@@ -738,7 +738,8 @@ export default function ServicesSections() {
       axios.get(`${API_BASE}/services-page/items`),
     ]).then(([pageRes, itemsRes]) => {
       setPageData(pageRes.data.data)
-      setServices((itemsRes.data.data || []).filter(i => i.is_active))
+      const activeItems = (itemsRes.data.data || []).filter(i => i.is_active)
+      setServices(activeItems.length ? activeItems : TIMELINE_SERVICES)
     }).catch(() => {
       // Lỗi → giữ null → các component dùng hardcode mặc định
     }).finally(() => setDataReady(true))
