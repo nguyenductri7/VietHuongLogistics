@@ -7,6 +7,8 @@ const faqRoutes = require('./routes/Faq')
 const faqContentRoutes = require('./routes/Faqcontent')
 const app = express();
 const PORT = process.env.PORT || 5000;
+let databaseStatus = 'connecting';
+let databaseError = null;
 
 app.use(cors({
   origin: [
@@ -42,9 +44,14 @@ app.use('/api/faq-inquiries', faqRoutes)
 app.use('/api/faq-content', require('./routes/Faqcontent'))
 // Health check
 app.get('/api/health', (req, res) => {
-  res.json({
-    success: true,
+  const databaseConnected = databaseStatus === 'connected';
+  res.status(databaseConnected ? 200 : 503).json({
+    success: databaseConnected,
     message: 'Van Tai Viet Huong API đang chạy!',
+    database: databaseStatus,
+    database_error: databaseConnected
+      ? null
+      : (process.env.NODE_ENV === 'production' ? 'Database chưa sẵn sàng.' : databaseError),
     timestamp: new Date().toISOString(),
     version: '1.0.0',
   });
@@ -80,9 +87,25 @@ app.use((err, req, res, next) => {
 // ================================================
 // START SERVER
 // ================================================
-async function start() {
-  await testConnection();
-  app.listen(PORT, () => {
+const DB_RETRY_DELAY_MS = 15000;
+
+async function connectDatabase() {
+  databaseStatus = 'connecting';
+  databaseError = null;
+
+  try {
+    await testConnection();
+    databaseStatus = 'connected';
+  } catch (err) {
+    databaseStatus = 'error';
+    databaseError = err.message;
+    console.error(`Sẽ thử kết nối MySQL lại sau ${DB_RETRY_DELAY_MS / 1000} giây.`);
+    setTimeout(connectDatabase, DB_RETRY_DELAY_MS);
+  }
+}
+
+function start() {
+  app.listen(PORT, '0.0.0.0', () => {
     console.log(`\n🚀 Server đang chạy tại: http://localhost:${PORT}`);
     console.log(`📚 API Health check: http://localhost:${PORT}/api/health`);
     console.log(`\n📋 Danh sách API endpoints:`);
@@ -103,10 +126,8 @@ async function start() {
     console.log(`   POST   /api/contact`);
     console.log(`   GET    /api/contact/admin`);
     console.log('');
+    connectDatabase();
   });
 }
 
-start().catch((err) => {
-  console.error('Không thể khởi động server:', err);
-  process.exit(1);
-});
+start();

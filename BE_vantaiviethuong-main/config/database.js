@@ -16,6 +16,7 @@ const pool = mysql.createPool({
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
+  connectTimeout: parseInt(process.env.DB_CONNECT_TIMEOUT, 10) || 10000,
   charset: 'utf8mb4',
   ...(sslConfig ? { ssl: sslConfig } : {}),
 });
@@ -28,7 +29,7 @@ async function testConnection() {
     connection.release();
   } catch (err) {
     console.error('❌ Lỗi kết nối MySQL:', err.message);
-    process.exit(1);
+    throw err;
   }
 }
 
