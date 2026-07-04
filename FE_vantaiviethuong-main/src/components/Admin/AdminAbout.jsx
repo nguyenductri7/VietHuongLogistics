@@ -3,6 +3,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { ArrowLeft } from 'lucide-react'
+import { normalizeAbout } from '../About/Aboutdetailpage'
 import styles from './AdminAbout.module.scss'
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
@@ -12,7 +13,7 @@ const ICON_OPTIONS = ['Truck', 'Plane', 'ShoppingBag', 'Warehouse', 'LineChart',
 export default function AdminAbout() {
   const navigate = useNavigate()
 
-  const [data, setData] = useState(null)
+  const [data, setData] = useState(() => normalizeAbout())
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState({})
   const [message, setMessage] = useState(null)
@@ -23,8 +24,11 @@ export default function AdminAbout() {
 
   useEffect(() => {
     axios.get(`${API_BASE}/about`)
-      .then(res => setData(res.data.data))
-      .catch(() => setMessage({ type: 'error', text: 'Không thể tải nội dung About.' }))
+      .then(res => setData(normalizeAbout(res.data?.data)))
+      .catch((err) => {
+        setData(normalizeAbout())
+        setMessage({ type: 'error', text: err.response?.data?.message || 'Không thể tải nội dung trang Giới thiệu.' })
+      })
       .finally(() => setLoading(false))
   }, [])
 
@@ -230,7 +234,7 @@ function TextField({ label, value, onChange }) {
   return (
     <label className={styles.field}>
       <span>{label}</span>
-      <input type="text" value={value} onChange={e => onChange(e.target.value)} />
+      <input type="text" value={value ?? ''} onChange={e => onChange(e.target.value)} />
     </label>
   )
 }
@@ -239,7 +243,7 @@ function TextAreaField({ label, value, onChange }) {
   return (
     <label className={styles.field}>
       <span>{label}</span>
-      <textarea value={value} onChange={e => onChange(e.target.value)} rows={3} />
+      <textarea value={value ?? ''} onChange={e => onChange(e.target.value)} rows={3} />
     </label>
   )
 }
@@ -248,7 +252,7 @@ function SelectField({ label, value, options, onChange }) {
   return (
     <label className={styles.field}>
       <span>{label}</span>
-      <select value={value} onChange={e => onChange(e.target.value)}>
+      <select value={value ?? options[0] ?? ''} onChange={e => onChange(e.target.value)}>
         {options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
       </select>
     </label>

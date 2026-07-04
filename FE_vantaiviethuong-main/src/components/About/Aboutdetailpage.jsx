@@ -38,7 +38,7 @@ const TICKER_ITEMS = [
   { icon: <Truck size={13} />,      text: '500+ chuyến mỗi ngày' },
 ]
 
-const FALLBACK_ABOUT = {
+export const FALLBACK_ABOUT = {
   hero: {
     eyebrow: 'Về Việt Hương Logistics',
     title_line1: 'Đồng Hành',
@@ -81,7 +81,7 @@ const FALLBACK_ABOUT = {
   ],
 }
 
-function normalizeAbout(payload) {
+export function normalizeAbout(payload) {
   const source = payload && typeof payload === 'object' ? payload : {}
   const useArray = (value, fallback) => Array.isArray(value) && value.length ? value : fallback
   return {

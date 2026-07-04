@@ -4,6 +4,24 @@ const { pool } = require('../config/database');
 // ── Các field JSON hợp lệ trong bảng, dùng để validate khi update ──
 const JSON_FIELDS = ['hero', 'stats', 'identity', 'services', 'timeline', 'values_section'];
 
+const EMPTY_ABOUT_PAGE = {
+  hero: {},
+  stats: [],
+  identity: {},
+  services: [],
+  timeline: [],
+  values_section: [],
+};
+
+function parseJson(value, fallback) {
+  try {
+    if (value === null || value === undefined) return fallback;
+    return typeof value === 'string' ? JSON.parse(value) : value;
+  } catch {
+    return fallback;
+  }
+}
+
 // GET /api/about
 // Trả về toàn bộ nội dung trang About (public, không cần đăng nhập)
 const getAbout = async (req, res) => {
@@ -11,7 +29,7 @@ const getAbout = async (req, res) => {
     const [rows] = await pool.query('SELECT * FROM about_page ORDER BY id DESC LIMIT 1');
 
     if (!rows.length) {
-      return res.status(404).json({ success: false, message: 'Chưa có nội dung About.' });
+      return res.json({ success: true, data: { id: null, ...EMPTY_ABOUT_PAGE, updated_at: null } });
     }
 
     const row = rows[0];
@@ -20,7 +38,7 @@ const getAbout = async (req, res) => {
     // driver trả về string thì parse thủ công để tránh lỗi phía frontend.
     const parsed = {};
     for (const field of JSON_FIELDS) {
-      parsed[field] = typeof row[field] === 'string' ? JSON.parse(row[field]) : row[field];
+      parsed[field] = parseJson(row[field], EMPTY_ABOUT_PAGE[field]);
     }
 
     res.json({
@@ -42,9 +60,14 @@ const getAbout = async (req, res) => {
 // Cần đăng nhập (route được bọc bởi middleware auth ở routes/about.js)
 const updateAbout = async (req, res) => {
   try {
-    const [rows] = await pool.query('SELECT id FROM about_page ORDER BY id DESC LIMIT 1');
+    let [rows] = await pool.query('SELECT id FROM about_page ORDER BY id DESC LIMIT 1');
     if (!rows.length) {
-      return res.status(404).json({ success: false, message: 'Chưa có nội dung About để cập nhật.' });
+      const [result] = await pool.query(
+        `INSERT INTO about_page (hero, stats, identity, services, timeline, values_section)
+         VALUES (?, ?, ?, ?, ?, ?)`,
+        JSON_FIELDS.map(field => JSON.stringify(EMPTY_ABOUT_PAGE[field]))
+      );
+      rows = [{ id: result.insertId }];
     }
     const aboutId = rows[0].id;
 

@@ -158,7 +158,7 @@ CREATE TABLE IF NOT EXISTS about_page (
 
 -- Create the singleton page row expected by aboutController.
 INSERT INTO about_page (hero, stats, identity, services, timeline, values_section)
-SELECT JSON_OBJECT(), JSON_OBJECT(), JSON_OBJECT(), JSON_ARRAY(), JSON_ARRAY(), JSON_OBJECT()
+SELECT JSON_OBJECT(), JSON_ARRAY(), JSON_OBJECT(), JSON_ARRAY(), JSON_ARRAY(), JSON_ARRAY()
 WHERE NOT EXISTS (SELECT 1 FROM about_page);
 
 -- ================================================
