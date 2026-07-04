@@ -1,7 +1,7 @@
-const nodemailer = require('nodemailer');
+const RESEND_API_URL = 'https://api.resend.com/emails';
+const DEFAULT_RECIPIENT = 'ductri09876@gmail.com';
+const DEFAULT_FROM = 'Viet Huong Logistics <onboarding@resend.dev>';
 
-const TEST_RECIPIENT = 'ductri09876@gmail.com';
-let transporter = null;
 let warnedMissingConfig = false;
 
 function escapeHtml(value = '') {
@@ -14,47 +14,49 @@ function escapeHtml(value = '') {
 }
 
 function getMailConfig() {
-  const user = String(process.env.SMTP_USER || '').trim();
-  // Google thường hiển thị App Password theo nhóm có khoảng trắng.
-  const pass = String(process.env.SMTP_PASS || '').replace(/\s/g, '');
-  const to = String(process.env.NOTIFICATION_EMAIL || TEST_RECIPIENT).trim();
+  const apiKey = String(process.env.RESEND_API_KEY || '').trim();
+  const to = String(process.env.NOTIFICATION_EMAIL || DEFAULT_RECIPIENT).trim();
+  const from = String(process.env.RESEND_FROM_EMAIL || DEFAULT_FROM).trim();
 
-  if (!user || !pass || !to) {
+  if (!apiKey || !to || !from) {
     if (!warnedMissingConfig) {
-      console.warn('[MAIL] Chưa cấu hình SMTP_USER/SMTP_PASS; bỏ qua thông báo email.');
+      console.warn('[MAIL] Chưa cấu hình RESEND_API_KEY; bỏ qua thông báo email.');
       warnedMissingConfig = true;
     }
     return null;
   }
 
-  return { user, pass, to };
-}
-
-function getTransporter(config) {
-  if (!transporter) {
-    transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: { user: config.user, pass: config.pass },
-      connectionTimeout: 10000,
-      greetingTimeout: 10000,
-      socketTimeout: 15000,
-    });
-  }
-  return transporter;
+  return { apiKey, to, from };
 }
 
 async function sendMail({ subject, text, html, replyTo }) {
   const config = getMailConfig();
   if (!config) return false;
 
-  await getTransporter(config).sendMail({
-    from: `Việt Hương Logistics <${config.user}>`,
-    to: config.to,
-    replyTo: replyTo || undefined,
+  const payload = {
+    from: config.from,
+    to: [config.to],
     subject,
     text,
     html,
+  };
+
+  if (replyTo) payload.reply_to = replyTo;
+
+  const response = await fetch(RESEND_API_URL, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${config.apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+    signal: AbortSignal.timeout(15000),
   });
+
+  if (!response.ok) {
+    const details = await response.text();
+    throw new Error(`Resend API ${response.status}: ${details}`);
+  }
 
   return true;
 }
