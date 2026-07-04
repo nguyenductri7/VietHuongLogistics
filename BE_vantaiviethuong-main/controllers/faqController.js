@@ -1,5 +1,6 @@
 // controllers/faqController.js
 const { pool } = require('../config/database')
+const { sendFaqNotification } = require('../services/emailService')
 
 const ALLOWED_STATUSES = ['pending', 'inprogress', 'done']
 
@@ -14,7 +15,24 @@ const submitInquiry = async (req, res) => {
       `INSERT INTO faq_inquiries (name, phone, question) VALUES (?, ?, ?)`,
       [name.trim(), phone.trim(), question.trim()]
     )
-    return res.status(201).json({ message: 'Câu hỏi đã được gửi thành công!', id: result.insertId })
+
+    let emailNotificationSent = false
+    try {
+      emailNotificationSent = await sendFaqNotification({
+        id: result.insertId,
+        name: name.trim(),
+        phone: phone.trim(),
+        question: question.trim(),
+      })
+    } catch (mailError) {
+      console.error('[MAIL] Không thể gửi thông báo FAQ:', mailError.message)
+    }
+
+    return res.status(201).json({
+      message: 'Câu hỏi đã được gửi thành công!',
+      id: result.insertId,
+      email_notification_sent: emailNotificationSent,
+    })
   } catch (err) {
     console.error('[FAQ] submitInquiry error:', err)
     return res.status(500).json({ message: 'Lỗi server, vui lòng thử lại.' })

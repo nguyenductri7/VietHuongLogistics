@@ -1,4 +1,5 @@
 const { pool } = require('../config/database');
+const { sendContactNotification } = require('../services/emailService');
 
 // POST /api/contact - Frontend gửi form liên hệ
 const submitContact = async (req, res) => {
@@ -33,12 +34,26 @@ const submitContact = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Thông tin liên hệ vượt quá độ dài cho phép.' });
     }
 
-    await pool.query(
+    const [result] = await pool.query(
       'INSERT INTO contact_messages (full_name, email, phone, company, message) VALUES (?, ?, ?, ?, ?)',
       [contact.full_name, contact.email, contact.phone, contact.company, contact.message]
     );
 
-    res.status(201).json({ success: true, message: 'Gửi tin nhắn thành công! Chúng tôi sẽ liên hệ sớm.' });
+    let emailNotificationSent = false;
+    try {
+      emailNotificationSent = await sendContactNotification({
+        id: result.insertId,
+        ...contact,
+      });
+    } catch (mailError) {
+      console.error('[MAIL] Không thể gửi thông báo liên hệ:', mailError.message);
+    }
+
+    res.status(201).json({
+      success: true,
+      message: 'Gửi tin nhắn thành công! Chúng tôi sẽ liên hệ sớm.',
+      email_notification_sent: emailNotificationSent,
+    });
   } catch (err) {
     console.error('submitContact error:', err);
     res.status(500).json({ success: false, message: 'Lỗi server.' });
