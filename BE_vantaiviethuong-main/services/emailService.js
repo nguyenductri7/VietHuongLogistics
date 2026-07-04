@@ -13,6 +13,83 @@ function escapeHtml(value = '') {
     .replace(/'/g, '&#039;');
 }
 
+function renderInfoRows(rows) {
+  return rows.map(({ label, value }) => `
+    <tr>
+      <td style="padding:10px 0;border-bottom:1px solid #e8edf3;color:#64748b;font-size:13px;width:120px;vertical-align:top;">${label}</td>
+      <td style="padding:10px 0;border-bottom:1px solid #e8edf3;color:#172033;font-size:14px;font-weight:600;vertical-align:top;">${value}</td>
+    </tr>
+  `).join('');
+}
+
+function renderEmailTemplate({ eyebrow, title, description, reference, rows, messageLabel, message, action }) {
+  const actionButton = action ? `
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin-top:24px;">
+      <tr>
+        <td bgcolor="#cc1a1a" style="border-radius:8px;">
+          <a href="${action.href}" style="display:inline-block;padding:12px 22px;color:#ffffff;text-decoration:none;font-size:14px;font-weight:700;">${action.label}</a>
+        </td>
+      </tr>
+    </table>
+  ` : '';
+
+  return `<!doctype html>
+  <html lang="vi">
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      <title>${title}</title>
+    </head>
+    <body style="margin:0;padding:0;background:#f2f5f8;font-family:Arial,Helvetica,sans-serif;color:#172033;">
+      <div style="display:none;max-height:0;overflow:hidden;opacity:0;">${description}</div>
+      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#f2f5f8;">
+        <tr>
+          <td align="center" style="padding:28px 12px;">
+            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:620px;background:#ffffff;border-radius:14px;overflow:hidden;box-shadow:0 8px 30px rgba(15,23,42,.08);">
+              <tr>
+                <td style="background:#172033;padding:24px 30px;border-top:5px solid #cc1a1a;">
+                  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tr>
+                      <td>
+                        <div style="font-size:20px;font-weight:800;color:#ffffff;letter-spacing:.2px;">VIỆT HƯƠNG</div>
+                        <div style="font-size:10px;color:#cbd5e1;letter-spacing:3px;margin-top:3px;">LOGISTICS</div>
+                      </td>
+                      <td align="right" style="color:#cbd5e1;font-size:12px;">Mã #${reference}</td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding:30px;">
+                  <div style="display:inline-block;background:#fff1f2;color:#b91c1c;border-radius:999px;padding:6px 10px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;">${eyebrow}</div>
+                  <h1 style="margin:16px 0 8px;font-size:25px;line-height:1.3;color:#172033;">${title}</h1>
+                  <p style="margin:0 0 22px;color:#64748b;font-size:14px;line-height:1.6;">${description}</p>
+
+                  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                    ${renderInfoRows(rows)}
+                  </table>
+
+                  <div style="margin-top:24px;background:#f8fafc;border-left:4px solid #cc1a1a;border-radius:6px;padding:18px;">
+                    <div style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px;">${messageLabel}</div>
+                    <div style="font-size:15px;line-height:1.7;color:#263247;word-break:break-word;">${message}</div>
+                  </div>
+                  ${actionButton}
+                </td>
+              </tr>
+              <tr>
+                <td style="background:#f8fafc;border-top:1px solid #e8edf3;padding:18px 30px;color:#94a3b8;font-size:11px;line-height:1.6;text-align:center;">
+                  Email tự động từ hệ thống Việt Hương Logistics<br>
+                  <a href="https://viethuonglogistics.com" style="color:#cc1a1a;text-decoration:none;">viethuonglogistics.com</a>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </body>
+  </html>`;
+}
+
 function getMailConfig() {
   const apiKey = String(process.env.RESEND_API_KEY || '').trim();
   const to = String(process.env.NOTIFICATION_EMAIL || DEFAULT_RECIPIENT).trim();
@@ -83,15 +160,24 @@ async function sendContactNotification(contact) {
       '',
       contact.message,
     ].join('\n'),
-    html: `
-      <h2>Yêu cầu liên hệ mới</h2>
-      <p><strong>Mã yêu cầu:</strong> #${safe.id}</p>
-      <p><strong>Họ tên:</strong> ${safe.name}</p>
-      <p><strong>Điện thoại:</strong> ${safe.phone}</p>
-      <p><strong>Email:</strong> ${safe.email}</p>
-      <p><strong>Công ty:</strong> ${safe.company}</p>
-      <p><strong>Nội dung:</strong><br>${safe.message}</p>
-    `,
+    html: renderEmailTemplate({
+      eyebrow: 'Liên hệ mới',
+      title: 'Bạn vừa nhận được một yêu cầu tư vấn',
+      description: 'Khách hàng đã gửi thông tin từ biểu mẫu liên hệ trên website.',
+      reference: safe.id,
+      rows: [
+        { label: 'Họ và tên', value: safe.name },
+        { label: 'Điện thoại', value: safe.phone },
+        { label: 'Email', value: safe.email },
+        { label: 'Công ty', value: safe.company },
+      ],
+      messageLabel: 'Nội dung yêu cầu',
+      message: safe.message,
+      action: contact.email ? {
+        label: 'Trả lời khách hàng',
+        href: `mailto:${encodeURIComponent(contact.email)}?subject=${encodeURIComponent(`Phản hồi từ Việt Hương Logistics - yêu cầu #${contact.id}`)}`,
+      } : null,
+    }),
   });
 }
 
@@ -112,13 +198,22 @@ async function sendFaqNotification(inquiry) {
       '',
       inquiry.question,
     ].join('\n'),
-    html: `
-      <h2>Câu hỏi mới từ khách hàng</h2>
-      <p><strong>Mã câu hỏi:</strong> #${safe.id}</p>
-      <p><strong>Họ tên:</strong> ${safe.name}</p>
-      <p><strong>Điện thoại:</strong> ${safe.phone}</p>
-      <p><strong>Câu hỏi:</strong><br>${safe.question}</p>
-    `,
+    html: renderEmailTemplate({
+      eyebrow: 'Câu hỏi mới',
+      title: 'Khách hàng cần được giải đáp',
+      description: 'Một câu hỏi mới vừa được gửi từ trang giải đáp trên website.',
+      reference: safe.id,
+      rows: [
+        { label: 'Họ và tên', value: safe.name },
+        { label: 'Điện thoại', value: safe.phone },
+      ],
+      messageLabel: 'Câu hỏi của khách hàng',
+      message: safe.question,
+      action: {
+        label: 'Gọi cho khách hàng',
+        href: `tel:${encodeURIComponent(inquiry.phone)}`,
+      },
+    }),
   });
 }
 
