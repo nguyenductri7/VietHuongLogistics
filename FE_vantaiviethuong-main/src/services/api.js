@@ -135,6 +135,11 @@ export const homePageApi = {
 // ════════════════════════════════════════════════════════════
 // PARTNERS / ĐỐI TÁC
 // ════════════════════════════════════════════════════════════
+export const servicePageApi = {
+  getPage: () => request('/services-page'),
+  getItems: () => request('/services-page/items'),
+}
+
 export const partnerApi = {
   getList: () => request('/partners'),
   adminList: () => request('/partners/admin'),

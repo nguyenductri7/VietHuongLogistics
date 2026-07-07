@@ -1,8 +1,8 @@
-import { useRef, useEffect, useCallback, useState } from 'react'
+import { useRef, useEffect, useCallback, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { homePageApi } from '../../services/api'
+import { homePageApi, resolveApiMediaUrl, servicePageApi } from '../../services/api'
 import styles from './Services.module.scss'
 
 gsap.registerPlugin(ScrollTrigger)
@@ -83,10 +83,36 @@ const DEFAULT_SECTION = {
   cta_link: '/dich-vu#lien-he',
 }
 
+const CARD_SIZES = ['large', 'tall', 'small', 'wide']
+
+function normalizeServiceItems(items) {
+  if (!Array.isArray(items)) return []
+
+  return items
+    .filter(item => item?.is_active !== 0 && item?.is_active !== false)
+    .map((item, index) => ({
+      id: item.slug || item.id || `service-${index}`,
+      slug: item.slug,
+      label: String(index + 1).padStart(2, '0'),
+      title: item.title || '',
+      desc: item.subtitle || item.description || '',
+      features: Array.isArray(item.tags) && item.tags.length ? item.tags : [],
+      image: resolveApiMediaUrl(item.image),
+      size: CARD_SIZES[index % CARD_SIZES.length],
+      link: item.slug ? `/dich-vu/${item.slug}` : '/dich-vu',
+    }))
+    .filter(item => item.title && item.image)
+}
+
 export default function Services() {
   const sectionRef = useRef(null)
   const cardsRef = useRef([])
   const [section, setSection] = useState(DEFAULT_SECTION)
+  const [managedServices, setManagedServices] = useState([])
+  const displayedServices = useMemo(
+    () => (managedServices.length ? managedServices : services),
+    [managedServices],
+  )
 
   useEffect(() => {
     let cancelled = false
@@ -94,6 +120,18 @@ export default function Services() {
       .then(res => {
         if (!cancelled && res.data?.services_section) {
           setSection({ ...DEFAULT_SECTION, ...res.data.services_section })
+        }
+      })
+      .catch(() => {})
+    return () => { cancelled = true }
+  }, [])
+
+  useEffect(() => {
+    let cancelled = false
+    servicePageApi.getItems()
+      .then(res => {
+        if (!cancelled) {
+          setManagedServices(normalizeServiceItems(res.data))
         }
       })
       .catch(() => {})
@@ -217,7 +255,7 @@ export default function Services() {
         card.removeEventListener('mouseleave', onLeave)
       })
     }
-  }, [handleMouseMove, handleMouseLeave])
+  }, [displayedServices, handleMouseMove, handleMouseLeave])
 
   if (!section.enabled) return null
 
@@ -253,7 +291,7 @@ export default function Services() {
       {/* ── Bento Grid — full bleed ── */}
       <div className={styles.bentoWrap}>
         <div className={styles.bento}>
-          {services.map((s, i) => (
+          {displayedServices.map((s, i) => (
             <article
               key={s.id}
               ref={(el) => (cardsRef.current[i] = el)}
@@ -288,7 +326,7 @@ export default function Services() {
                     ))}
                   </ul>
 
-                  <Link to="/dich-vu#lien-he" className={styles.cardLink}>
+                  <Link to={s.link || '/dich-vu'} className={styles.cardLink}>
                     Báo Giá Ngay
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                       <path d="M5 12h14M12 5l7 7-7 7" />

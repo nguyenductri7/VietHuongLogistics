@@ -432,12 +432,27 @@ const ProcessStepCard = ({ step, isActive }) => {
 
 export const ContactSection = ({ contactData }) => {
   const sectionRef = useRef(null);
+  const [managedContactData, setManagedContactData] = useState(null);
   const [form, setForm] = useState({
     name: '', phone: '', email: '', service: '', cargo: '', note: '',
   });
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
+  const activeContactData = contactData || managedContactData;
+
+  useEffect(() => {
+    if (contactData) return;
+    let cancelled = false;
+
+    axios.get(`${API_BASE}/services-page`)
+      .then(res => {
+        if (!cancelled) setManagedContactData(res.data?.data?.contact_info || null);
+      })
+      .catch(() => {});
+
+    return () => { cancelled = true; };
+  }, [contactData]);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -476,7 +491,7 @@ export const ContactSection = ({ contactData }) => {
       requestAnimationFrame(() => ScrollTrigger.refresh());
     }, sectionRef);
     return () => ctx.revert();
-  }, [contactData]);
+  }, [activeContactData]);
 
   const handleChange = (e) => {
     setForm(f => ({ ...f, [e.target.name]: e.target.value }));
@@ -551,18 +566,18 @@ export const ContactSection = ({ contactData }) => {
             {/* Ảnh thực tế */}
             <div className={s.contactLeftImg}>
          <img
-                src={contactData?.left_image || 'https://images.unsplash.com/photo-1553413077-190dd305871c?q=80&w=1200&auto=format&fit=crop'}
+                src={activeContactData?.left_image || 'https://images.unsplash.com/photo-1553413077-190dd305871c?q=80&w=1200&auto=format&fit=crop'}
                 alt="Kho bãi Việt Hương"
               />
             </div>
 
             {/* Panel thông tin */}
             <div className={s.contactInfoPanel}>
-    <h3 className={s.contactInfoTitle}>{contactData?.company_name || 'Việt Hương Logistics'}</h3>
-              <p className={s.contactInfoTagline}>{contactData?.tagline || 'Uy Tín · Nhanh Chóng · Tận Tâm'}</p>
+    <h3 className={s.contactInfoTitle}>{activeContactData?.company_name || 'Việt Hương Logistics'}</h3>
+              <p className={s.contactInfoTagline}>{activeContactData?.tagline || 'Uy Tín · Nhanh Chóng · Tận Tâm'}</p>
 
               <ul className={s.contactInfoList}>
-                {(contactData?.items || CONTACT_INFO).map((item, i) => (
+                {(activeContactData?.items || CONTACT_INFO).map((item, i) => (
                   <li key={i} className={s.contactInfoItem}>
                     <span className={s.contactInfoIcon}>{item.icon || ICON_MAP[item.icon_key] || <MapPin size={15} />}</span>
                     <span className={s.contactInfoText}>
