@@ -9,7 +9,7 @@ import {
 import styles from './AdminDashboard.module.scss'
 import logo from '../../assets/VIET HUONG LOGISTICS.png'
 const cards = [
-  { icon: Home,          label: 'Trang chủ',        desc: 'Hero, banner, nội dung chính',              color: '#2563EB', to: '/admin/settings'  },
+  { icon: Home,          label: 'Trang chủ',        desc: 'Hero, banner, nội dung chính',              color: '#2563EB', to: '/admin/home'  },
   { icon: Info,          label: 'Giới thiệu',        desc: 'Chỉnh sửa nội dung trang About',            color: '#DC2626', to: '/admin/about'     },
   { icon: Truck,         label: 'Dịch vụ',           desc: 'Quản lý banner, danh sách dịch vụ, quy trình', color: '#0ea5e9', to: '/admin/services'  },
   { icon: HelpCircle,    label: 'Giải đáp',          desc: 'Quản lý câu hỏi khách gửi',                color: '#7c3aed', to: '/admin/faq'       },
@@ -20,7 +20,7 @@ const cards = [
 
 const navItems = [
   { icon: LayoutDashboard, label: 'Tổng quan',    to: '/admin'           },
-  { icon: Home,            label: 'Trang chủ',    to: '/admin/settings'  },
+  { icon: Home,            label: 'Trang chủ',    to: '/admin/home'  },
   { icon: Info,            label: 'Giới thiệu',   to: '/admin/about'     },
   { icon: Truck,           label: 'Dịch vụ',      to: '/admin/services'  },
   { icon: HelpCircle,      label: 'Giải đáp',     to: '/admin/faq'       },

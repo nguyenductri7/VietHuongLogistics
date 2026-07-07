@@ -132,6 +132,19 @@ export const settingsApi = {
   },
 }
 
+export const homePageApi = {
+  get: () => request('/home-page'),
+
+  update: (data) =>
+    request('/home-page', { method: 'PUT', body: JSON.stringify(data) }),
+
+  uploadImage: (file) => {
+    const fd = new FormData()
+    fd.append('image', file)
+    return requestForm('/home-page/upload-image', { method: 'POST', body: fd })
+  },
+}
+
 // ════════════════════════════════════════════════════════════
 // PARTNERS / ĐỐI TÁC
 // ════════════════════════════════════════════════════════════

@@ -4,6 +4,7 @@ import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import styles from './Hero.module.scss'
 import heroSlide1 from '../../assets/hero-slide-1.png'
+import { homePageApi } from '../../services/api'
 gsap.registerPlugin(ScrollTrigger)
 
 // FIX: Tắt lag compensation — animation đều hơn ở mọi frame rate
@@ -19,6 +20,15 @@ const CHARS_VH       = 'VIET HUONG'.split('')
 const SCROLL_LOCK_MS = 0
 const VIDEO_INTRO_MAX_MS = 7000
 const VIDEO_PLAYBACK_RATE = 1.12
+const DEFAULT_HERO_CONTENT = {
+  title: 'VIET HUONG',
+  subtitle: 'LOGISTICS',
+  description: 'Kết nối toàn quốc — vươn tầm quốc tế.\nVận chuyển chuyên nghiệp, nhanh chóng và an toàn.',
+  primary_cta_label: 'Yêu Cầu Báo Giá',
+  primary_cta_link: '/dich-vu#lien-he',
+  secondary_cta_label: 'Xem Dịch Vụ',
+  secondary_cta_link: '/dich-vu',
+}
 
 // ─── COMPONENT ────────────────────────────────────────────
 export default function Hero() {
@@ -40,6 +50,21 @@ export default function Hero() {
   const phaseRef = useRef('video')
   const [phase, setPhase] = useState('video')
   const [showSkipVideo, setShowSkipVideo] = useState(false)
+  const [heroContent, setHeroContent] = useState(DEFAULT_HERO_CONTENT)
+  const heroChars = (heroContent.title || DEFAULT_HERO_CONTENT.title).split('')
+  const heroDescriptionLines = String(heroContent.description || DEFAULT_HERO_CONTENT.description).split('\n')
+
+  useEffect(() => {
+    let cancelled = false
+    homePageApi.get()
+      .then(res => {
+        if (!cancelled && res.data?.hero) {
+          setHeroContent({ ...DEFAULT_HERO_CONTENT, ...res.data.hero })
+        }
+      })
+      .catch(() => {})
+    return () => { cancelled = true }
+  }, [])
 
   const setHeroPhase = useCallback((nextPhase) => {
     phaseRef.current = nextPhase
@@ -375,7 +400,7 @@ useEffect(() => {
 
       <div ref={contentRef} className={`${styles.content} ${phase === 'text' ? styles.contentVisible : ''}`}>
         <h1 className={styles.heroTitle}>
-          {CHARS_VH.map((ch, i) => (
+          {heroChars.map((ch, i) => (
             <span
               key={i}
               className={`${styles.char} ${styles.charVH} ${ch === ' ' ? styles.charSpace : ''}`}
@@ -388,7 +413,7 @@ useEffect(() => {
         </h1>
         <div className={styles.logisticsRow}>
           <span className={styles.logLine} />
-          LOGISTICS
+          {heroContent.subtitle || DEFAULT_HERO_CONTENT.subtitle}
           <span className={styles.logLine} />
         </div>
         <p className={styles.desc}>

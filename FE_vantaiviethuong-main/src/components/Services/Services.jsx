@@ -1,7 +1,8 @@
-import { useRef, useEffect, useCallback } from 'react'
+import { useRef, useEffect, useCallback, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { homePageApi } from '../../services/api'
 import styles from './Services.module.scss'
 
 gsap.registerPlugin(ScrollTrigger)
@@ -74,9 +75,30 @@ const services = [
   },
 ]
 
+const DEFAULT_SECTION = {
+  enabled: true,
+  title: 'Giải Pháp Vận Tải',
+  accent: 'Toàn Diện',
+  cta_label: 'Tư Vấn Miễn Phí',
+  cta_link: '/dich-vu#lien-he',
+}
+
 export default function Services() {
   const sectionRef = useRef(null)
   const cardsRef = useRef([])
+  const [section, setSection] = useState(DEFAULT_SECTION)
+
+  useEffect(() => {
+    let cancelled = false
+    homePageApi.get()
+      .then(res => {
+        if (!cancelled && res.data?.services_section) {
+          setSection({ ...DEFAULT_SECTION, ...res.data.services_section })
+        }
+      })
+      .catch(() => {})
+    return () => { cancelled = true }
+  }, [])
 
   // ── Spotlight / magnetic effect ──────────────────────────────────────
   const handleMouseMove = useCallback((e, card) => {
@@ -197,6 +219,8 @@ export default function Services() {
     }
   }, [handleMouseMove, handleMouseLeave])
 
+  if (!section.enabled) return null
+
   return (
     <section id="services" ref={sectionRef} className={styles.services}>
       {/* Section-level parallax atmosphere */}
@@ -216,7 +240,7 @@ export default function Services() {
           </div>
           <div className={styles.headerRight}>
         
-            <Link to="/dich-vu#lien-he" className={styles.headerCta}>
+            <Link to={section.cta_link || DEFAULT_SECTION.cta_link} className={styles.headerCta}>
               Tư Vấn Miễn Phí
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M5 12h14M12 5l7 7-7 7" />

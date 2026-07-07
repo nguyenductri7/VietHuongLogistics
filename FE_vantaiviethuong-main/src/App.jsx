@@ -12,6 +12,7 @@ import AdminBlogs from './components/Admin/AdminBlogs'
 import AdminAbout from './components/Admin/AdminAbout'
 import AdminServices from './components/Admin/Adminservices';
 import AdminSettings from './components/Admin/AdminSettings'
+import AdminHome from './components/Admin/AdminHome'
 
 import Navbar from './components/Navbar/Navbar'
 import Hero from './components/Hero/Hero'
@@ -184,6 +185,15 @@ function AppInner() {
 />
 
         {/* Cài đặt website */}
+        <Route
+          path="/admin/home"
+          element={
+            <ProtectedRoute>
+              <AdminHome />
+            </ProtectedRoute>
+          }
+        />
+
         <Route
           path="/admin/settings"
           element={
