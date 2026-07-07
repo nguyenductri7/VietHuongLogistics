@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom'
 import { useRef, useLayoutEffect } from 'react'
 import { Helmet, HelmetProvider } from 'react-helmet-async'
 import { gsap } from 'gsap'
@@ -11,7 +11,6 @@ import AdminDashboard from './components/Admin/AdminDashboard'
 import AdminBlogs from './components/Admin/AdminBlogs'
 import AdminAbout from './components/Admin/AdminAbout'
 import AdminServices from './components/Admin/Adminservices';
-import AdminSettings from './components/Admin/AdminSettings'
 import AdminHome from './components/Admin/AdminHome'
 
 import Navbar from './components/Navbar/Navbar'
@@ -20,7 +19,7 @@ import About from './components/About/About'
 import Services from './components/Services/Services'
 import Partners from './components/Partners/Partners'
 import Blog from './components/Blog/Blog'
-import Footer from './components/Footer/Footer'
+import Footer from './components/Footer/FooterCms'
 import AboutDetailPage from './components/About/Aboutdetailpage'
 import ServicesDetailPage from './components/Services/ServicesDetailPage'
 import ServiceDetailPage from './components/Services/ServiceDetailPage'
@@ -196,11 +195,7 @@ function AppInner() {
 
         <Route
           path="/admin/settings"
-          element={
-            <ProtectedRoute>
-              <AdminSettings />
-            </ProtectedRoute>
-          }
+          element={<Navigate to="/admin/home" replace />}
         />
 <Route
   path="/admin/faq"
