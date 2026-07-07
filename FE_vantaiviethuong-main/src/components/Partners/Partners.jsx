@@ -1,7 +1,8 @@
-import { useRef, useEffect, useCallback } from 'react'
+import { useRef, useEffect, useCallback, useMemo, useState } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import styles from './Partners.module.scss'
+import { partnerApi, resolveApiMediaUrl } from '../../services/api'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -91,17 +92,43 @@ export default function Partners() {
   const tickerRef  = useRef(null)
   const tickerTl   = useRef(null)
   const cardRefs   = useRef([])
+  const [managedLogos, setManagedLogos] = useState([])
+  const displayLogos = useMemo(
+    () => (managedLogos.length ? managedLogos : logos),
+    [managedLogos],
+  )
+
+  useEffect(() => {
+    let cancelled = false
+    partnerApi.getList()
+      .then(res => {
+        if (cancelled) return
+        const nextLogos = Array.isArray(res.data)
+          ? res.data
+              .filter(item => item.logo_url)
+              .map(item => ({
+                src: resolveApiMediaUrl(item.logo_url),
+                alt: item.name || 'Logo đối tác',
+                href: item.website_url || '',
+              }))
+          : []
+        setManagedLogos(nextLogos)
+      })
+      .catch(() => {})
+    return () => { cancelled = true }
+  }, [])
 
   useEffect(() => {
     const track = tickerRef.current
     if (!track) return
+    if (tickerTl.current) tickerTl.current.kill()
     gsap.set(track, { x: 0 })
     const half = track.scrollWidth / 2
     tickerTl.current = gsap.to(track, {
       x: -half, duration: 28, ease: 'none', repeat: -1,
     })
     return () => { if (tickerTl.current) tickerTl.current.kill() }
-  }, [])
+  }, [displayLogos])
 
   const handleMouseMove = useCallback((e, card) => {
     const rect = card.getBoundingClientRect()
@@ -203,7 +230,7 @@ export default function Partners() {
         aria-hidden="true"
       >
         <div className={styles.tickerTrack} ref={tickerRef}>
-          {[...logos, ...logos, ...logos].map((logo, i) => (
+          {[...displayLogos, ...displayLogos, ...displayLogos].map((logo, i) => (
             <div key={i} className={styles.logoPill}>
               <img src={logo.src} alt={logo.alt} loading="lazy" />
             </div>

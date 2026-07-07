@@ -1,6 +1,15 @@
 const { pool } = require('../config/database');
 const { deleteFromCloudinary } = require('../config/cloudinary');
 
+const parseBooleanFlag = (value) => {
+  if (value === undefined) return undefined;
+  if (typeof value === 'boolean') return value ? 1 : 0;
+  if (typeof value === 'number') return value === 1 ? 1 : 0;
+
+  const normalized = String(value).trim().toLowerCase();
+  return ['1', 'true', 'yes', 'on'].includes(normalized) ? 1 : 0;
+};
+
 // GET /api/partners - Public
 const getPartners = async (req, res) => {
   try {
@@ -58,6 +67,7 @@ const updatePartner = async (req, res) => {
     const partner = existing[0];
     let logo_url = partner.logo_url;
     let logo_public_id = partner.logo_public_id;
+    const nextIsActive = parseBooleanFlag(is_active);
 
     if (req.file) {
       if (partner.logo_public_id) await deleteFromCloudinary(partner.logo_public_id).catch(console.error);
@@ -73,7 +83,7 @@ const updatePartner = async (req, res) => {
         logo_public_id,
         website_url ?? partner.website_url,
         sort_order !== undefined ? parseInt(sort_order) : partner.sort_order,
-        is_active !== undefined ? (is_active ? 1 : 0) : partner.is_active,
+        nextIsActive !== undefined ? nextIsActive : partner.is_active,
         id,
       ]
     );

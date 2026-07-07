@@ -2,8 +2,9 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   ArrowLeft, Save, Home, Info, Truck, Users, Phone, LayoutTemplate, Loader2,
+  Camera, Plus, Trash2, Eye, EyeOff,
 } from 'lucide-react'
-import { homePageApi } from '../../services/api'
+import { homePageApi, partnerApi, resolveApiMediaUrl } from '../../services/api'
 import styles from './AdminSettings.module.scss'
 
 const DEFAULT_HOME = {
@@ -173,6 +174,15 @@ export default function AdminHome() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [toast, setToast] = useState(null)
+  const [partners, setPartners] = useState([])
+  const [partnerLoading, setPartnerLoading] = useState(false)
+  const [partnerSaving, setPartnerSaving] = useState(false)
+  const [partnerForm, setPartnerForm] = useState({
+    name: '',
+    website_url: '',
+    sort_order: '',
+    logo: null,
+  })
 
   useEffect(() => {
     homePageApi.get()
@@ -180,6 +190,22 @@ export default function AdminHome() {
       .catch(err => showToast(err.message || 'Không thể tải dữ liệu trang chủ.', 'error'))
       .finally(() => setLoading(false))
   }, [])
+
+  const loadPartners = async () => {
+    setPartnerLoading(true)
+    try {
+      const res = await partnerApi.adminList()
+      setPartners(Array.isArray(res.data) ? res.data : [])
+    } catch (err) {
+      showToast(err.message || 'Không thể tải danh sách đối tác.', 'error')
+    } finally {
+      setPartnerLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    if (activeTab === 'partners_section') loadPartners()
+  }, [activeTab])
 
   const showToast = (msg, type = 'success') => {
     setToast({ msg, type })
@@ -215,6 +241,58 @@ export default function AdminHome() {
       showToast(err.message || 'Lưu thất bại.', 'error')
     } finally {
       setSaving(false)
+    }
+  }
+
+  const handleCreatePartner = async (event) => {
+    event.preventDefault()
+    if (!partnerForm.name.trim()) {
+      showToast('Vui lòng nhập tên công ty đối tác.', 'error')
+      return
+    }
+
+    setPartnerSaving(true)
+    try {
+      const fd = new FormData()
+      fd.append('name', partnerForm.name.trim())
+      fd.append('website_url', partnerForm.website_url.trim())
+      fd.append('sort_order', partnerForm.sort_order || '0')
+      if (partnerForm.logo) fd.append('logo', partnerForm.logo)
+
+      await partnerApi.create(fd)
+      setPartnerForm({ name: '', website_url: '', sort_order: '', logo: null })
+      showToast('Đã thêm logo đối tác!')
+      await loadPartners()
+    } catch (err) {
+      showToast(err.message || 'Thêm đối tác thất bại.', 'error')
+    } finally {
+      setPartnerSaving(false)
+    }
+  }
+
+  const handleTogglePartner = async (partner) => {
+    const fd = new FormData()
+    fd.append('name', partner.name || '')
+    fd.append('website_url', partner.website_url || '')
+    fd.append('sort_order', partner.sort_order ?? 0)
+    fd.append('is_active', partner.is_active ? '0' : '1')
+
+    try {
+      await partnerApi.update(partner.id, fd)
+      await loadPartners()
+    } catch (err) {
+      showToast(err.message || 'Cập nhật đối tác thất bại.', 'error')
+    }
+  }
+
+  const handleDeletePartner = async (id) => {
+    if (!window.confirm('Xóa đối tác này?')) return
+    try {
+      await partnerApi.delete(id)
+      showToast('Đã xóa đối tác.')
+      await loadPartners()
+    } catch (err) {
+      showToast(err.message || 'Xóa đối tác thất bại.', 'error')
     }
   }
 
@@ -302,6 +380,136 @@ export default function AdminHome() {
                 </div>
               )
             })}
+
+            {activeTab === 'partners_section' && (
+              <div style={{ borderTop: '1px solid #F3F4F6', marginTop: 8, paddingTop: 22 }}>
+                <h3 style={{ margin: '0 0 14px', fontSize: 15, color: '#111827' }}>
+                  Logo công ty đối tác
+                </h3>
+
+                <form
+                  onSubmit={handleCreatePartner}
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: '1.2fr 1.2fr .5fr 1fr auto',
+                    gap: 10,
+                    alignItems: 'end',
+                    marginBottom: 22,
+                  }}
+                >
+                  <div className={styles.field} style={{ marginBottom: 0 }}>
+                    <label className={styles.label}>Tên công ty</label>
+                    <input
+                      className={styles.input}
+                      value={partnerForm.name}
+                      onChange={e => setPartnerForm(prev => ({ ...prev, name: e.target.value }))}
+                      placeholder="VD: Maersk"
+                    />
+                  </div>
+
+                  <div className={styles.field} style={{ marginBottom: 0 }}>
+                    <label className={styles.label}>Website</label>
+                    <input
+                      className={styles.input}
+                      value={partnerForm.website_url}
+                      onChange={e => setPartnerForm(prev => ({ ...prev, website_url: e.target.value }))}
+                      placeholder="https://..."
+                    />
+                  </div>
+
+                  <div className={styles.field} style={{ marginBottom: 0 }}>
+                    <label className={styles.label}>Thứ tự</label>
+                    <input
+                      className={styles.input}
+                      type="number"
+                      value={partnerForm.sort_order}
+                      onChange={e => setPartnerForm(prev => ({ ...prev, sort_order: e.target.value }))}
+                      placeholder="0"
+                    />
+                  </div>
+
+                  <div className={styles.field} style={{ marginBottom: 0 }}>
+                    <label className={styles.label}>Logo</label>
+                    <input
+                      className={styles.input}
+                      type="file"
+                      accept="image/*"
+                      onChange={e => setPartnerForm(prev => ({ ...prev, logo: e.target.files?.[0] || null }))}
+                    />
+                  </div>
+
+                  <button className={styles.saveBtn} type="submit" disabled={partnerSaving}>
+                    {partnerSaving
+                      ? <><Loader2 size={14} className={styles.spinner} /> Đang thêm</>
+                      : <><Plus size={14} /> Thêm</>
+                    }
+                  </button>
+                </form>
+
+                {partnerLoading ? (
+                  <div className={styles.loadingBox} style={{ padding: '18px 0' }}>
+                    <Loader2 size={16} className={styles.spinner} /> Đang tải đối tác...
+                  </div>
+                ) : (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 12 }}>
+                    {partners.map(partner => (
+                      <div
+                        key={partner.id}
+                        style={{
+                          border: '1px solid #E5E7EB',
+                          borderRadius: 12,
+                          background: '#F9FAFB',
+                          padding: 12,
+                        }}
+                      >
+                        <div
+                          style={{
+                            height: 88,
+                            borderRadius: 10,
+                            background: '#fff',
+                            border: '1px solid #E5E7EB',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            marginBottom: 10,
+                            overflow: 'hidden',
+                          }}
+                        >
+                          {partner.logo_url ? (
+                            <img src={resolveApiMediaUrl(partner.logo_url)} alt={partner.name} style={{ maxWidth: '82%', maxHeight: '70%', objectFit: 'contain' }} />
+                          ) : (
+                            <Camera size={26} color="#9CA3AF" />
+                          )}
+                        </div>
+
+                        <div style={{ fontWeight: 700, color: '#111827', fontSize: 14 }}>{partner.name}</div>
+                        <div style={{ color: '#6B7280', fontSize: 12, marginTop: 3 }}>
+                          Thứ tự: {partner.sort_order ?? 0} · {partner.is_active ? 'Đang hiện' : 'Đang ẩn'}
+                        </div>
+
+                        <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+                          <button
+                            type="button"
+                            className={styles.changeImgBtn}
+                            onClick={() => handleTogglePartner(partner)}
+                          >
+                            {partner.is_active ? <EyeOff size={13} /> : <Eye size={13} />}
+                            {partner.is_active ? 'Ẩn' : 'Hiện'}
+                          </button>
+                          <button
+                            type="button"
+                            className={styles.changeImgBtn}
+                            onClick={() => handleDeletePartner(partner.id)}
+                          >
+                            <Trash2 size={13} /> Xóa
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
 
             <div className={styles.saveRow}>
               <button className={styles.saveBtn} onClick={handleSave} disabled={saving}>
