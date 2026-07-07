@@ -1,5 +1,6 @@
 import styles from './Footer.module.scss'
 import { MapPin } from 'lucide-react'
+import logoFooter from '../../assets/logofooter.png'
 
 export default function Footer() {
   return (
@@ -9,7 +10,7 @@ export default function Footer() {
 
         {/* Cột 1 */}
         <div className={styles.brand}>
-          <img src="/src/assets/logofooter.png" alt="Việt Hương Logistics" className={styles.logoImg}/>
+          <img src={logoFooter} alt="Việt Hương Logistics" className={styles.logoImg}/>
           <p className={styles.companyName}>CÔNG TY TNHH GIAO NHẬN VẬN TẢI VIỆT HƯƠNG</p>
           <p className={styles.taxCode}>Mã số thuế: 0402058419</p>
 

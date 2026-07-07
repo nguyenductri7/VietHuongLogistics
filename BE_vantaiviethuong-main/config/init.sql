@@ -1,14 +1,8 @@
 -- ================================================
--- VAN TAI VIET HUONG - Database Schema
--- Chạy file này để tạo database và các bảng
--- MySQL: mysql -u root -p < init.sql
+-- DEPRECATED: không dùng file này cho deploy mới.
+-- Schema hiện được quản lý bằng migrations/*.sql và lệnh: npm run migrate
+-- File được giữ lại tạm thời để tham chiếu dữ liệu cũ.
 -- ================================================
-
-CREATE DATABASE IF NOT EXISTS vantaiviethuong
-  CHARACTER SET utf8mb4
-  COLLATE utf8mb4_unicode_ci;
-
-USE vantaiviethuong;
 
 -- ================================================
 -- BẢNG ADMIN USERS

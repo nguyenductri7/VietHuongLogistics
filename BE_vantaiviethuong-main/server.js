@@ -3,6 +3,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const { testConnection } = require('./config/database');
+const { runMigrations } = require('./scripts/migrate');
 const faqRoutes = require('./routes/Faq')
 const faqContentRoutes = require('./routes/Faqcontent')
 const app = express();
@@ -94,6 +95,7 @@ async function connectDatabase() {
   databaseError = null;
 
   try {
+    await runMigrations();
     await testConnection();
     databaseStatus = 'connected';
   } catch (err) {

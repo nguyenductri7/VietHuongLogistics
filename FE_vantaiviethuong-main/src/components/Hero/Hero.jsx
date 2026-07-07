@@ -74,17 +74,6 @@ export default function Hero() {
   const setupScrollTrigger = useCallback(() => {
     if (stRef.current) stRef.current.kill()
 
-    const aboutEl = document.querySelector('#about')
-
-    if (aboutEl) {
-      gsap.set(aboutEl, {
-        position: 'fixed',
-        top: 0, left: 0,
-        width: '100%',
-        zIndex: 1,
-      })
-    }
-
     stRef.current = ScrollTrigger.create({
       trigger : '#page-wrap',
       start   : 'top top',
@@ -98,27 +87,11 @@ export default function Hero() {
       onLeave: () => {
         const heroShell = document.getElementById('hero-sticky-shell')
         if (heroShell) heroShell.style.pointerEvents = 'none'
-        if (aboutEl) {
-          gsap.set(aboutEl, {
-            position: 'relative',
-            top: 'auto', left: 'auto',
-            width: '100%',
-            zIndex: 'auto',
-          })
-        }
       },
 
       onEnterBack: () => {
         const heroShell = document.getElementById('hero-sticky-shell')
         if (heroShell) heroShell.style.pointerEvents = 'auto'
-        if (aboutEl) {
-          gsap.set(aboutEl, {
-            position: 'fixed',
-            top: 0, left: 0,
-            width: '100%',
-            zIndex: 1,
-          })
-        }
       },
     })
   }, [applyCurtain])

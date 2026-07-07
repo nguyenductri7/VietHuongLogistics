@@ -6,7 +6,7 @@ Backend Node.js + Express + MySQL + Cloudinary cho website vận tải.
 
 ## 📋 Yêu cầu
 
-- **Node.js** >= 16.x
+- **Node.js** >= 18.x
 - **MySQL** >= 8.0
 - Tài khoản **Cloudinary** (miễn phí tại https://cloudinary.com)
 
@@ -38,6 +38,12 @@ DB_USER=root
 DB_PASSWORD=mật_khẩu_mysql_của_bạn
 DB_NAME=vantaiviethuong
 
+# Chỉ cần cho lần khởi tạo database mới; xóa khỏi môi trường sau khi Admin được tạo
+INITIAL_ADMIN_USERNAME=admin
+INITIAL_ADMIN_PASSWORD=mật_khẩu_mạnh_tối_thiểu_8_ký_tự
+INITIAL_ADMIN_NAME=Quản trị viên
+INITIAL_ADMIN_EMAIL=admin@example.com
+
 JWT_SECRET=chuỗi_bí_mật_dài_và_ngẫu_nhiên
 
 CLOUDINARY_CLOUD_NAME=tên_cloud_của_bạn
@@ -47,30 +53,23 @@ CLOUDINARY_API_SECRET=api_secret_của_bạn
 FRONTEND_URL=http://localhost:5173
 ```
 
-### Bước 3: Tạo database MySQL
+### Bước 3: Cập nhật schema database
 
 ```bash
-# Đăng nhập MySQL
-mysql -u root -p
-
-# Chạy script tạo database
-source config/init.sql
+npm run migrate
 ```
 
-Hoặc mở **MySQL Workbench** → chạy file `config/init.sql`.
+Không chạy `config/init.sql` thủ công. Lệnh migration dùng đúng database trong
+`DB_NAME`, chỉ chạy các phiên bản chưa áp dụng và ghi lịch sử vào bảng
+`schema_migrations`. Khi `npm start`, backend cũng tự kiểm tra và chạy migration
+trước khi đánh dấu database sẵn sàng.
 
-### Bước 4: Tạo mật khẩu admin
+### Bước 4: Tạo tài khoản Admin ban đầu
 
-```bash
-node generate-password.js Admin@123
-```
-
-Copy hash xuất ra → chạy SQL:
-
-```sql
-USE vantaiviethuong;
-UPDATE admin_users SET password = 'HASH_Ở_TRÊN' WHERE username = 'admin';
-```
+Với database mới, khai báo các biến `INITIAL_ADMIN_*` như ví dụ phía trên rồi
+chạy `npm run migrate` hoặc deploy backend. Hệ thống chỉ tạo Admin khi bảng
+`admin_users` chưa có tài khoản và không tự ghi đè mật khẩu ở những lần chạy sau.
+Sau khi đăng nhập thành công, xóa `INITIAL_ADMIN_PASSWORD` khỏi môi trường.
 
 ### Bước 5: Chạy server
 
@@ -231,7 +230,8 @@ backend/
 ├── config/
 │   ├── database.js      # Kết nối MySQL
 │   ├── cloudinary.js    # Config Cloudinary + multer
-│   └── init.sql         # Script tạo database
+│   └── init.sql         # File cũ, không dùng cho deploy mới
+├── migrations/          # Schema có phiên bản, chạy theo thứ tự
 ├── controllers/
 │   ├── authController.js
 │   ├── blogController.js
@@ -246,6 +246,8 @@ backend/
 │   ├── settings.js
 │   ├── partners.js
 │   └── contact.js
+├── scripts/
+│   └── migrate.js       # Migration runner
 ├── .env.example
 ├── generate-password.js
 ├── package.json

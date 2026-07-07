@@ -230,8 +230,6 @@ export default function About() {
     mountedRef.current = true
     const section = sectionRef.current
     if (!section) return
-    const servicesEl = document.getElementById('services')
-
     slideRefs.current.forEach((el, i) => {
       if (!el) return
       el.style.position      = 'absolute'
@@ -248,19 +246,12 @@ export default function About() {
       gsap.set(el, { clipPath: 'inset(0 0 0 100%)' })
     })
     if (canvasWrapRef.current) gsap.set(canvasWrapRef.current, { x: 0, opacity: 1 })
-if (servicesEl) gsap.set(servicesEl, { 
-  position: 'fixed', top: 0, left: 0, width: '100%', height: '100vh',
-  zIndex: 6, x: window.innerWidth, opacity: 1, visibility: 'hidden',
-  pointerEvents: 'none', willChange: 'transform',
-})
     applyTheme('red')
 
     let currentSlide = 0
     let pendingSlide = 0
     let wipeTl       = null
     let isAnimating  = false
-    let exitTransitionActive = false
-    let viewportWidth = window.innerWidth
 
     const goToSlide = (nextIdx) => {
       if (!mountedRef.current) return
@@ -323,31 +314,6 @@ if (nextIdx === 1) wipeTl.call(animateCounters, [], '+=0.1')
       start: 'top top',
       end: 'bottom top',
       invalidateOnRefresh: true,
-onRefresh: () => {
-  viewportWidth = window.innerWidth
-},
-onLeave: () => {
-  exitTransitionActive = false
-  if (servicesEl) {
-    gsap.set(servicesEl, { 
-      position: 'relative',
-      top: 'auto', left: 'auto',
-      width: '100%', height: 'auto',
-      zIndex: 'auto',
-      x: 0, opacity: 1, visibility: 'visible', willChange: 'auto',
-      pointerEvents: 'auto',
-    })
-  }
-},
-
-onEnterBack: () => {
-  exitTransitionActive = true
-  if (servicesEl) gsap.set(servicesEl, { 
-    position: 'fixed', top: 0, left: 0, width: '100%', height: '100vh',
-    zIndex: 6, x: viewportWidth, opacity: 1, visibility: 'visible',
-    pointerEvents: 'none', willChange: 'transform',
-  })
-},
       onUpdate: (self) => {
         if (!mountedRef.current) return
         const p = self.progress
@@ -361,25 +327,14 @@ onEnterBack: () => {
             invalidateRef.current?.()
           }
         }
-if (p > 0.85) {
-  if (!exitTransitionActive) {
-    exitTransitionActive = true
-    if (servicesEl) gsap.set(servicesEl, { visibility: 'visible' })
-  }
-  const ep = gsap.utils.mapRange(0.85, 1.0, 0, 1, p)
-  if (canvasWrapRef.current) 
-    gsap.set(canvasWrapRef.current, { x: -(ep * viewportWidth * 1.1), opacity: 1 - ep * 0.5 })
-  const last = slideRefs.current[n - 1]
-  if (last) gsap.set(last, { opacity: 1 - ep })
+        if (canvasWrapRef.current) 
+          gsap.set(canvasWrapRef.current, { x: 0, opacity: 1 })
+        if (p > 0.85) {
+          const last = slideRefs.current[n - 1]
+          if (last) gsap.set(last, { opacity: 1 })
+        }
   // ← THÊM LẠI dòng này
-  if (servicesEl) gsap.set(servicesEl, { x: (1 - ep) * viewportWidth })
-} else {
-  if (!exitTransitionActive) return
-  exitTransitionActive = false
-  if (canvasWrapRef.current) gsap.set(canvasWrapRef.current, { x: 0, opacity: 1 })
   // ← THÊM LẠI dòng này
-  if (servicesEl) gsap.set(servicesEl, { x: viewportWidth, visibility: 'hidden' })
-}
       },
     })
 
@@ -389,7 +344,6 @@ if (p > 0.85) {
       counterTweens.current = []
       aboutTrigger.kill()
       if (wipeTl) wipeTl.kill()
-      if (servicesEl) gsap.set(servicesEl, { clearProps: 'all' })
     }
   }, [animateCounters, applyTheme])
 
