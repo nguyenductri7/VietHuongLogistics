@@ -119,19 +119,6 @@ export const blogApi = {
 // ════════════════════════════════════════════════════════════
 // WEBSITE SETTINGS
 // ════════════════════════════════════════════════════════════
-export const settingsApi = {
-  getAll: () => request('/settings'),
-
-  update: (data) =>
-    request('/settings/admin', { method: 'PUT', body: JSON.stringify(data) }),
-
-  uploadImage: (key, file) => {
-    const fd = new FormData()
-    fd.append('image', file)
-    return requestForm(`/settings/admin/image/${key}`, { method: 'PUT', body: fd })
-  },
-}
-
 export const homePageApi = {
   get: () => request('/home-page'),
 
