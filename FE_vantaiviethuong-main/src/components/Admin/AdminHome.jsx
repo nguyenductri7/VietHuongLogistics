@@ -207,11 +207,15 @@ function normalizeHome(data = {}) {
 }
 
 function normalizeReviews(reviews = []) {
-  const source = Array.isArray(reviews) && reviews.length ? reviews : DEFAULT_HOME.partners_section.reviews
-  return DEFAULT_HOME.partners_section.reviews.map((fallback, index) => ({
+  const source = Array.isArray(reviews) ? reviews : DEFAULT_HOME.partners_section.reviews
+  return source.map((review, index) => {
+    const fallback = DEFAULT_HOME.partners_section.reviews[index % DEFAULT_HOME.partners_section.reviews.length]
+    return {
     ...fallback,
-    ...(source[index] || {}),
-  }))
+    ...(review || {}),
+    id: review?.id || `${Date.now()}-${index}`,
+  }
+  })
 }
 
 export default function AdminHome() {
@@ -283,6 +287,43 @@ export default function AdminHome() {
         },
       }
     })
+  }
+
+  const handleAddReview = () => {
+    setHome(prev => {
+      const reviews = normalizeReviews(prev.partners_section?.reviews)
+      const nextIndex = reviews.length
+      const fallback = DEFAULT_HOME.partners_section.reviews[nextIndex % DEFAULT_HOME.partners_section.reviews.length]
+
+      return {
+        ...prev,
+        partners_section: {
+          ...prev.partners_section,
+          reviews: [
+            ...reviews,
+            {
+              ...fallback,
+              id: `${Date.now()}-${nextIndex}`,
+              initials: '',
+              name: '',
+              company: '',
+              quote: '',
+            },
+          ],
+        },
+      }
+    })
+  }
+
+  const handleDeleteReview = (index) => {
+    if (!window.confirm('Xóa đánh giá này?')) return
+    setHome(prev => ({
+      ...prev,
+      partners_section: {
+        ...prev.partners_section,
+        reviews: normalizeReviews(prev.partners_section?.reviews).filter((_, reviewIndex) => reviewIndex !== index),
+      },
+    }))
   }
 
   const getSectionPayload = (sectionKey) => {
@@ -581,12 +622,23 @@ export default function AdminHome() {
 
             {activeTab === 'testimonials_section' && (
               <div style={{ borderTop: '1px solid #F3F4F6', marginTop: 8, paddingTop: 22 }}>
-                <h3 style={{ margin: '0 0 8px', fontSize: 15, color: '#111827' }}>
-                  Đánh giá khách hàng trên trang chủ
-                </h3>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 8 }}>
+                  <h3 style={{ margin: 0, fontSize: 15, color: '#111827' }}>
+                    Đánh giá khách hàng trên trang chủ
+                  </h3>
+                  <button type="button" className={styles.saveBtn} onClick={handleAddReview}>
+                    <Plus size={14} /> Thêm đánh giá
+                  </button>
+                </div>
                 <p style={{ margin: '0 0 16px', color: '#6B7280', fontSize: 13 }}>
                   Các nội dung này sẽ hiển thị trong cụm thẻ đánh giá bên dưới logo đối tác.
                 </p>
+
+                {normalizeReviews(home.partners_section?.reviews).length === 0 && (
+                  <div style={{ border: '1px dashed #D1D5DB', borderRadius: 12, padding: 18, color: '#6B7280', fontSize: 14, marginBottom: 14 }}>
+                    Chưa có đánh giá nào. Bấm “Thêm đánh giá” để tạo đánh giá đầu tiên.
+                  </div>
+                )}
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 14 }}>
                   {normalizeReviews(home.partners_section?.reviews).map((review, index) => (
@@ -599,8 +651,17 @@ export default function AdminHome() {
                         padding: 14,
                       }}
                     >
-                      <div style={{ fontWeight: 700, color: '#111827', fontSize: 14, marginBottom: 12 }}>
-                        Đánh giá #{index + 1}
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginBottom: 12 }}>
+                        <div style={{ fontWeight: 700, color: '#111827', fontSize: 14 }}>
+                          Đánh giá #{index + 1}
+                        </div>
+                        <button
+                          type="button"
+                          className={styles.changeImgBtn}
+                          onClick={() => handleDeleteReview(index)}
+                        >
+                          <Trash2 size={13} /> Xóa
+                        </button>
                       </div>
 
                       <div style={{ display: 'grid', gridTemplateColumns: '80px 1fr', gap: 10 }}>

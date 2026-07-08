@@ -66,11 +66,14 @@ const DEFAULT_REVIEWS = [
 ]
 
 function normalizeReviews(reviews = []) {
-  const source = Array.isArray(reviews) && reviews.length ? reviews : DEFAULT_REVIEWS
-  return DEFAULT_REVIEWS.map((fallback, index) => ({
-    ...fallback,
-    ...(source[index] || {}),
-  }))
+  const source = Array.isArray(reviews) ? reviews : DEFAULT_REVIEWS
+  return source.map((review, index) => {
+    const fallback = DEFAULT_REVIEWS[index % DEFAULT_REVIEWS.length]
+    return {
+      ...fallback,
+      ...(review || {}),
+    }
+  })
 }
 
 function Stars() {
@@ -117,6 +120,10 @@ export default function Partners() {
     () => normalizeReviews(reviewContent.reviews),
     [reviewContent.reviews],
   )
+  const leadReview = displayReviews[0]
+  const topReviews = displayReviews.slice(1, 3)
+  const wideReview = displayReviews[3]
+  const extraReviews = displayReviews.slice(4)
 
   useEffect(() => {
     let cancelled = false
@@ -144,7 +151,9 @@ export default function Partners() {
           setReviewContent({
             title: partnersSection.reviews_title || DEFAULT_REVIEWS_TITLE,
             subtitle: partnersSection.reviews_subtitle || DEFAULT_REVIEWS_SUBTITLE,
-            reviews: normalizeReviews(partnersSection.reviews),
+            reviews: Array.isArray(partnersSection.reviews)
+              ? normalizeReviews(partnersSection.reviews)
+              : DEFAULT_REVIEWS,
           })
         }
       })
@@ -274,65 +283,97 @@ export default function Partners() {
 
       <div className="container">
         <div className={styles.reviewHeader}>
-          <span className={styles.eyebrow}>{reviewContent.title || DEFAULT_REVIEWS_TITLE}</span>
+          <span className={styles.eyebrow}>Khách hàng nói gì</span>
+          <h2 className={styles.reviewTitle}>{reviewContent.title || DEFAULT_REVIEWS_TITLE}</h2>
           <p className={styles.reviewSub}>{reviewContent.subtitle || DEFAULT_REVIEWS_SUBTITLE}</p>
         </div>
 
-        <div className={styles.bento + ' js-bento'}>
+        {displayReviews.length > 0 ? (
+          <div className={styles.bento + ' js-bento'}>
 
-          <article
-            className={styles.cardTall + ' js-card'}
-            ref={(el) => { if (el) cardRefs.current[0] = el }}
-            style={{ '--grad-from': displayReviews[0].gradFrom, '--sun-color': displayReviews[0].sunColor }}
-          >
-            <Stars />
-            <span className={styles.openQuote}>"</span>
-            <p className={styles.quoteLg}>{displayReviews[0].quote}</p>
-            <footer className={styles.cardFooter}>
-              <Avatar initials={displayReviews[0].initials} bg={displayReviews[0].avatarBg} color={displayReviews[0].avatarColor} />
-              <div>
-                <strong className={styles.name}>{displayReviews[0].name}</strong>
-                <span className={styles.role}>{displayReviews[0].company}</span>
+            {leadReview && (
+              <article
+                className={styles.cardTall + ' js-card'}
+                ref={(el) => { if (el) cardRefs.current[0] = el }}
+                style={{ '--grad-from': leadReview.gradFrom, '--sun-color': leadReview.sunColor }}
+              >
+                <Stars />
+                <span className={styles.openQuote}>"</span>
+                <p className={styles.quoteLg}>{leadReview.quote}</p>
+                <footer className={styles.cardFooter}>
+                  <Avatar initials={leadReview.initials} bg={leadReview.avatarBg} color={leadReview.avatarColor} />
+                  <div>
+                    <strong className={styles.name}>{leadReview.name}</strong>
+                    <span className={styles.role}>{leadReview.company}</span>
+                  </div>
+                </footer>
+              </article>
+            )}
+
+            {(topReviews.length > 0 || wideReview || extraReviews.length > 0) && (
+              <div className={styles.rightCol}>
+                {topReviews.length > 0 && (
+                  <div className={styles.topRow}>
+                    {topReviews.map((r, i) => (
+                      <article
+                        key={r.id || i}
+                        className={styles.cardSmall + ' js-card'}
+                        ref={(el) => { if (el) cardRefs.current[i + 1] = el }}
+                        style={{ '--grad-from': r.gradFrom, '--sun-color': r.sunColor }}
+                      >
+                        <Stars />
+                        <Avatar initials={r.initials} bg={r.avatarBg} color={r.avatarColor} size={48} />
+                        <strong className={styles.name} style={{ marginTop: 10 }}>{r.name}</strong>
+                        <span className={styles.role}>{r.company}</span>
+                        <p className={styles.quoteSm}>"{r.quote}"</p>
+                      </article>
+                    ))}
+                  </div>
+                )}
+
+                {wideReview && (
+                  <article
+                    className={styles.cardWide + ' js-card'}
+                    ref={(el) => { if (el) cardRefs.current[3] = el }}
+                    style={{ '--grad-from': wideReview.gradFrom, '--sun-color': wideReview.sunColor }}
+                  >
+                    <div className={styles.wideLeft}>
+                      <Avatar initials={wideReview.initials} bg={wideReview.avatarBg} color={wideReview.avatarColor} size={52} />
+                      <div>
+                        <strong className={styles.name}>{wideReview.name}</strong>
+                        <span className={styles.role}>{wideReview.company}</span>
+                        <Stars />
+                      </div>
+                    </div>
+                    <p className={styles.wideQuote}>"{wideReview.quote}"</p>
+                  </article>
+                )}
+
+                {extraReviews.length > 0 && (
+                  <div className={styles.extraReviews}>
+                    {extraReviews.map((r, i) => (
+                      <article
+                        key={r.id || `extra-${i}`}
+                        className={styles.cardSmall + ' js-card'}
+                        ref={(el) => { if (el) cardRefs.current[i + 4] = el }}
+                        style={{ '--grad-from': r.gradFrom, '--sun-color': r.sunColor }}
+                      >
+                        <Stars />
+                        <Avatar initials={r.initials} bg={r.avatarBg} color={r.avatarColor} size={48} />
+                        <strong className={styles.name} style={{ marginTop: 10 }}>{r.name}</strong>
+                        <span className={styles.role}>{r.company}</span>
+                        <p className={styles.quoteSm}>"{r.quote}"</p>
+                      </article>
+                    ))}
+                  </div>
+                )}
               </div>
-            </footer>
-          </article>
+            )}
 
-          <div className={styles.rightCol}>
-            <div className={styles.topRow}>
-              {displayReviews.slice(1, 3).map((r, i) => (
-                <article
-                  key={r.id || i}
-                  className={styles.cardSmall + ' js-card'}
-                  ref={(el) => { if (el) cardRefs.current[i + 1] = el }}
-                  style={{ '--grad-from': r.gradFrom, '--sun-color': r.sunColor }}
-                >
-                  <Stars />
-                  <Avatar initials={r.initials} bg={r.avatarBg} color={r.avatarColor} size={48} />
-                  <strong className={styles.name} style={{ marginTop: 10 }}>{r.name}</strong>
-                  <span className={styles.role}>{r.company}</span>
-                  <p className={styles.quoteSm}>"{r.quote}"</p>
-                </article>
-              ))}
-            </div>
-
-            <article
-              className={styles.cardWide + ' js-card'}
-              ref={(el) => { if (el) cardRefs.current[3] = el }}
-              style={{ '--grad-from': displayReviews[3].gradFrom, '--sun-color': displayReviews[3].sunColor }}
-            >
-              <div className={styles.wideLeft}>
-                <Avatar initials={displayReviews[3].initials} bg={displayReviews[3].avatarBg} color={displayReviews[3].avatarColor} size={52} />
-                <div>
-                  <strong className={styles.name}>{displayReviews[3].name}</strong>
-                  <span className={styles.role}>{displayReviews[3].company}</span>
-                  <Stars />
-                </div>
-              </div>
-              <p className={styles.wideQuote}>"{displayReviews[3].quote}"</p>
-            </article>
           </div>
-
-        </div>
+        ) : (
+          <p className={styles.emptyReviews}>Các đánh giá khách hàng sẽ được cập nhật sớm.</p>
+        )}
       </div>
     </section>
   )
