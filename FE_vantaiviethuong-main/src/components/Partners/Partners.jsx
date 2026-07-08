@@ -76,6 +76,20 @@ function normalizeReviews(reviews = []) {
   })
 }
 
+function splitHighlightTitle(title = '') {
+  const value = String(title || DEFAULT_REVIEWS_TITLE).trim()
+  const words = value.split(/\s+/).filter(Boolean)
+
+  if (words.length <= 2) {
+    return { main: '', accent: value }
+  }
+
+  return {
+    main: words.slice(0, -2).join(' '),
+    accent: words.slice(-2).join(' '),
+  }
+}
+
 function Stars() {
   return (
     <div className={styles.stars} aria-label="5 sao">
@@ -124,6 +138,7 @@ export default function Partners() {
   const topReviews = displayReviews.slice(1, 3)
   const wideReview = displayReviews[3]
   const extraReviews = displayReviews.slice(4)
+  const reviewTitle = splitHighlightTitle(reviewContent.title || DEFAULT_REVIEWS_TITLE)
 
   useEffect(() => {
     let cancelled = false
@@ -284,7 +299,10 @@ export default function Partners() {
       <div className="container">
         <div className={styles.reviewHeader}>
           <span className={styles.eyebrow}>Khách hàng nói gì</span>
-          <h2 className={styles.reviewTitle}>{reviewContent.title || DEFAULT_REVIEWS_TITLE}</h2>
+          <h2 className={styles.reviewTitle}>
+            {reviewTitle.main && <>{reviewTitle.main} </>}
+            <em className={styles.accent}>{reviewTitle.accent}</em>
+          </h2>
           <p className={styles.reviewSub}>{reviewContent.subtitle || DEFAULT_REVIEWS_SUBTITLE}</p>
         </div>
 

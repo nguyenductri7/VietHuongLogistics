@@ -6,9 +6,26 @@
   left: 0;
   right: 0;
   z-index: $z-nav;
-  transition: background 0.5s $ease-out, box-shadow 0.5s $ease-out;
+  background: rgba($white, 0.98);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 1px 0 rgba($black, 0.08);
+  transform: translateY(0);
+  opacity: 1;
+  transition:
+    background 0.35s $ease-out,
+    box-shadow 0.35s $ease-out,
+    backdrop-filter 0.35s $ease-out;
   // Mặc định: có nền mờ để text navbar không bị lẫn vào hero
-  background: linear-gradient(180deg, rgba($black, 0.65) 0%, transparent 100%);
+  .navLink {
+    color: $gray-800;
+    &:hover { color: $red; background: rgba($red, 0.06); }
+  }
+  .logoMain { color: $red; }
+  .logoSub  { color: $gray-600; }
+  .ctaBtn   { background: $red; border-color: $red; color: $white; }
+  .logoMark { background: $red; }
+  .hamburger span { background: $gray-800; }
 
   &.scrolled {
     background: rgba($white, 0.97);
@@ -25,6 +42,32 @@
     .ctaBtn   { background: $red; border-color: $red; color: $white; }
     .logoMark { background: $red; }
     .hamburger span { background: $gray-800; }
+  }
+
+  &.transparent {
+    background: rgba(5, 30, 46, 0.18);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: none;
+
+    .navLink {
+      color: rgba($white, 0.96);
+      text-shadow: 0 1px 10px rgba($black, .35);
+
+      &:hover {
+        color: $white;
+        background: rgba($white, 0.12);
+      }
+    }
+
+    .ctaBtn {
+      background: rgba($red, .94);
+      border-color: rgba($red, .94);
+      color: $white;
+      box-shadow: 0 10px 24px rgba($black, .18);
+    }
+
+    .hamburger span { background: $white; }
   }
 }
 

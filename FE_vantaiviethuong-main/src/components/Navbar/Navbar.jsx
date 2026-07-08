@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { gsap } from 'gsap'
 import styles from './Navbar.module.scss'
 import logoImg from '../../assets/logo viet huong.png'
 
@@ -13,59 +12,35 @@ const navLinks = [
   { label: 'LIÊN HỆ',      href: null,        to: '/lien-he' },
 ]
 
-const SHOW_THRESHOLD = 100
-
 export default function Navbar() {
   const navRef     = useRef(null)
   const lastScroll = useRef(0)
-  const isVisible  = useRef(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const [transparent, setTransparent] = useState(false)
 
   const navigate = useNavigate()
   const location = useLocation()
 
   useEffect(() => {
-    gsap.set(navRef.current, { y: -100, opacity: 0 })
-
-    const showNav = () => {
-      if (isVisible.current) return
-      isVisible.current = true
-      gsap.to(navRef.current, { y: 0, opacity: 1, duration: 0.55, ease: 'power3.out' })
-    }
-
-    const hideNav = () => {
-      if (!isVisible.current) return
-      isVisible.current = false
-      gsap.to(navRef.current, { y: -100, opacity: 0, duration: 0.4, ease: 'power3.in' })
-    }
-
     const handleScroll = () => {
       const cur = window.scrollY
-      setScrolled(cur > 80)
-      cur >= SHOW_THRESHOLD ? showNav() : hideNav()
+      const isScrollingDown = cur > lastScroll.current && cur > 80
+
+      setScrolled(cur > 16)
+      setTransparent(isScrollingDown)
       lastScroll.current = cur
     }
 
+    handleScroll()
     window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
   useEffect(() => {
-    gsap.killTweensOf(navRef.current)
-
-    if (location.pathname !== '/') {
-      gsap.set(navRef.current, { y: 0, opacity: 1 })
-      isVisible.current = true
-    } else {
-      if (window.scrollY < SHOW_THRESHOLD) {
-        gsap.set(navRef.current, { y: -100, opacity: 0 })
-        isVisible.current = false
-      } else {
-        gsap.set(navRef.current, { y: 0, opacity: 1 })
-        isVisible.current = true
-      }
-    }
+    lastScroll.current = window.scrollY
+    setScrolled(window.scrollY > 16)
+    setTransparent(false)
   }, [location.pathname])
 
   const handleAnchorClick = (e, href) => {
@@ -97,7 +72,7 @@ export default function Navbar() {
   return (
     <header
       ref={navRef}
-      className={`${styles.navbar} ${scrolled ? styles.scrolled : ''}`}
+      className={`${styles.navbar} ${scrolled ? styles.scrolled : ''} ${transparent ? styles.transparent : ''}`}
       role="banner"
     >
       <div className={`container ${styles.inner}`}>
