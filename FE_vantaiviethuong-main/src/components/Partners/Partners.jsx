@@ -2,7 +2,7 @@ import { useRef, useEffect, useCallback, useMemo, useState } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import styles from './Partners.module.scss'
-import { partnerApi, resolveApiMediaUrl } from '../../services/api'
+import { homePageApi, partnerApi, resolveApiMediaUrl } from '../../services/api'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -15,7 +15,10 @@ const logos = Object.entries(logoModules)
   .sort(([a], [b]) => a.localeCompare(b, undefined, { numeric: true }))
   .map(([, mod], i) => ({ src: mod.default, alt: LOGO_ALTS[i] ?? 'Logo ' + (i + 1) }))
 
-const reviews = [
+const DEFAULT_REVIEWS_TITLE = 'Đánh giá từ khách hàng'
+const DEFAULT_REVIEWS_SUBTITLE = 'Những phản hồi thực tế từ các doanh nghiệp đã đồng hành cùng Việt Hương Logistics.'
+
+const DEFAULT_REVIEWS = [
   {
     id: 'a',
     initials: 'TQ',
@@ -62,6 +65,14 @@ const reviews = [
   },
 ]
 
+function normalizeReviews(reviews = []) {
+  const source = Array.isArray(reviews) && reviews.length ? reviews : DEFAULT_REVIEWS
+  return DEFAULT_REVIEWS.map((fallback, index) => ({
+    ...fallback,
+    ...(source[index] || {}),
+  }))
+}
+
 function Stars() {
   return (
     <div className={styles.stars} aria-label="5 sao">
@@ -93,26 +104,49 @@ export default function Partners() {
   const tickerTl   = useRef(null)
   const cardRefs   = useRef([])
   const [managedLogos, setManagedLogos] = useState([])
+  const [reviewContent, setReviewContent] = useState({
+    title: DEFAULT_REVIEWS_TITLE,
+    subtitle: DEFAULT_REVIEWS_SUBTITLE,
+    reviews: DEFAULT_REVIEWS,
+  })
   const displayLogos = useMemo(
     () => (managedLogos.length ? managedLogos : logos),
     [managedLogos],
   )
+  const displayReviews = useMemo(
+    () => normalizeReviews(reviewContent.reviews),
+    [reviewContent.reviews],
+  )
 
   useEffect(() => {
     let cancelled = false
-    partnerApi.getList()
-      .then(res => {
+    Promise.allSettled([partnerApi.getList(), homePageApi.get()])
+      .then(([partnerResult, homeResult]) => {
         if (cancelled) return
-        const nextLogos = Array.isArray(res.data)
-          ? res.data
+
+        const partnerData = partnerResult.status === 'fulfilled' ? partnerResult.value?.data : []
+        const nextLogos = Array.isArray(partnerData)
+          ? partnerData
               .filter(item => item.logo_url)
               .map(item => ({
                 src: resolveApiMediaUrl(item.logo_url),
-                alt: item.name || 'Logo đối tác',
+                alt: item.name || 'Logo Ä‘á»‘i tĂ¡c',
                 href: item.website_url || '',
               }))
           : []
         setManagedLogos(nextLogos)
+
+        const partnersSection = homeResult.status === 'fulfilled'
+          ? homeResult.value?.data?.partners_section
+          : null
+
+        if (partnersSection && typeof partnersSection === 'object') {
+          setReviewContent({
+            title: partnersSection.reviews_title || DEFAULT_REVIEWS_TITLE,
+            subtitle: partnersSection.reviews_subtitle || DEFAULT_REVIEWS_SUBTITLE,
+            reviews: normalizeReviews(partnersSection.reviews),
+          })
+        }
       })
       .catch(() => {})
     return () => { cancelled = true }
@@ -239,30 +273,35 @@ export default function Partners() {
       </div>
 
       <div className="container">
+        <div className={styles.reviewHeader}>
+          <span className={styles.eyebrow}>{reviewContent.title || DEFAULT_REVIEWS_TITLE}</span>
+          <p className={styles.reviewSub}>{reviewContent.subtitle || DEFAULT_REVIEWS_SUBTITLE}</p>
+        </div>
+
         <div className={styles.bento + ' js-bento'}>
 
           <article
             className={styles.cardTall + ' js-card'}
             ref={(el) => { if (el) cardRefs.current[0] = el }}
-            style={{ '--grad-from': reviews[0].gradFrom, '--sun-color': reviews[0].sunColor }}
+            style={{ '--grad-from': displayReviews[0].gradFrom, '--sun-color': displayReviews[0].sunColor }}
           >
             <Stars />
             <span className={styles.openQuote}>"</span>
-            <p className={styles.quoteLg}>{reviews[0].quote}</p>
+            <p className={styles.quoteLg}>{displayReviews[0].quote}</p>
             <footer className={styles.cardFooter}>
-              <Avatar initials={reviews[0].initials} bg={reviews[0].avatarBg} color={reviews[0].avatarColor} />
+              <Avatar initials={displayReviews[0].initials} bg={displayReviews[0].avatarBg} color={displayReviews[0].avatarColor} />
               <div>
-                <strong className={styles.name}>{reviews[0].name}</strong>
-                <span className={styles.role}>{reviews[0].company}</span>
+                <strong className={styles.name}>{displayReviews[0].name}</strong>
+                <span className={styles.role}>{displayReviews[0].company}</span>
               </div>
             </footer>
           </article>
 
           <div className={styles.rightCol}>
             <div className={styles.topRow}>
-              {reviews.slice(1, 3).map((r, i) => (
+              {displayReviews.slice(1, 3).map((r, i) => (
                 <article
-                  key={r.id}
+                  key={r.id || i}
                   className={styles.cardSmall + ' js-card'}
                   ref={(el) => { if (el) cardRefs.current[i + 1] = el }}
                   style={{ '--grad-from': r.gradFrom, '--sun-color': r.sunColor }}
@@ -279,17 +318,17 @@ export default function Partners() {
             <article
               className={styles.cardWide + ' js-card'}
               ref={(el) => { if (el) cardRefs.current[3] = el }}
-              style={{ '--grad-from': reviews[3].gradFrom, '--sun-color': reviews[3].sunColor }}
+              style={{ '--grad-from': displayReviews[3].gradFrom, '--sun-color': displayReviews[3].sunColor }}
             >
               <div className={styles.wideLeft}>
-                <Avatar initials={reviews[3].initials} bg={reviews[3].avatarBg} color={reviews[3].avatarColor} size={52} />
+                <Avatar initials={displayReviews[3].initials} bg={displayReviews[3].avatarBg} color={displayReviews[3].avatarColor} size={52} />
                 <div>
-                  <strong className={styles.name}>{reviews[3].name}</strong>
-                  <span className={styles.role}>{reviews[3].company}</span>
+                  <strong className={styles.name}>{displayReviews[3].name}</strong>
+                  <span className={styles.role}>{displayReviews[3].company}</span>
                   <Stars />
                 </div>
               </div>
-              <p className={styles.wideQuote}>"{reviews[3].quote}"</p>
+              <p className={styles.wideQuote}>"{displayReviews[3].quote}"</p>
             </article>
           </div>
 

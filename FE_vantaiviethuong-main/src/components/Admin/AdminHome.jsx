@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   ArrowLeft, Save, Home, Info, Truck, Users, Phone, LayoutTemplate, Loader2,
-  Camera, Plus, Trash2, Eye, EyeOff,
+  Camera, Plus, Trash2, Eye, EyeOff, Star,
 } from 'lucide-react'
 import { homePageApi, partnerApi, resolveApiMediaUrl } from '../../services/api'
 import styles from './AdminSettings.module.scss'
@@ -36,6 +36,34 @@ const DEFAULT_HOME = {
   partners_section: {
     enabled: true,
     title: 'Đối tác của chúng tôi',
+    reviews_title: 'Đánh giá từ khách hàng',
+    reviews_subtitle: 'Những phản hồi thực tế từ các doanh nghiệp đã đồng hành cùng Việt Hương Logistics.',
+    reviews: [
+      {
+        initials: 'TQ',
+        name: 'Tony Quoc',
+        company: 'BITI France',
+        quote: 'Tôi rất hài lòng với dịch vụ logistics của Việt Hương. Các nhân viên hỗ trợ tận tình, chuyên nghiệp. Thời gian giao nhận hàng luôn được đảm bảo chính xác.',
+      },
+      {
+        initials: 'BN',
+        name: 'Bảo Nguyên',
+        company: 'BITI VN',
+        quote: 'Dịch vụ chuyên nghiệp và đáng tin cậy. Hệ thống vận chuyển tiên tiến mang lại sự hài lòng tuyệt đối. Đảm bảo an toàn hàng hóa là điều tôi thích nhất.',
+      },
+      {
+        initials: 'JT',
+        name: 'Jessie Truong',
+        company: 'Unilever VN',
+        quote: 'Rất chuyên nghiệp trong xử lý hàng hóa. Vận chuyển an toàn, đúng hạn — tôi hoàn toàn tin tưởng và sẽ tiếp tục hợp tác lâu dài.',
+      },
+      {
+        initials: 'PH',
+        name: 'Phạm Quốc Hùng',
+        company: 'CFO — Masan Group',
+        quote: 'Từ khi hợp tác với Việt Hương, chi phí vận chuyển giảm 18% trong khi chất lượng dịch vụ tăng lên rõ rệt. Đó là điều hiếm thấy trên thị trường.',
+      },
+    ],
   },
   contact_section: {
     enabled: true,
@@ -107,6 +135,16 @@ const SECTIONS = [
     ],
   },
   {
+    key: 'testimonials_section',
+    dataKey: 'partners_section',
+    label: 'Đánh giá khách hàng',
+    icon: Star,
+    fields: [
+      { key: 'reviews_title', label: 'Tiêu đề đánh giá', type: 'text' },
+      { key: 'reviews_subtitle', label: 'Mô tả đánh giá', type: 'textarea' },
+    ],
+  },
+  {
     key: 'contact_section',
     label: 'Liên hệ',
     icon: Phone,
@@ -164,7 +202,16 @@ function normalizeHome(data = {}) {
   }
 
   merged.footer.offices_text = officesToText(merged.footer.offices)
+  merged.partners_section.reviews = normalizeReviews(merged.partners_section.reviews)
   return merged
+}
+
+function normalizeReviews(reviews = []) {
+  const source = Array.isArray(reviews) && reviews.length ? reviews : DEFAULT_HOME.partners_section.reviews
+  return DEFAULT_HOME.partners_section.reviews.map((fallback, index) => ({
+    ...fallback,
+    ...(source[index] || {}),
+  }))
 }
 
 export default function AdminHome() {
@@ -222,9 +269,27 @@ export default function AdminHome() {
     }))
   }
 
+  const handleReviewChange = (index, fieldKey, value) => {
+    setHome(prev => {
+      const reviews = normalizeReviews(prev.partners_section?.reviews).map((review, reviewIndex) => (
+        reviewIndex === index ? { ...review, [fieldKey]: value } : review
+      ))
+
+      return {
+        ...prev,
+        partners_section: {
+          ...prev.partners_section,
+          reviews,
+        },
+      }
+    })
+  }
+
   const getSectionPayload = (sectionKey) => {
-    const payload = { ...home[sectionKey] }
-    if (sectionKey === 'footer') {
+    const section = SECTIONS.find(item => item.key === sectionKey)
+    const dataKey = section?.dataKey || sectionKey
+    const payload = { ...home[dataKey] }
+    if (dataKey === 'footer') {
       payload.offices = textToOffices(payload.offices_text)
       delete payload.offices_text
     }
@@ -234,7 +299,9 @@ export default function AdminHome() {
   const handleSave = async () => {
     setSaving(true)
     try {
-      const res = await homePageApi.update({ [activeTab]: getSectionPayload(activeTab) })
+      const section = SECTIONS.find(item => item.key === activeTab)
+      const dataKey = section?.dataKey || activeTab
+      const res = await homePageApi.update({ [dataKey]: getSectionPayload(activeTab) })
       setHome(normalizeHome(res.data))
       showToast('Đã lưu nội dung trang chủ!')
     } catch (err) {
@@ -297,6 +364,7 @@ export default function AdminHome() {
   }
 
   const currentSection = SECTIONS.find(section => section.key === activeTab)
+  const activeDataKey = currentSection?.dataKey || activeTab
 
   return (
     <div className={styles.page}>
@@ -343,7 +411,7 @@ export default function AdminHome() {
             <h2 className={styles.sectionTitle}>{currentSection.label}</h2>
 
             {currentSection.fields.map(field => {
-              const value = home[activeTab]?.[field.key]
+              const value = home[activeDataKey]?.[field.key]
 
               return (
                 <div key={field.key} className={styles.field}>
@@ -354,14 +422,14 @@ export default function AdminHome() {
                       className={styles.textarea}
                       rows={field.key === 'offices_text' ? 8 : 4}
                       value={value || ''}
-                      onChange={e => handleChange(activeTab, field.key, e.target.value)}
+                      onChange={e => handleChange(activeDataKey, field.key, e.target.value)}
                     />
                   ) : field.type === 'checkbox' ? (
                     <label style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#4B5563', fontSize: 14 }}>
                       <input
                         type="checkbox"
                         checked={Boolean(value)}
-                        onChange={e => handleChange(activeTab, field.key, e.target.checked)}
+                        onChange={e => handleChange(activeDataKey, field.key, e.target.checked)}
                       />
                       Bật
                     </label>
@@ -370,7 +438,7 @@ export default function AdminHome() {
                       className={styles.input}
                       type="text"
                       value={value || ''}
-                      onChange={e => handleChange(activeTab, field.key, e.target.value)}
+                      onChange={e => handleChange(activeDataKey, field.key, e.target.value)}
                     />
                   )}
 
@@ -508,6 +576,79 @@ export default function AdminHome() {
                     ))}
                   </div>
                 )}
+              </div>
+            )}
+
+            {activeTab === 'testimonials_section' && (
+              <div style={{ borderTop: '1px solid #F3F4F6', marginTop: 8, paddingTop: 22 }}>
+                <h3 style={{ margin: '0 0 8px', fontSize: 15, color: '#111827' }}>
+                  Đánh giá khách hàng trên trang chủ
+                </h3>
+                <p style={{ margin: '0 0 16px', color: '#6B7280', fontSize: 13 }}>
+                  Các nội dung này sẽ hiển thị trong cụm thẻ đánh giá bên dưới logo đối tác.
+                </p>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 14 }}>
+                  {normalizeReviews(home.partners_section?.reviews).map((review, index) => (
+                    <div
+                      key={index}
+                      style={{
+                        border: '1px solid #E5E7EB',
+                        borderRadius: 12,
+                        background: '#fff',
+                        padding: 14,
+                      }}
+                    >
+                      <div style={{ fontWeight: 700, color: '#111827', fontSize: 14, marginBottom: 12 }}>
+                        Đánh giá #{index + 1}
+                      </div>
+
+                      <div style={{ display: 'grid', gridTemplateColumns: '80px 1fr', gap: 10 }}>
+                        <div className={styles.field} style={{ marginBottom: 0 }}>
+                          <label className={styles.label}>Chữ tắt</label>
+                          <input
+                            className={styles.input}
+                            value={review.initials || ''}
+                            maxLength={3}
+                            onChange={e => handleReviewChange(index, 'initials', e.target.value.toUpperCase())}
+                            placeholder="TQ"
+                          />
+                        </div>
+
+                        <div className={styles.field} style={{ marginBottom: 0 }}>
+                          <label className={styles.label}>Tên khách hàng</label>
+                          <input
+                            className={styles.input}
+                            value={review.name || ''}
+                            onChange={e => handleReviewChange(index, 'name', e.target.value)}
+                            placeholder="Tên khách hàng"
+                          />
+                        </div>
+                      </div>
+
+                      <div className={styles.field} style={{ marginTop: 10 }}>
+                        <label className={styles.label}>Công ty / chức vụ</label>
+                        <input
+                          className={styles.input}
+                          value={review.company || ''}
+                          onChange={e => handleReviewChange(index, 'company', e.target.value)}
+                          placeholder="VD: CEO — ABC Logistics"
+                        />
+                      </div>
+
+                      <div className={styles.field} style={{ marginBottom: 0 }}>
+                        <label className={styles.label}>Nội dung đánh giá</label>
+                        <textarea
+                          className={styles.textarea}
+                          rows={4}
+                          value={review.quote || ''}
+                          onChange={e => handleReviewChange(index, 'quote', e.target.value)}
+                          placeholder="Nhập nội dung đánh giá..."
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
 

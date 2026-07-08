@@ -67,6 +67,19 @@
   margin: 0;
 }
 
+.reviewHeader {
+  max-width: 720px;
+  margin: 0 0 28px;
+}
+
+.reviewSub {
+  margin: 12px 0 0;
+  max-width: 560px;
+  font-size: 15px;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, .58);
+}
+
 // ─── Ticker ────────────────────────────────────────────────────────────────
 .tickerWrap {
   position: relative;

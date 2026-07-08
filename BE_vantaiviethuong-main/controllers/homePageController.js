@@ -38,6 +38,34 @@ const DEFAULT_HOME_PAGE = {
   partners_section: {
     enabled: true,
     title: 'Đối tác của chúng tôi',
+    reviews_title: 'Đánh giá từ khách hàng',
+    reviews_subtitle: 'Những phản hồi thực tế từ các doanh nghiệp đã đồng hành cùng Việt Hương Logistics.',
+    reviews: [
+      {
+        initials: 'TQ',
+        name: 'Tony Quoc',
+        company: 'BITI France',
+        quote: 'Tôi rất hài lòng với dịch vụ logistics của Việt Hương. Các nhân viên hỗ trợ tận tình, chuyên nghiệp. Thời gian giao nhận hàng luôn được đảm bảo chính xác.',
+      },
+      {
+        initials: 'BN',
+        name: 'Bảo Nguyên',
+        company: 'BITI VN',
+        quote: 'Dịch vụ chuyên nghiệp và đáng tin cậy. Hệ thống vận chuyển tiên tiến mang lại sự hài lòng tuyệt đối. Đảm bảo an toàn hàng hóa là điều tôi thích nhất.',
+      },
+      {
+        initials: 'JT',
+        name: 'Jessie Truong',
+        company: 'Unilever VN',
+        quote: 'Rất chuyên nghiệp trong xử lý hàng hóa. Vận chuyển an toàn, đúng hạn — tôi hoàn toàn tin tưởng và sẽ tiếp tục hợp tác lâu dài.',
+      },
+      {
+        initials: 'PH',
+        name: 'Phạm Quốc Hùng',
+        company: 'CFO — Masan Group',
+        quote: 'Từ khi hợp tác với Việt Hương, chi phí vận chuyển giảm 18% trong khi chất lượng dịch vụ tăng lên rõ rệt. Đó là điều hiếm thấy trên thị trường.',
+      },
+    ],
   },
   contact_section: {
     enabled: true,
