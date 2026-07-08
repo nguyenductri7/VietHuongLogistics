@@ -1,4 +1,4 @@
-import { useRef, useEffect, Suspense, useState, useCallback } from 'react'
+import { useRef, useEffect, Suspense, useState, useCallback, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { useGLTF, Environment, ContactShadows } from '@react-three/drei'
@@ -6,6 +6,7 @@ import * as THREE from 'three'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import styles from './About.module.scss'
+import { homePageApi } from '../../services/api'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -117,6 +118,26 @@ const INIT_ROT_Y = Math.PI * 1.5
 const END_ROT_Y  = Math.PI * 1.25 - (Math.PI * 2 / 3)
 const TRUCK_MODEL_URL = '/models/truck-optimized.glb'
 
+const DEFAULT_ABOUT_INTRO = {
+  enabled: true,
+  section_label: 'Giới thiệu',
+  show_3d_truck: true,
+  title: 'Đối Tác Tin Cậy',
+  title_accent: 'Trong Từng Chuyến Hàng',
+  description: 'Viet Huong Logistics — thành viên chiến lược của Viet Huong Group — cung cấp giải pháp logistics toàn diện, kết nối doanh nghiệp Việt Nam với thị trường toàn cầu bằng công nghệ hiện đại và đội ngũ chuyên nghiệp.',
+  pills: 'Vận chuyển nội địa\nXuất nhập khẩu\nMua hộ quốc tế\nKết nối toàn cầu',
+  cta_label: 'Tìm Hiểu Thêm',
+  cta_link: '/dich-vu#lien-he',
+}
+
+function normalizePills(value) {
+  if (Array.isArray(value)) return value.filter(Boolean)
+  return String(value || '')
+    .split('\n')
+    .map(item => item.trim())
+    .filter(Boolean)
+}
+
 // ─── Lấy invalidate từ trong Canvas ra ngoài ───────────────────────────────
 function InvalidateOnScroll({ invalidateRef }) {
   const { invalidate } = useThree()
@@ -177,6 +198,38 @@ export default function About() {
   const counterTweens = useRef([])
   const invalidateRef = useRef(null)
   const [active, setActive] = useState(0)
+  const [aboutIntro, setAboutIntro] = useState(DEFAULT_ABOUT_INTRO)
+
+  useEffect(() => {
+    let cancelled = false
+    homePageApi.get()
+      .then(res => {
+        if (cancelled) return
+        setAboutIntro({
+          ...DEFAULT_ABOUT_INTRO,
+          ...(res.data?.about_intro || {}),
+        })
+      })
+      .catch(() => {})
+    return () => { cancelled = true }
+  }, [])
+
+  const slides = useMemo(() => {
+    const introPills = normalizePills(aboutIntro.pills)
+    return SLIDES.map((slide, index) => {
+      if (index !== 0) return slide
+      return {
+        ...slide,
+        label: aboutIntro.section_label || slide.label,
+        title: aboutIntro.title || slide.title,
+        titleAccent: aboutIntro.title_accent || slide.titleAccent,
+        body: aboutIntro.description || slide.body,
+        pills: introPills.length ? introPills : slide.pills,
+        ctaLabel: aboutIntro.cta_label || 'Tìm Hiểu Thêm',
+        ctaLink: aboutIntro.cta_link || '/dich-vu#lien-he',
+      }
+    })
+  }, [aboutIntro])
 
   const truckTarget   = useRef({ rotY: INIT_ROT_Y, posX: 0 })
   const [renderQuality] = useState(() => {
@@ -278,7 +331,7 @@ export default function About() {
       const dir    = nextIdx > currentSlide ? 1 : -1
       if (!inEl || !wipeEl) return
 
-      const nt = THEMES[SLIDES[nextIdx]?.theme] || THEMES.red
+      const nt = THEMES[slides[nextIdx]?.theme] || THEMES.red
       wipeEl.style.background = nt.accent
       gsap.set(wipeEl, { clipPath: 'inset(0 100% 0 0)' })
 
@@ -299,7 +352,7 @@ wipeTl = gsap.timeline({
 wipeTl
   .call(() => {
     if (!mountedRef.current) return
-    applyTheme(SLIDES[nextIdx].theme)
+    applyTheme(slides[nextIdx].theme)
     gsap.set(inEl, { opacity: 0, pointerEvents: 'auto' })
   })
   .to(outEl, { opacity: 0, duration: 0.5, ease: 'power2.inOut' })
@@ -317,7 +370,7 @@ if (nextIdx === 1) wipeTl.call(animateCounters, [], '+=0.1')
       onUpdate: (self) => {
         if (!mountedRef.current) return
         const p = self.progress
-        const n = SLIDES.length
+        const n = slides.length
         const idx = Math.min(n - 1, Math.floor(p * n * 0.9999))
         if (idx !== lastIdx) { lastIdx = idx; goToSlide(idx); setActive(idx) }
         if (p <= 0.75) {
@@ -345,9 +398,11 @@ if (nextIdx === 1) wipeTl.call(animateCounters, [], '+=0.1')
       aboutTrigger.kill()
       if (wipeTl) wipeTl.kill()
     }
-  }, [animateCounters, applyTheme])
+  }, [animateCounters, applyTheme, slides])
 
-  const at = THEMES[SLIDES[active]?.theme] || THEMES.red
+  if (!aboutIntro.enabled) return null
+
+  const at = THEMES[slides[active]?.theme] || THEMES.red
 
   return (
     <section
@@ -364,7 +419,7 @@ if (nextIdx === 1) wipeTl.call(animateCounters, [], '+=0.1')
         {/* ── Left text column ── */}
         <div className={styles.textCol}>
           <nav className={styles.dots} aria-label="Slide navigation">
-            {SLIDES.map((s, i) => (
+            {slides.map((s, i) => (
               <span
                 key={i}
                 className={`${styles.dot} ${active === i ? styles.dotActive : ''}`}
@@ -376,7 +431,7 @@ if (nextIdx === 1) wipeTl.call(animateCounters, [], '+=0.1')
 
           {/* Slides */}
           <div className={styles.slidesWrap}>
-            {SLIDES.map((slide, i) => {
+            {slides.map((slide, i) => {
               const t = THEMES[slide.theme]
               return (
                 <div key={i} ref={el => (slideRefs.current[i] = el)} className={styles.slide}>
@@ -444,8 +499,8 @@ if (nextIdx === 1) wipeTl.call(animateCounters, [], '+=0.1')
                   )}
 
                   {slide.cta && (
-                    <Link to="/dich-vu#lien-he" className={styles.cta} style={{ color: t.accent }}>
-                      Tìm Hiểu Thêm
+                    <Link to={slide.ctaLink || '/dich-vu#lien-he'} className={styles.cta} style={{ color: t.accent }}>
+                      {slide.ctaLabel || 'Tìm Hiểu Thêm'}
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                         <path d="M5 12h14M12 5l7 7-7 7" />
                       </svg>
@@ -499,7 +554,7 @@ if (nextIdx === 1) wipeTl.call(animateCounters, [], '+=0.1')
 
           {/* Progress */}
           <div className={styles.progressWrap}>
-            {SLIDES.map((s, i) => (
+            {slides.map((s, i) => (
               <div key={i}
                 className={`${styles.progressStep} ${active >= i ? styles.progressActive : ''}`}
                 style={active >= i ? { '--step-color': THEMES[s.theme].accent } : {}}
@@ -515,7 +570,7 @@ if (nextIdx === 1) wipeTl.call(animateCounters, [], '+=0.1')
           <div className={styles.slideNum}>
             <span className={styles.slideNumCurrent}>{String(active + 1).padStart(2, '0')}</span>
             <span className={styles.slideNumSep}> / </span>
-            <span className={styles.slideNumTotal}>{String(SLIDES.length).padStart(2, '0')}</span>
+            <span className={styles.slideNumTotal}>{String(slides.length).padStart(2, '0')}</span>
           </div>
           <Canvas
             frameloop="demand"

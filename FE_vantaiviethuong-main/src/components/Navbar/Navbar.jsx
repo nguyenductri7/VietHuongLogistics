@@ -14,7 +14,6 @@ const navLinks = [
 
 export default function Navbar() {
   const navRef     = useRef(null)
-  const lastScroll = useRef(0)
   const [menuOpen, setMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [transparent, setTransparent] = useState(false)
@@ -25,11 +24,10 @@ export default function Navbar() {
   useEffect(() => {
     const handleScroll = () => {
       const cur = window.scrollY
-      const isScrollingDown = cur > lastScroll.current && cur > 80
+      const isAwayFromTop = cur > 16
 
-      setScrolled(cur > 16)
-      setTransparent(isScrollingDown)
-      lastScroll.current = cur
+      setScrolled(isAwayFromTop)
+      setTransparent(isAwayFromTop)
     }
 
     handleScroll()
@@ -38,9 +36,9 @@ export default function Navbar() {
   }, [])
 
   useEffect(() => {
-    lastScroll.current = window.scrollY
-    setScrolled(window.scrollY > 16)
-    setTransparent(false)
+    const isAwayFromTop = window.scrollY > 16
+    setScrolled(isAwayFromTop)
+    setTransparent(isAwayFromTop)
   }, [location.pathname])
 
   const handleAnchorClick = (e, href) => {

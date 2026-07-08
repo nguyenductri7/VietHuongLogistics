@@ -26,6 +26,12 @@ const DEFAULT_HOME_PAGE = {
     enabled: true,
     section_label: 'Giới thiệu',
     show_3d_truck: true,
+    title: 'Đối Tác Tin Cậy',
+    title_accent: 'Trong Từng Chuyến Hàng',
+    description: 'Viet Huong Logistics — thành viên chiến lược của Viet Huong Group — cung cấp giải pháp logistics toàn diện, kết nối doanh nghiệp Việt Nam với thị trường toàn cầu bằng công nghệ hiện đại và đội ngũ chuyên nghiệp.',
+    pills: 'Vận chuyển nội địa\nXuất nhập khẩu\nMua hộ quốc tế\nKết nối toàn cầu',
+    cta_label: 'Tìm Hiểu Thêm',
+    cta_link: '/dich-vu#lien-he',
   },
   services_section: {
     enabled: true,
