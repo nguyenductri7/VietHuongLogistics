@@ -116,6 +116,17 @@ function ServiceIcon({ service }) {
   return ICON_MAP[service?.icon_key] || ICON_MAP.Truck
 }
 
+const DEFAULT_SERVICE_LINKS = [
+  '/dich-vu/van-chuyen-noi-dia',
+  '/dich-vu/van-chuyen-quoc-te',
+  '/dich-vu/logistics-kho-bai',
+  '/dich-vu',
+]
+
+function getServiceLink(service, index) {
+  return service?.link || service?.href || (service?.slug ? `/dich-vu/${service.slug}` : DEFAULT_SERVICE_LINKS[index] || '/dich-vu')
+}
+
 export default function AboutDetailPage() {
   const [about, setAbout] = useState(FALLBACK_ABOUT)
   const [loadError] = useState(false)
@@ -452,9 +463,9 @@ export default function AboutDetailPage() {
                     <h3 className={styles.serviceCardTitle}>{s.title}</h3>
                   </div>
                   <p className={styles.serviceCardDesc}>{s.desc}</p>
-                  <a href="#contact" className={styles.serviceCardLink}>
+                  <Link to={getServiceLink(s, i)} className={styles.serviceCardLink}>
                     Tìm hiểu thêm <ArrowRight size={12} />
-                  </a>
+                  </Link>
                 </div>
               </div>
             ))}
@@ -472,9 +483,9 @@ export default function AboutDetailPage() {
                     <h3 className={styles.serviceCardTitle}>{s.title}</h3>
                   </div>
                   <p className={styles.serviceCardDesc}>{s.desc}</p>
-                  <a href="#contact" className={styles.serviceCardLink}>
+                  <Link to={getServiceLink(s, i + 2)} className={styles.serviceCardLink}>
                     Tìm hiểu thêm <ArrowRight size={12} />
-                  </a>
+                  </Link>
                 </div>
               </div>
             ))}
