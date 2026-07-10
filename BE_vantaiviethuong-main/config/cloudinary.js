@@ -34,8 +34,8 @@ const websiteStorage = new CloudinaryStorage({
   cloudinary,
   params: {
     folder: 'vantaiviethuong/website',
-    allowed_formats: ['jpg', 'jpeg', 'png', 'webp', 'svg'],
-    transformation: [{ quality: 'auto', fetch_format: 'auto' }],
+    resource_type: 'auto',
+    allowed_formats: ['jpg', 'jpeg', 'png', 'webp', 'svg', 'mp4', 'webm', 'mov'],
   },
 });
 
@@ -62,7 +62,7 @@ const uploadBlogContent = multer({
 
 const uploadWebsite = multer({
   storage: websiteStorage,
-  limits: { fileSize: 10 * 1024 * 1024 },
+  limits: { fileSize: 100 * 1024 * 1024 },
 });
 
 const uploadPartner = multer({

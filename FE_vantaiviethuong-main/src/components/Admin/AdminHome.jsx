@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   ArrowLeft, Save, Home, Info, Truck, Users, Phone, LayoutTemplate, Loader2,
-  Camera, Plus, Trash2, Eye, EyeOff, Star,
+  Camera, Plus, Trash2, Eye, EyeOff, Star, Upload,
 } from 'lucide-react'
 import { homePageApi, partnerApi, resolveApiMediaUrl } from '../../services/api'
 import styles from './AdminSettings.module.scss'
@@ -103,8 +103,8 @@ const SECTIONS = [
       { key: 'primary_cta_link', label: 'Link nút chính', type: 'text' },
       { key: 'secondary_cta_label', label: 'Nút phụ', type: 'text' },
       { key: 'secondary_cta_link', label: 'Link nút phụ', type: 'text' },
-      { key: 'video_url', label: 'Đường dẫn video', type: 'text' },
-      { key: 'fallback_image_url', label: 'Ảnh fallback', type: 'text' },
+      { key: 'video_url', label: 'Video hero', type: 'video_upload' },
+      { key: 'fallback_image_url', label: 'Ảnh fallback', type: 'image_upload' },
       { key: 'show_video', label: 'Hiển thị video', type: 'checkbox' },
     ],
   },
@@ -240,6 +240,7 @@ export default function AdminHome() {
   const [partners, setPartners] = useState([])
   const [partnerLoading, setPartnerLoading] = useState(false)
   const [partnerSaving, setPartnerSaving] = useState(false)
+  const [uploadingField, setUploadingField] = useState(null)
   const [partnerForm, setPartnerForm] = useState({
     name: '',
     website_url: '',
@@ -364,6 +365,20 @@ export default function AdminHome() {
     }
   }
 
+  const handleHeroMediaUpload = async (fieldKey, file) => {
+    if (!file) return
+    setUploadingField(fieldKey)
+    try {
+      const res = await homePageApi.uploadImage(file)
+      handleChange('hero', fieldKey, res.url)
+      showToast('Upload thành công! Bấm “Lưu section” để lưu thay đổi.')
+    } catch (err) {
+      showToast(err.message || 'Upload thất bại.', 'error')
+    } finally {
+      setUploadingField(null)
+    }
+  }
+
   const handleCreatePartner = async (event) => {
     event.preventDefault()
     if (!partnerForm.name.trim()) {
@@ -477,6 +492,57 @@ export default function AdminHome() {
                       value={value || ''}
                       onChange={e => handleChange(activeDataKey, field.key, e.target.value)}
                     />
+                  ) : field.type === 'image_upload' || field.type === 'video_upload' ? (
+                    <div style={{ display: 'grid', gap: 10 }}>
+                      {value && (
+                        <div
+                          style={{
+                            border: '1px solid #E5E7EB',
+                            borderRadius: 12,
+                            overflow: 'hidden',
+                            background: '#F9FAFB',
+                            maxWidth: 420,
+                          }}
+                        >
+                          {field.type === 'video_upload' ? (
+                            <video
+                              src={resolveApiMediaUrl(value)}
+                              controls
+                              muted
+                              style={{ display: 'block', width: '100%', maxHeight: 220, objectFit: 'cover' }}
+                            />
+                          ) : (
+                            <img
+                              src={resolveApiMediaUrl(value)}
+                              alt={field.label}
+                              style={{ display: 'block', width: '100%', maxHeight: 220, objectFit: 'cover' }}
+                            />
+                          )}
+                        </div>
+                      )}
+
+                      <label className={styles.changeImgBtn} style={{ width: 'fit-content' }}>
+                        {uploadingField === field.key
+                          ? <><Loader2 size={14} className={styles.spinner} /> Đang upload...</>
+                          : <><Upload size={14} /> Chọn {field.type === 'video_upload' ? 'video' : 'ảnh'}</>
+                        }
+                        <input
+                          hidden
+                          type="file"
+                          accept={field.type === 'video_upload' ? 'video/mp4,video/webm,video/quicktime' : 'image/*'}
+                          disabled={uploadingField === field.key}
+                          onChange={e => handleHeroMediaUpload(field.key, e.target.files?.[0])}
+                        />
+                      </label>
+
+                      <input
+                        className={styles.input}
+                        type="text"
+                        value={value || ''}
+                        placeholder="URL sau khi upload hoặc dán link thủ công"
+                        onChange={e => handleChange(activeDataKey, field.key, e.target.value)}
+                      />
+                    </div>
                   ) : field.type === 'checkbox' ? (
                     <label style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#4B5563', fontSize: 14 }}>
                       <input

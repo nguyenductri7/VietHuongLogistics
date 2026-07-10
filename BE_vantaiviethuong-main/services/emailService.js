@@ -1,6 +1,7 @@
 const RESEND_API_URL = 'https://api.resend.com/emails';
 const DEFAULT_RECIPIENT = 'ductri09876@gmail.com';
 const DEFAULT_FROM = 'Viet Huong Logistics <onboarding@resend.dev>';
+const DEFAULT_EMAIL_LOGO_PATH = '/static/email/logofooter.png';
 
 let warnedMissingConfig = false;
 
@@ -22,7 +23,24 @@ function renderInfoRows(rows) {
   `).join('');
 }
 
+function getDefaultEmailLogoUrl() {
+  const baseUrl = String(
+    process.env.PUBLIC_API_URL
+    || process.env.RENDER_EXTERNAL_URL
+    || 'https://viethuonglogistics.onrender.com'
+  ).trim().replace(/\/+$/, '');
+
+  return baseUrl ? `${baseUrl}${DEFAULT_EMAIL_LOGO_PATH}` : '';
+}
+
 function renderEmailTemplate({ eyebrow, title, description, reference, rows, messageLabel, message, action }) {
+  const emailLogoUrl = String(process.env.EMAIL_LOGO_URL || getDefaultEmailLogoUrl()).trim();
+  const brandMarkup = emailLogoUrl
+    ? `<img src="${escapeHtml(emailLogoUrl)}" alt="Viet Huong Logistics" width="170" style="display:block;width:170px;max-width:170px;height:auto;border:0;outline:none;text-decoration:none;">`
+    : `
+                        <div style="font-size:20px;font-weight:800;color:#ffffff;letter-spacing:.2px;">VIỆT HƯƠNG</div>
+                        <div style="font-size:10px;color:#cbd5e1;letter-spacing:3px;margin-top:3px;">LOGISTICS</div>
+                      `;
   const actionButton = action ? `
     <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin-top:24px;">
       <tr>
@@ -51,8 +69,7 @@ function renderEmailTemplate({ eyebrow, title, description, reference, rows, mes
                   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
                     <tr>
                       <td>
-                        <div style="font-size:20px;font-weight:800;color:#ffffff;letter-spacing:.2px;">VIỆT HƯƠNG</div>
-                        <div style="font-size:10px;color:#cbd5e1;letter-spacing:3px;margin-top:3px;">LOGISTICS</div>
+                        ${brandMarkup}
                       </td>
                       <td align="right" style="color:#cbd5e1;font-size:12px;">Mã #${reference}</td>
                     </tr>

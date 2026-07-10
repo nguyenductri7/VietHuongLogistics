@@ -2,7 +2,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Plus, Trash2 } from 'lucide-react'
 import { normalizeAbout } from '../About/Aboutdetailpage'
 import styles from './AdminAbout.module.scss'
 
@@ -48,6 +48,21 @@ export default function AdminAbout() {
       target[keys[keys.length - 1]] = value
       return next
     })
+  }, [])
+
+  const addListItem = useCallback((sectionKey, item) => {
+    setData(prev => ({
+      ...prev,
+      [sectionKey]: [...(prev[sectionKey] || []), item],
+    }))
+  }, [])
+
+  const removeListItem = useCallback((sectionKey, index) => {
+    if (!window.confirm('Xóa mục này?')) return
+    setData(prev => ({
+      ...prev,
+      [sectionKey]: (prev[sectionKey] || []).filter((_, i) => i !== index),
+    }))
   }, [])
 
   const saveSection = async (sectionKey) => {
@@ -177,9 +192,27 @@ export default function AdminAbout() {
 
       {/* ══════════ TIMELINE ══════════ */}
       <Section title="Lịch Sử Hình Thành" onSave={() => saveSection('timeline')} saving={saving.timeline}>
+        <div className={styles.sectionActions}>
+          <button
+            type="button"
+            className={styles.secondaryBtn}
+            onClick={() => addListItem('timeline', { year: '', title: '', desc: '', img: '' })}
+          >
+            <Plus size={14} /> Thêm năm
+          </button>
+        </div>
         {data.timeline.map((m, i) => (
           <div key={i} className={styles.itemBlock}>
-            <p className={styles.itemLabel}>Mốc thời gian #{i + 1}</p>
+            <div className={styles.itemHeader}>
+              <p className={styles.itemLabel}>Mốc thời gian #{i + 1}</p>
+              <button
+                type="button"
+                className={styles.dangerBtn}
+                onClick={() => removeListItem('timeline', i)}
+              >
+                <Trash2 size={13} /> Xóa
+              </button>
+            </div>
             <div className={styles.row}>
               <TextField label="Năm" value={m.year}
                 onChange={v => updateField(`timeline.${i}.year`, v)} />
@@ -197,9 +230,27 @@ export default function AdminAbout() {
 
       {/* ══════════ VALUES ══════════ */}
       <Section title="Giá Trị Cốt Lõi" onSave={() => saveSection('values_section')} saving={saving.values_section}>
+        <div className={styles.sectionActions}>
+          <button
+            type="button"
+            className={styles.secondaryBtn}
+            onClick={() => addListItem('values_section', { icon_key: ICON_OPTIONS[0], title: '', text: '' })}
+          >
+            <Plus size={14} /> Thêm giá trị
+          </button>
+        </div>
         {data.values_section.map((v, i) => (
           <div key={i} className={styles.itemBlock}>
-            <p className={styles.itemLabel}>Giá trị #{i + 1}</p>
+            <div className={styles.itemHeader}>
+              <p className={styles.itemLabel}>Giá trị #{i + 1}</p>
+              <button
+                type="button"
+                className={styles.dangerBtn}
+                onClick={() => removeListItem('values_section', i)}
+              >
+                <Trash2 size={13} /> Xóa
+              </button>
+            </div>
             <div className={styles.row}>
               <SelectField label="Icon" value={v.icon_key} options={ICON_OPTIONS}
                 onChange={val => updateField(`values_section.${i}.icon_key`, val)} />
