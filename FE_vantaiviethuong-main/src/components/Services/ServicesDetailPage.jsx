@@ -541,6 +541,12 @@ export const ContactSection = ({ contactData }) => {
     }
   };
 
+  const handleResetForm = () => {
+    setSubmitted(false);
+    setSubmitError('');
+    setForm({ name: '', phone: '', email: '', service: '', cargo: '', note: '' });
+  };
+
   return (
     <section ref={sectionRef} className={s.contactSection} id="lien-he">
       <div className={s.contactInner}>
@@ -607,6 +613,13 @@ export const ContactSection = ({ contactData }) => {
                       Chúng tôi sẽ liên hệ lại trong vòng 30 phút.<br />
                       Cảm ơn bạn đã tin tưởng Việt Hương Logistics.
                     </p>
+                    <button
+                      type="button"
+                      className={s.submitResetBtn}
+                      onClick={handleResetForm}
+                    >
+                      {'G\u1eedi y\u00eau c\u1ea7u kh\u00e1c'}
+                    </button>
                   </div>
                 ) : (
                   <>

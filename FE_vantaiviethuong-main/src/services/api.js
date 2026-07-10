@@ -153,6 +153,15 @@ export const partnerApi = {
 // ════════════════════════════════════════════════════════════
 // CONTACT / LIÊN HỆ
 // ════════════════════════════════════════════════════════════
+export const branchApi = {
+  getList: () => request('/branches'),
+  adminList: () => request('/branches/admin'),
+  create: (data) =>
+    request('/branches/admin', { method: 'POST', body: JSON.stringify(data) }),
+  update: (id, data) =>
+    request(`/branches/admin/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  delete: (id) => request(`/branches/admin/${id}`, { method: 'DELETE' }),
+}
 export const contactApi = {
   // Public — gửi form liên hệ
   submit: (data) =>

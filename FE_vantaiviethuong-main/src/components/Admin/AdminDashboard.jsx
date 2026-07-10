@@ -3,7 +3,7 @@ import { useAuth } from '../../context/AuthContext'
 import { useNavigate } from 'react-router-dom'
 import {
   Home, Info, Truck, HelpCircle, Newspaper,
-  Phone, Settings, Users, MessageSquare, LogOut, ChevronRight, LayoutDashboard,
+  Phone, Settings, Users, MessageSquare, LogOut, ChevronRight, LayoutDashboard, Building2,
   FileText   // ← thêm icon mới cho "Nội dung FAQ"
 } from 'lucide-react'
 import styles from './AdminDashboard.module.scss'
@@ -15,6 +15,7 @@ const cards = [
   { icon: HelpCircle,    label: 'Giải đáp',          desc: 'Quản lý câu hỏi khách gửi',                color: '#7c3aed', to: '/admin/faq'       },
   { icon: FileText,      label: 'Nội dung FAQ',      desc: 'Chỉnh sửa danh mục & câu hỏi hiển thị trên trang FAQ', color: '#9333ea', to: '/admin/faq-content' },
   { icon: Newspaper,     label: 'Tin tức / Blog',    desc: 'Đăng và chỉnh sửa bài viết',               color: '#d97706', to: '/admin/blogs'     },
+  { icon: Building2,     label: 'Văn phòng & Chi nhánh', desc: 'Thêm, sửa, xóa địa điểm trên trang khách hàng', color: '#0f766e', to: '/admin/branches' },
   { icon: Phone,         label: 'Liên hệ',           desc: 'Xem yêu cầu từ khách hàng',                color: '#059669', to: '/admin/contacts'  },
 ]
 
@@ -26,6 +27,7 @@ const navItems = [
   { icon: HelpCircle,      label: 'Giải đáp',     to: '/admin/faq'       },
   { icon: FileText,        label: 'Nội dung FAQ', to: '/admin/faq-content' },
   { icon: Newspaper,       label: 'Tin tức',       to: '/admin/blogs'     },
+  { icon: Building2,       label: 'Chi nhánh',      to: '/admin/branches'  },
   { icon: Phone,           label: 'Liên hệ',      to: '/admin/contacts'  },
 
 ]

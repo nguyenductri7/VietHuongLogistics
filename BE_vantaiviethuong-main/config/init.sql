@@ -216,6 +216,26 @@ CREATE TABLE IF NOT EXISTS contact_messages (
 );
 
 -- ================================================
+-- BẢNG BRANCHES (Văn phòng & Chi nhánh)
+-- ================================================
+CREATE TABLE IF NOT EXISTS branches (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(200) NOT NULL,
+  address VARCHAR(500) NOT NULL,
+  email VARCHAR(150),
+  phone VARCHAR(50),
+  lat DECIMAL(11, 7) NOT NULL DEFAULT 16.0707000,
+  lng DECIMAL(11, 7) NOT NULL DEFAULT 108.1526000,
+  image_url VARCHAR(700),
+  is_headquarter TINYINT(1) DEFAULT 0,
+  is_active TINYINT(1) DEFAULT 1,
+  sort_order INT DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_branches_active_order (is_active, sort_order),
+  INDEX idx_branches_headquarter (is_headquarter)
+);
+-- ================================================
 -- DỮ LIỆU MẶC ĐỊNH: Admin account
 -- Password: Admin@123 (nhớ đổi sau khi setup)
 -- ================================================

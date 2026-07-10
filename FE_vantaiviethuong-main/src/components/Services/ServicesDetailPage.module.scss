@@ -1877,6 +1877,34 @@ text-shadow: 0 1px 4px rgba(#1a0505,.55);
     text-overflow: ellipsis;
   }
 }
+
+.submitResetBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 24px;
+  padding: 12px 22px;
+  border: 1px solid rgba($sun-gold, .35);
+  border-radius: $r-pill;
+  background: linear-gradient(135deg, rgba($red, .92), rgba($sun-warm, .9), rgba($sun-amber, .82));
+  color: $white;
+  font-family: $font;
+  font-size: .88rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 10px 26px rgba($red, .34), 0 0 22px rgba($sun-amber, .18);
+  transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    border-color: rgba($sun-gold, .65);
+    box-shadow: 0 16px 34px rgba($red, .42), 0 0 32px rgba($sun-amber, .28);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
 .cardImgWrapper {
   border-radius: $r-xl $r-xl 0 0;
   overflow: hidden;

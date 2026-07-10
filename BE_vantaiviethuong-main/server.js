@@ -41,6 +41,7 @@ app.use('/api/blogs', require('./routes/blogs'));
 app.use('/api/settings', require('./routes/settings'));
 app.use('/api/home-page', require('./routes/homePage'));
 app.use('/api/partners', require('./routes/partners'));
+app.use('/api/branches', require('./routes/branches'));
 app.use('/api/contact', require('./routes/contact'));
 app.use('/api/about',    require('./routes/About'));   
 app.use('/api/services-page', require('./routes/Servicespage'));

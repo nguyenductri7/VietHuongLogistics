@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { MapPin, Mail, Phone, Building2, ChevronRight, Star } from 'lucide-react'
 import { Helmet } from 'react-helmet-async'
+import { branchApi } from '../../services/api'
 import styles from './ContactDetail.module.scss'
 
 // ── Trụ sở chính ─────────────────────────────────────────────
@@ -60,8 +61,6 @@ const BRANCHES = [
 ]
 
 // Tất cả locations để đặt markers (HQ + branches)
-const ALL_LOCATIONS = [HEADQUARTER, ...BRANCHES]
-
 const VN_GEOJSON_URL =
   'https://raw.githubusercontent.com/wmgeolab/geoBoundaries/main/releaseData/gbOpen/VNM/ADM0/geoBoundaries-VNM-ADM0.geojson'
 
@@ -71,6 +70,28 @@ export default function ContactDetail() {
   const markersRef = useRef([])
   const heroRef = useRef(null)
   const [active, setActive] = useState('hq')
+  const [headquarter, setHeadquarter] = useState(HEADQUARTER)
+  const [branches, setBranches] = useState(BRANCHES)
+  const allLocations = [headquarter, ...branches]
+
+  useEffect(() => {
+    let cancelled = false
+
+    branchApi.getList()
+      .then(res => {
+        if (cancelled) return
+        const rows = Array.isArray(res.data) ? res.data : []
+        if (!rows.length) return
+
+        const hq = rows.find(item => item.is_headquarter) || rows[0]
+        setHeadquarter(hq)
+        setBranches(rows.filter(item => String(item.id) !== String(hq.id)))
+        setActive(String(hq.id))
+      })
+      .catch(() => {})
+
+    return () => { cancelled = true }
+  }, [])
 
   // ── Parallax hero ─────────────────────────────────────────────
   useEffect(() => {
@@ -139,8 +160,8 @@ export default function ContactDetail() {
         .catch(() => {})
 
       // Markers — tất cả locations
-      ALL_LOCATIONS.forEach((loc, i) => {
-        const isHQ = loc.id === 'hq'
+      allLocations.forEach((loc, i) => {
+        const isHQ = loc.is_headquarter || String(loc.id) === String(headquarter.id)
         const icon = window.L.divIcon({
           className: '',
           html: `<div class="cd-marker ${isHQ ? 'cd-marker--hq' : ''}">
@@ -164,7 +185,7 @@ export default function ContactDetail() {
             { closeButton: false, offset: [0, -8] }
           )
 
-        marker.on('click', () => setActive(loc.id))
+        marker.on('click', () => setActive(String(loc.id)))
         markersRef.current[i] = marker
       })
 
@@ -186,10 +207,10 @@ export default function ContactDetail() {
     return () => {
       if (leafletMap.current) { leafletMap.current.remove(); leafletMap.current = null }
     }
-  }, [])
+  }, [headquarter, branches])
 
   function handleLocationClick(loc, index) {
-    setActive(loc.id)
+    setActive(String(loc.id))
     if (leafletMap.current) {
       leafletMap.current.flyTo([loc.lat, loc.lng], 15, { duration: 1.2 })
       markersRef.current[index]?.openPopup()
@@ -234,27 +255,27 @@ export default function ContactDetail() {
               Trụ Sở Chính
             </div>
             <div
-              className={`${styles.cardHq} ${active === HEADQUARTER.id ? styles.cardHqActive : ''}`}
-              onClick={() => handleLocationClick(HEADQUARTER, 0)}
+              className={`${styles.cardHq} ${String(active) === String(headquarter.id) ? styles.cardHqActive : ''}`}
+              onClick={() => handleLocationClick(headquarter, 0)}
             >
               <div className={styles.cardHqThumb}>
-                <img src={HEADQUARTER.image_url} alt={HEADQUARTER.name} />
+                <img src={headquarter.image_url} alt={headquarter.name} />
                 <div className={styles.cardHqThumbOverlay} />
                 <span className={styles.hqBadge}>TRỤ SỞ CHÍNH</span>
               </div>
               <div className={styles.cardHqContent}>
-                <h3 className={styles.cardHqName}>{HEADQUARTER.name}</h3>
+                <h3 className={styles.cardHqName}>{headquarter.name}</h3>
                 <div className={styles.cardRow}>
                   <MapPin size={13} className={styles.cardIcon} />
-                  <span>{HEADQUARTER.address}</span>
+                  <span>{headquarter.address}</span>
                 </div>
                 <div className={styles.cardRow}>
                   <Mail size={13} className={styles.cardIcon} />
-                  <span>{HEADQUARTER.email}</span>
+                  <span>{headquarter.email}</span>
                 </div>
                 <div className={styles.cardRow}>
                   <Phone size={13} className={styles.cardIcon} />
-                  <span>{HEADQUARTER.phone}</span>
+                  <span>{headquarter.phone}</span>
                 </div>
                 <div className={styles.cardFooter}>
                   <span className={styles.cardCta}>
@@ -270,10 +291,10 @@ export default function ContactDetail() {
               Văn Phòng Đại Diện
             </div>
             <div className={styles.cards}>
-              {BRANCHES.map((branch, i) => (
+              {branches.map((branch, i) => (
                 <div
                   key={branch.id}
-                  className={`${styles.card} ${active === branch.id ? styles.cardActive : ''}`}
+                  className={`${styles.card} ${String(active) === String(branch.id) ? styles.cardActive : ''}`}
                   onClick={() => handleLocationClick(branch, i + 1)}
                 >
                   <div className={styles.cardThumb}>
