@@ -43,8 +43,8 @@ export default function AdminContacts() {
     window.setTimeout(() => setToast(null), 3000)
   }
 
-  const fetchData = async () => {
-    setLoading(true)
+  const fetchData = async ({ silent = false } = {}) => {
+    if (!silent) setLoading(true)
     try {
       const params = { page, limit: 20 }
       if (statusFilter) params.status = statusFilter
@@ -59,15 +59,20 @@ export default function AdminContacts() {
       setPagination(listRes.pagination || { total: 0, page: 1, total_pages: 1 })
       setStats({ ...EMPTY_STATS, ...(statsRes.data || {}) })
     } catch (error) {
-      showToast(error.message || 'Không thể tải danh sách liên hệ.', 'error')
+      if (!silent) showToast(error.message || 'Không thể tải danh sách liên hệ.', 'error')
     } finally {
-      setLoading(false)
+      if (!silent) setLoading(false)
     }
   }
 
   useEffect(() => {
     const timer = window.setTimeout(fetchData, search ? 350 : 0)
     return () => window.clearTimeout(timer)
+  }, [page, search, statusFilter])
+
+  useEffect(() => {
+    const timer = window.setInterval(() => fetchData({ silent: true }), 30000)
+    return () => window.clearInterval(timer)
   }, [page, search, statusFilter])
 
   const handleSearch = (event) => {

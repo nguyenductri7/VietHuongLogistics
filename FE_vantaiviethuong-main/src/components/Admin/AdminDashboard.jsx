@@ -1,13 +1,15 @@
 // src/components/Admin/AdminDashboard.jsx
+import { useEffect, useState } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import { useNavigate } from 'react-router-dom'
 import {
   Home, Info, Truck, HelpCircle, Newspaper,
   Phone, Settings, Users, MessageSquare, LogOut, ChevronRight, LayoutDashboard, Building2,
-  FileText   // ← thêm icon mới cho "Nội dung FAQ"
+  FileText, UserRound
 } from 'lucide-react'
 import styles from './AdminDashboard.module.scss'
 import logo from '../../assets/VIET HUONG LOGISTICS.png'
+import { contactApi } from '../../services/api'
 const cards = [
   { icon: Home,          label: 'Trang chủ',        desc: 'Hero, banner, nội dung chính',              color: '#2563EB', to: '/admin/home'  },
   { icon: Info,          label: 'Giới thiệu',        desc: 'Chỉnh sửa nội dung trang About',            color: '#DC2626', to: '/admin/about'     },
@@ -17,6 +19,7 @@ const cards = [
   { icon: Newspaper,     label: 'Tin tức / Blog',    desc: 'Đăng và chỉnh sửa bài viết',               color: '#d97706', to: '/admin/blogs'     },
   { icon: Building2,     label: 'Văn phòng & Chi nhánh', desc: 'Thêm, sửa, xóa địa điểm trên trang khách hàng', color: '#0f766e', to: '/admin/branches' },
   { icon: Phone,         label: 'Liên hệ',           desc: 'Xem yêu cầu từ khách hàng',                color: '#059669', to: '/admin/contacts'  },
+  { icon: UserRound,     label: 'Hồ sơ Admin',       desc: 'Cập nhật thông tin và đổi mật khẩu',          color: '#be123c', to: '/admin/profile'  },
 ]
 
 const navItems = [
@@ -29,12 +32,35 @@ const navItems = [
   { icon: Newspaper,       label: 'Tin tức',       to: '/admin/blogs'     },
   { icon: Building2,       label: 'Chi nhánh',      to: '/admin/branches'  },
   { icon: Phone,           label: 'Liên hệ',      to: '/admin/contacts'  },
+  { icon: UserRound,       label: 'Hồ sơ Admin',    to: '/admin/profile'  },
 
 ]
 
 export default function AdminDashboard() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
+  const [newContacts, setNewContacts] = useState(0)
+
+  useEffect(() => {
+    let alive = true
+
+    const loadContactStats = async () => {
+      try {
+        const res = await contactApi.getStats()
+        if (alive) setNewContacts(Number(res?.data?.new_count) || 0)
+      } catch {
+        if (alive) setNewContacts(0)
+      }
+    }
+
+    loadContactStats()
+    const timer = window.setInterval(loadContactStats, 30000)
+
+    return () => {
+      alive = false
+      window.clearInterval(timer)
+    }
+  }, [])
 
   const handleLogout = () => {
     logout()
@@ -60,20 +86,23 @@ export default function AdminDashboard() {
                 onClick={() => navigate(item.to)}
               >
                 <Icon size={16} strokeWidth={1.8} />
-                {item.label}
+                <span className={styles.navLabel}>{item.label}</span>
+                {item.to === '/admin/contacts' && newContacts > 0 && (
+                  <span className={styles.navBadge}>{newContacts > 99 ? '99+' : newContacts}</span>
+                )}
               </button>
             )
           })}
         </nav>
 
         <div className={styles.sideFooter}>
-          <div className={styles.userInfo}>
+          <button className={styles.userInfo} onClick={() => navigate('/admin/profile')}>
             <div className={styles.avatar}>{user?.full_name?.[0] || 'A'}</div>
             <div>
               <div className={styles.userName}>{user?.full_name || user?.username}</div>
               <div className={styles.userRole}>{user?.role}</div>
             </div>
-          </div>
+          </button>
           <button className={styles.logoutBtn} onClick={handleLogout}>
             <LogOut size={15} strokeWidth={1.8} />
             Đăng xuất
@@ -111,7 +140,12 @@ export default function AdminDashboard() {
                   <Icon size={22} color={c.color} strokeWidth={1.8} />
                 </div>
                 <div className={styles.cardContent}>
-                  <div className={styles.cardLabel}>{c.label}</div>
+                  <div className={styles.cardLabel}>
+                    {c.label}
+                    {c.to === '/admin/contacts' && newContacts > 0 && (
+                      <span className={styles.cardBadge}>{newContacts > 99 ? '99+' : `${newContacts} mới`}</span>
+                    )}
+                  </div>
                   <div className={styles.cardDesc}>{c.desc}</div>
                 </div>
                 <ChevronRight size={16} className={styles.cardArrow} />

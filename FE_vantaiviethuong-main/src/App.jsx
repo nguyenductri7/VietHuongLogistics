@@ -32,6 +32,7 @@ import AdminFaq from './components/Admin/AdminFaq'
 import AdminFaqContent from './components/Admin/AdminFaqContent'
 import AdminContacts from './components/Admin/AdminContacts'
 import AdminBranches from './components/Admin/AdminBranches'
+import AdminProfile from './components/Admin/AdminProfile'
 gsap.registerPlugin(ScrollTrigger)
 
 // ─── Helpers ─────────────────────────────────────────────────
@@ -220,6 +221,14 @@ function AppInner() {
           element={
             <ProtectedRoute>
               <AdminBranches />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/profile"
+          element={
+            <ProtectedRoute>
+              <AdminProfile />
             </ProtectedRoute>
           }
         />

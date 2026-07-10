@@ -75,6 +75,12 @@ export const authApi = {
 
   getMe: () => request('/auth/me'),
 
+  updateProfile: (data) =>
+    request('/auth/profile', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+
   changePassword: (current_password, new_password) =>
     request('/auth/change-password', {
       method: 'POST',

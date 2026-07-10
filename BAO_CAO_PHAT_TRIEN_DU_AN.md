@@ -1,8 +1,8 @@
-# BÁO CÁO TIẾP NHẬN, KHẮC PHỤC VÀ PHÁT TRIỂN WEBSITE viethuonglogict
+# BÁO CÁO TIẾP NHẬN, KHẮC PHỤC VÀ PHÁT TRIỂN WEBSITE VIỆT HƯƠNG LOGISTICS
 
 ## 1. Các vấn đề ghi nhận khi được tiếp nhận dự án
 
-1. Frontend bị lỗi dependency giữa Vite và plugin React khi build trên Vercel.
+1. Frontend bị lỗi dependency giữa Vite và plugin React
 2. Các đường dẫn như `/login` trả về lỗi 404 khi truy cập hoặc tải lại trực tiếp.
 3. Frontend sau khi deploy vẫn gửi API về `localhost:5000`.
 4. Backend chặn request từ frontend do cấu hình CORS chưa đủ.
@@ -15,6 +15,15 @@
 11. Khu vực “Góc nhìn ngành vận tải” ở trang chủ chưa đồng bộ với dữ liệu trang tin tức.
 12. Gmail SMTP bị timeout trên Render Free do nền tảng chặn các cổng SMTP.
 13. Email gửi về quản trị chưa có giao diện trình bày chuyên nghiệp.
+14. Admin chưa có cơ chế nhắc nhanh khi phát sinh yêu cầu liên hệ mới, quản trị viên phải vào trang liên hệ và bấm làm mới thủ công.
+15. Một số nội dung trang chủ còn bị viết cứng trong code, chưa cho phép quản trị viên thay đổi từ Admin.
+16. Khu vực dịch vụ, đối tác, đánh giá khách hàng và thông tin liên hệ trên trang chủ chưa đồng bộ hoàn toàn với dữ liệu quản trị.
+17. Trang “Liên hệ” thực tế đang dùng để hiển thị văn phòng/chi nhánh nên tên menu chưa rõ nghĩa.
+18. Chưa có trang Admin riêng để quản lý danh sách văn phòng và chi nhánh.
+19. Một số khu vực upload media như video hero, ảnh fallback, logo đối tác, icon dịch vụ và icon quy trình còn khó quản lý đối với người không biết code.
+20. Giao diện trang chủ có hiện tượng lag/hiển thị chồng nội dung khi cuộn từ video đầu trang xuống khu vực xe và dịch vụ.
+21. Thanh menu khách hàng cần điều chỉnh lại hành vi khi cuộn trang để phù hợp trải nghiệm thực tế.
+22. Các liên kết ở một số card dịch vụ trên trang giới thiệu chưa điều hướng đúng tới trang dịch vụ tương ứng.
 .......
 
 ## 2. Các hạng mục đã thực hiện
@@ -45,6 +54,9 @@
 - Hiển thị thống kê số lượng yêu cầu theo trạng thái.
 - Cho phép cập nhật trạng thái và xóa yêu cầu.
 - Thêm đường dẫn quản lý liên hệ vào dashboard Admin.
+- Bổ sung badge thông báo số yêu cầu liên hệ mới ngay trên dashboard và sidebar Admin.
+- Bổ sung cơ chế tự cập nhật danh sách liên hệ theo chu kỳ 30 giây bằng polling, giúp admin nhận biết yêu cầu mới mà không cần tải lại trang.
+- Tối ưu quá trình tự cập nhật để không bật loading toàn trang, tránh gây giật giao diện khi admin đang xem hoặc xử lý dữ liệu.
 
 ### 2.4. Hoàn thiện quản lý dịch vụ
 
@@ -95,6 +107,61 @@
   - Nội dung yêu cầu hoặc câu hỏi nổi bật.
   - Nút trả lời email hoặc gọi điện nhanh.
   - Giao diện phù hợp cho cả máy tính và điện thoại.
+- Thay phần chữ thương hiệu trong email bằng logo công ty giống logo ở footer.
+- Bổ sung static route backend để phục vụ logo email ổn định trên môi trường production.
+
+### 2.10. Xây dựng quản lý trang chủ trong Admin
+
+- Thay thế khu vực setting trang chủ cũ bằng trang quản lý trang chủ mới tại `/admin/home`.
+- Cho phép Admin quản lý các khối nội dung chính xuất hiện trên trang chủ.
+- Đồng bộ khu vực “Giải Pháp Vận Tải Toàn Diện” ở trang chủ với dữ liệu dịch vụ thật đã quản lý trong Admin dịch vụ.
+- Đồng bộ form/thông tin liên hệ ở trang chủ với dữ liệu thật từ trang quản lý dịch vụ.
+- Giữ phần tin tức trang chủ lấy từ hệ thống quản lý tin tức sẵn có, tránh tạo trùng chức năng quản trị.
+- Bổ sung khả năng quản lý nội dung bên cạnh hình ảnh chiếc xe trên trang chủ.
+- Sửa lỗi hiển thị chồng/lộ nội dung khu vực dịch vụ khi cuộn từ phần video đầu trang xuống.
+
+### 2.11. Quản lý đối tác và đánh giá khách hàng
+
+- Bổ sung chức năng để Admin upload logo công ty đối tác thay vì phụ thuộc vào ảnh cố định.
+- Tách phần đánh giá khách hàng thành một tab quản lý riêng, không dùng chung với tab đối tác.
+- Bổ sung tiêu đề lớn cho khu vực đánh giá khách hàng trên trang chủ.
+- Cho phép tiêu đề đánh giá lấy từ Admin, có giá trị mặc định là “Đánh giá từ khách hàng”.
+- Bổ sung màu nhấn cho từ khóa trong tiêu đề lớn để đồng bộ phong cách với các section khác trên trang chủ.
+- Cho phép Admin thêm, sửa, xóa các đánh giá khách hàng.
+
+### 2.12. Quản lý văn phòng và chi nhánh
+
+- Đổi tên menu khách hàng từ “Liên hệ” sang “Văn phòng & Chi nhánh” để đúng ý nghĩa trang.
+- Đổi đường dẫn công khai từ `/lien-he` sang `/chi-nhanh`.
+- Giữ redirect từ `/lien-he` sang `/chi-nhanh` để tránh lỗi khi người dùng hoặc Google còn truy cập link cũ.
+- Xây dựng API backend quản lý danh sách chi nhánh.
+- Bổ sung bảng dữ liệu `branches` và dữ liệu chi nhánh mặc định.
+- Tạo trang Admin riêng để thêm, sửa, xóa văn phòng/chi nhánh.
+- Cho phép lưu các thông tin như tên chi nhánh, địa chỉ, hotline, email, giờ làm việc, kinh độ và vĩ độ để phục vụ hiển thị bản đồ.
+- Kết nối trang khách hàng với dữ liệu chi nhánh thật từ backend, có dữ liệu dự phòng nếu API tạm thời lỗi.
+
+### 2.13. Nâng cấp quản lý trang giới thiệu
+
+- Bổ sung nút thêm năm trong phần lịch sử hình thành để Admin có thể mở rộng timeline.
+- Bổ sung nút thêm giá trị trong phần giá trị cốt lõi để không bị giới hạn số lượng nội dung.
+- Chuyển trường đường dẫn video hero và ảnh fallback sang dạng upload, giúp Admin dễ thay video/ảnh mà không cần sửa code.
+- Cho phép upload icon cho phần dịch vụ trong trang giới thiệu, ngoài các icon cố định có sẵn.
+- Sửa các card trong phần “Giải Pháp Logistics Toàn Diện” để điều hướng đúng sang trang dịch vụ tương ứng.
+
+### 2.14. Nâng cấp quản lý trang dịch vụ
+
+- Bổ sung upload icon cho 5 bước quy trình trong trang quản lý dịch vụ.
+- Cho phép Admin dùng nhiều kiểu icon/ảnh khác nhau thay vì chỉ chọn icon có sẵn trong code.
+- Giữ cơ chế icon mặc định để website vẫn hiển thị ổn nếu Admin chưa upload icon riêng.
+- Đồng bộ dữ liệu dịch vụ giữa trang dịch vụ, trang chủ và các khu vực giới thiệu liên quan.
+
+### 2.15. Cải thiện giao diện và trải nghiệm người dùng
+
+- Sửa logo ở footer để hiển thị đúng.
+- Xóa logo phủ trên video giới thiệu ở trang chủ theo yêu cầu nhận diện mới.
+- Điều chỉnh luồng cuộn trang chủ: sau phần video/xe sẽ chuyển mượt sang khu vực “Giải Pháp Vận Tải Toàn Diện”, không còn phần hình ảnh trượt từ phải sang gây rối.
+- Điều chỉnh thanh menu khách hàng: khi ở đầu trang hiển thị trạng thái bình thường, khi cuộn xuống hoặc đang xem các phần bên dưới thì chuyển sang trạng thái trong suốt nhưng vẫn nhìn thấy các tab.
+- Bổ sung nút gửi yêu cầu khác/quay lại form sau khi gửi liên hệ thành công, giúp người dùng có thể gửi lại thông tin mới mà không cần tải lại trang.
 
 ## 3. Kết quả đạt được
 
@@ -105,8 +172,13 @@
 - Database đã có cấu trúc phục vụ các chức năng chính của website.
 - Schema database được cập nhật tự động khi deploy, không còn phụ thuộc vào thao tác chạy `init.sql` thủ công.
 - Form liên hệ và FAQ lưu dữ liệu thực tế vào Admin.
-- Quản trị viên có thể quản lý nội dung giới thiệu, dịch vụ, tin tức, FAQ và yêu cầu khách hàng.
+- Admin có thể nhìn thấy số yêu cầu liên hệ mới trực tiếp trên dashboard/sidebar và danh sách liên hệ được tự động làm mới định kỳ.
+- Quản trị viên có thể quản lý nội dung trang chủ, giới thiệu, dịch vụ, tin tức, FAQ, chi nhánh, đối tác, đánh giá khách hàng và yêu cầu khách hàng.
 - Nội dung tin tức trên trang chủ được đồng bộ với trang tin tức.
+- Nội dung dịch vụ trên trang chủ được đồng bộ với dữ liệu dịch vụ thật.
+- Website có trang “Văn phòng & Chi nhánh” rõ nghĩa hơn, dữ liệu có thể cập nhật từ Admin.
+- Các khu vực cần thay đổi media như logo đối tác, icon dịch vụ, icon quy trình, video hero và ảnh fallback đã thân thiện hơn với Admin.
+- Trải nghiệm cuộn trang chủ, thanh menu, form liên hệ và các liên kết dịch vụ được cải thiện.
 - Hệ thống có thể gửi thông báo qua Resend mà không phụ thuộc vào cổng Gmail SMTP.
 - Email thông báo đã có giao diện chuyên nghiệp và thuận tiện xử lý yêu cầu.
 
@@ -118,10 +190,18 @@
 - Kiểm tra cú pháp, thứ tự và bộ phân tách câu lệnh của migration tự động.
 - Kiểm tra đăng nhập Admin và xác thực JWT.
 - Kiểm tra gửi form liên hệ, lưu database và hiển thị trong Admin.
+- Kiểm tra badge số yêu cầu liên hệ mới trên dashboard Admin và cơ chế tự làm mới danh sách liên hệ theo chu kỳ.
 - Kiểm tra gửi câu hỏi FAQ và cập nhật trạng thái.
 - Kiểm tra tạo, sửa, xóa và sắp xếp dịch vụ.
 - Kiểm tra tạo và chỉnh sửa bài viết có nội dung rich text.
 - Kiểm tra payload gửi email qua Resend và cú pháp mẫu HTML email.
+- Kiểm tra thêm, sửa, xóa dữ liệu văn phòng/chi nhánh trong Admin.
+- Kiểm tra upload logo đối tác, icon dịch vụ, icon quy trình, video hero và ảnh fallback.
+- Kiểm tra dữ liệu dịch vụ hiển thị lại ở trang chủ và trang giới thiệu.
+- Kiểm tra thêm, sửa, xóa đánh giá khách hàng và tiêu đề section đánh giá.
+- Kiểm tra hành vi thanh menu khi ở đầu trang và khi cuộn xuống.
+- Kiểm tra giao diện trang chủ sau khi loại bỏ lỗi lộ/chồng nội dung khi cuộn.
+- Kiểm tra nút gửi yêu cầu khác sau khi gửi form liên hệ thành công.
 ---
 **Người lập báo cáo:** Nguyễn Đức Trí 
-**Ngày lập:** 06/07/2026
+**Ngày lập:** 11/07/2026

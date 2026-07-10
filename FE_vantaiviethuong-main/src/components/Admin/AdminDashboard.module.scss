@@ -109,6 +109,25 @@ $transition: 160ms ease;
   }
 }
 
+.navLabel {
+  flex: 1;
+  min-width: 0;
+}
+
+.navBadge {
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: $red;
+  color: $white;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 20px;
+  text-align: center;
+  box-shadow: 0 6px 14px rgba($red, .22);
+}
+
 .sideFooter {
   padding: 10px 8px 14px;
   border-top: 1px solid $gray-100;
@@ -118,8 +137,20 @@ $transition: 160ms ease;
   display: flex;
   align-items: center;
   gap: 10px;
+  width: 100%;
   padding: 10px 12px;
   margin-bottom: 6px;
+  border: 0;
+  border-radius: $radius-sm;
+  background: transparent;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  transition: background $transition;
+
+  &:hover {
+    background: $gray-50;
+  }
 }
 
 .avatar {
@@ -300,10 +331,27 @@ $transition: 160ms ease;
 }
 
 .cardLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-size: 14.5px;
   font-weight: 700;
   color: $gray-900;
   margin-bottom: 3px;
+}
+
+.cardBadge {
+  display: inline-flex;
+  align-items: center;
+  height: 20px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: #fff7ed;
+  color: #ea580c;
+  border: 1px solid #fed7aa;
+  font-size: 10.5px;
+  font-weight: 800;
+  white-space: nowrap;
 }
 
 .cardDesc {

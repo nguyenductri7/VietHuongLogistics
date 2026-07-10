@@ -62,6 +62,49 @@ const getMe = async (req, res) => {
   });
 };
 
+// PUT /api/auth/profile
+const updateProfile = async (req, res) => {
+  try {
+    const full_name = String(req.body.full_name || '').trim();
+    const email = String(req.body.email || '').trim();
+
+    if (!full_name) {
+      return res.status(400).json({ success: false, message: 'Vui lòng nhập họ tên.' });
+    }
+
+    if (full_name.length > 100) {
+      return res.status(400).json({ success: false, message: 'Họ tên không được vượt quá 100 ký tự.' });
+    }
+
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({ success: false, message: 'Email chưa đúng định dạng.' });
+    }
+
+    if (email.length > 100) {
+      return res.status(400).json({ success: false, message: 'Email không được vượt quá 100 ký tự.' });
+    }
+
+    await pool.query(
+      'UPDATE admin_users SET full_name = ?, email = ? WHERE id = ?',
+      [full_name, email || null, req.user.id]
+    );
+
+    const [rows] = await pool.query(
+      'SELECT id, username, full_name, email, role, is_active FROM admin_users WHERE id = ?',
+      [req.user.id]
+    );
+
+    res.json({
+      success: true,
+      message: 'Cập nhật hồ sơ thành công!',
+      user: rows[0],
+    });
+  } catch (err) {
+    console.error('Update profile error:', err);
+    res.status(500).json({ success: false, message: 'Lỗi server.' });
+  }
+};
+
 // POST /api/auth/change-password
 const changePassword = async (req, res) => {
   try {
@@ -92,4 +135,4 @@ const changePassword = async (req, res) => {
   }
 };
 
-module.exports = { login, getMe, changePassword };
+module.exports = { login, getMe, updateProfile, changePassword };
