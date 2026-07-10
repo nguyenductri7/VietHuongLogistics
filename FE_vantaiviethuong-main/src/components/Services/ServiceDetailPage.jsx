@@ -274,7 +274,7 @@ const ServiceDetailContent = ({ service, allServices = TIMELINE_SERVICES }) => {
               mang lại sự yên tâm tuyệt đối cho doanh nghiệp của bạn,
               từ khâu tiếp nhận đến tận tay người nhận.
             </p>
-            <Link to="/lien-he" className={s.btnPrimary}>
+            <Link to="/chi-nhanh" className={s.btnPrimary}>
               Nhận Báo Giá Ngay <ArrowRight size={16} />
             </Link>
           </div>

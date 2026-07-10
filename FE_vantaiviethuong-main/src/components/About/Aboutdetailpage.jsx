@@ -108,6 +108,14 @@ function WaveDivider({ fill = '#ffffff', flip = false }) {
   )
 }
 
+function ServiceIcon({ service }) {
+  if (service?.icon_url) {
+    return <img src={service.icon_url} alt="" className={styles.serviceIconImage} loading="lazy" />
+  }
+
+  return ICON_MAP[service?.icon_key] || ICON_MAP.Truck
+}
+
 export default function AboutDetailPage() {
   const [about, setAbout] = useState(FALLBACK_ABOUT)
   const [loadError] = useState(false)
@@ -316,7 +324,7 @@ export default function AboutDetailPage() {
           <p className={styles.heroSub}>{hero.subtitle}</p>
 
           <div className={styles.heroCtas}>
-            <Link to="/lien-he" className={styles.ctaPrimary}>
+            <Link to="/chi-nhanh" className={styles.ctaPrimary}>
               <Phone size={14} /> Liên Hệ Ngay
             </Link>
             <a href="#services" className={styles.ctaOutline}>
@@ -440,7 +448,7 @@ export default function AboutDetailPage() {
                 </div>
                 <div className={styles.serviceCardContent}>
                   <div className={styles.serviceCardHeader}>
-                    <div className={styles.serviceCardIcon}>{ICON_MAP[s.icon_key]}</div>
+                    <div className={styles.serviceCardIcon}><ServiceIcon service={s} /></div>
                     <h3 className={styles.serviceCardTitle}>{s.title}</h3>
                   </div>
                   <p className={styles.serviceCardDesc}>{s.desc}</p>
@@ -460,7 +468,7 @@ export default function AboutDetailPage() {
                 </div>
                 <div className={styles.serviceCardContent}>
                   <div className={styles.serviceCardHeader}>
-                    <div className={styles.serviceCardIcon}>{ICON_MAP[s.icon_key]}</div>
+                    <div className={styles.serviceCardIcon}><ServiceIcon service={s} /></div>
                     <h3 className={styles.serviceCardTitle}>{s.title}</h3>
                   </div>
                   <p className={styles.serviceCardDesc}>{s.desc}</p>

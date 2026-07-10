@@ -182,7 +182,7 @@ export const ServicesBanner = ({ bannerData }) => {
           {bannerData?.subtitle || 'Từ nội địa đến quốc tế, từ kho bãi đến chuyển phát nhanh — chúng tôi đảm bảo hàng hóa của bạn đến đúng nơi, đúng lúc.'}
         </p>
         <div ref={ctaRef} className={s.heroCtas}>
-          <Link to="/lien-he" className={s.heroBtnPrimary}>
+          <Link to="/chi-nhanh" className={s.heroBtnPrimary}>
             Tư Vấn Miễn Phí <ArrowRight size={16} />
           </Link>
           <Link to="#dich-vu" className={s.heroBtnGhost}>
@@ -326,7 +326,7 @@ export const ServiceTimeline = ({ services = TIMELINE_SERVICES }) => {
         </div>
 
         <div className={s.tlCta}>
-          <Link to="/lien-he" className={s.btnPrimary}>Tư Vấn Miễn Phí</Link>
+          <Link to="/chi-nhanh" className={s.btnPrimary}>Tư Vấn Miễn Phí</Link>
           <span className={s.tlCtaNote}>Đội ngũ phản hồi trong vòng 30 phút</span>
         </div>
       </div>
@@ -414,6 +414,10 @@ useEffect(() => {
 const ProcessStepCard = ({ step, isActive }) => {
   const cardRef = useRef(null);
   useSpotlight(cardRef);
+  const icon = step.icon_url
+    ? <img src={step.icon_url} alt="" className={s.stepIconImage} loading="lazy" />
+    : (step.icon || ICON_MAP[step.icon_key] || <Zap size={20} />);
+
   return (
     <div className={s.processStep}>
 <div className={`${s.stepCircle} ${isActive ? s.active : ''}`}>
@@ -421,7 +425,7 @@ const ProcessStepCard = ({ step, isActive }) => {
       </div>
       <div ref={cardRef} className={`${s.stepCard} ${isActive ? s.active : ''}`}>
         <span className={s.spotlight} />
-        <div className={s.stepIconWrap}>{step.icon || ICON_MAP[step.icon_key] || <Zap size={20} />}</div>
+        <div className={s.stepIconWrap}>{icon}</div>
         <h4 className={s.stepTitle}>{step.title}</h4>
         <p className={s.stepDesc}>{step.desc}</p>
         <div className={s.stepIndex}>0{step.id || step.step_order}</div>

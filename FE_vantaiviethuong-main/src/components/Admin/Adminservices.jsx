@@ -60,6 +60,7 @@ function normalizePage(data = {}) {
     ? data.process_steps.map((step, index) => ({
         step_order: step?.step_order || step?.id || index + 1,
         icon_key: step?.icon_key || DEFAULT_PAGE.process_steps[index]?.icon_key || 'Truck',
+        icon_url: step?.icon_url || '',
         title: step?.title || '',
         desc: step?.desc || '',
       }))
@@ -351,6 +352,9 @@ export default function AdminServices() {
               <TextField label="Tiêu đề" value={step.title}
                 onChange={v => updatePageField(`process_steps.${i}.title`, v)} />
             </div>
+            <ImageField label={"Icon upload (t\u00f9y ch\u1ecdn)"} value={step.icon_url}
+              uploading={uploadingKey === `process_steps.${i}.icon_url`}
+              onUpload={file => uploadImageFile(file, `process_steps.${i}.icon_url`, url => updatePageField(`process_steps.${i}.icon_url`, url))} />
             <TextAreaField label="Mô tả" value={step.desc}
               onChange={v => updatePageField(`process_steps.${i}.desc`, v)} />
           </div>

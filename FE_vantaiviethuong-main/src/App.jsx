@@ -116,7 +116,8 @@ function PublicLayout() {
         <Route path="/dich-vu/:id"  element={<ServiceDetailWrapper />} />
         <Route path="/tin-tuc"      element={<BlogListPage />} />
         <Route path="/tin-tuc/:id"  element={<BlogDetailWrapper />} />
-        <Route path="/lien-he"      element={<ContactDetailWrapper />} />
+        <Route path="/chi-nhanh"    element={<ContactDetailWrapper />} />
+        <Route path="/lien-he"      element={<Navigate to="/chi-nhanh" replace />} />
 
      <Route path="/giai-dap" element={<FaqWrapper />} />
       </Routes>

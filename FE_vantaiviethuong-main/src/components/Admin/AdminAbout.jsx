@@ -181,6 +181,9 @@ export default function AdminAbout() {
               <TextField label="Tên dịch vụ" value={svc.title}
                 onChange={v => updateField(`services.${i}.title`, v)} />
             </div>
+            <ImageField label={'Icon upload (t\u00f9y ch\u1ecdn)'} value={svc.icon_url}
+              uploading={uploadingKey === `services.${i}.icon_url`}
+              onUpload={file => handleImageUpload(`services.${i}.icon_url`, file)} />
             <TextAreaField label="Mô tả" value={svc.desc}
               onChange={v => updateField(`services.${i}.desc`, v)} />
             <ImageField label="Ảnh minh họa" value={svc.img}

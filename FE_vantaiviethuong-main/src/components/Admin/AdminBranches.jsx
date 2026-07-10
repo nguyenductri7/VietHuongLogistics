@@ -140,7 +140,7 @@ export default function AdminBranches() {
             <Building2 size={22} /> Văn phòng & Chi nhánh
           </h1>
           <p className={styles.subtitle}>
-            Quản lý các địa điểm hiển thị trên trang khách hàng /lien-he.
+            Quản lý các địa điểm hiển thị trên trang khách hàng /chi-nhanh.
           </p>
         </div>
         <button className={styles.refreshBtn} onClick={fetchBranches} disabled={loading}>

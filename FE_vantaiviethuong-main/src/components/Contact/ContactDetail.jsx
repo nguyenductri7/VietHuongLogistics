@@ -220,7 +220,7 @@ export default function ContactDetail() {
   return (
     <>
       <Helmet>
-        <title>Liên Hệ - Chi Nhánh Việt Hương Logistics</title>
+        <title>Văn Phòng & Chi Nhánh Việt Hương Logistics</title>
         <meta name="description" content="Liên hệ Vận Tải Việt Hương. Chi nhánh tại Đà Nẵng, Hải Phòng, TP. HCM. Hotline: 0905.386.888." />
       </Helmet>
 

@@ -1011,6 +1011,12 @@ $xl: 1280px;
 .serviceCardImg {}
 .serviceCardContent {}
 .serviceCardIcon {}
+.serviceIconImage {
+  display: block;
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+}
 .serviceCardTitle {}
 .serviceCardDesc {}
 .serviceCardLink {}

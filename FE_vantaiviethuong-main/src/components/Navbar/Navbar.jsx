@@ -9,7 +9,7 @@ const navLinks = [
   { label: 'DỊCH VỤ',      href: null,        to: '/dich-vu' },
   { label: 'GIẢI ĐÁP',     href: null,        to: '/giai-dap' },  // ← sửa
   { label: 'TIN TỨC',      href: null,        to: '/tin-tuc' },
-  { label: 'VĂN PHÒNG & CHI NHÁNH', href: null, to: '/lien-he' },
+  { label: 'VĂN PHÒNG & CHI NHÁNH', href: null, to: '/chi-nhanh' },
 ]
 
 export default function Navbar() {
