@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import {
   Home, Info, Truck, HelpCircle, Newspaper,
   Phone, Settings, Users, MessageSquare, LogOut, ChevronRight, LayoutDashboard, Building2,
-  FileText, UserRound
+  FileText
 } from 'lucide-react'
 import styles from './AdminDashboard.module.scss'
 import logo from '../../assets/VIET HUONG LOGISTICS.png'
@@ -19,7 +19,6 @@ const cards = [
   { icon: Newspaper,     label: 'Tin tức / Blog',    desc: 'Đăng và chỉnh sửa bài viết',               color: '#d97706', to: '/admin/blogs'     },
   { icon: Building2,     label: 'Văn phòng & Chi nhánh', desc: 'Thêm, sửa, xóa địa điểm trên trang khách hàng', color: '#0f766e', to: '/admin/branches' },
   { icon: Phone,         label: 'Liên hệ',           desc: 'Xem yêu cầu từ khách hàng',                color: '#059669', to: '/admin/contacts'  },
-  { icon: UserRound,     label: 'Hồ sơ Admin',       desc: 'Cập nhật thông tin và đổi mật khẩu',          color: '#be123c', to: '/admin/profile'  },
 ]
 
 const navItems = [
@@ -32,7 +31,6 @@ const navItems = [
   { icon: Newspaper,       label: 'Tin tức',       to: '/admin/blogs'     },
   { icon: Building2,       label: 'Chi nhánh',      to: '/admin/branches'  },
   { icon: Phone,           label: 'Liên hệ',      to: '/admin/contacts'  },
-  { icon: UserRound,       label: 'Hồ sơ Admin',    to: '/admin/profile'  },
 
 ]
 
