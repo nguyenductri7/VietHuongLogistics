@@ -254,13 +254,20 @@ $transition: 160ms ease;
 
   .navItem {
     justify-content: center;
+    align-items: center;
     gap: 0;
     padding: 11px 0;
     position: relative;
+
+    svg {
+      margin: 0;
+    }
   }
 
   .navLabel {
     width: 0;
+    min-width: 0;
+    flex: 0 0 0;
     opacity: 0;
   }
 
