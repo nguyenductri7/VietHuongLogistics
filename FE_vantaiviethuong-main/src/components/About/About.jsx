@@ -40,10 +40,10 @@ const THEMES = {
 
 // ─── Images ────────────────────────────────────────────────────────────────
 const IMAGES = {
-  intro:      'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=1200&q=85',
-  stats:      'https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?w=1200&q=85',
+  intro: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=1200&q=85',
+  stats: 'https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?w=1200&q=85',
   milestones: 'https://images.unsplash.com/photo-1494412651409-8963ce7935a7?w=1200&q=85',
-  values:     'https://images.unsplash.com/photo-1521737852567-6949f3f9f2b5?w=1200&q=85',
+  values: 'https://images.unsplash.com/photo-1521737852567-6949f3f9f2b5?w=1200&q=85',
 }
 
 // ─── Slides ────────────────────────────────────────────────────────────────
@@ -66,10 +66,10 @@ const SLIDES = [
     title: 'Hành Trình',
     titleAccent: 'Bằng Con Số',
     stats: [
-      { num: '15+', raw: 15,  suffix: '+', desc: 'Năm kinh nghiệm' },
-      { num: '63',  raw: 63,  suffix: '',  desc: 'Tỉnh thành phủ sóng' },
-      { num: '500+',raw: 500, suffix: '+', desc: 'Chuyến / ngày' },
-      { num: '99%', raw: 99,  suffix: '%', desc: 'Giao hàng đúng hẹn' },
+      { num: '15+', raw: 15, suffix: '+', desc: 'Năm kinh nghiệm' },
+      { num: '63', raw: 63, suffix: '', desc: 'Tỉnh thành phủ sóng' },
+      { num: '500+', raw: 500, suffix: '+', desc: 'Chuyến / ngày' },
+      { num: '99%', raw: 99, suffix: '%', desc: 'Giao hàng đúng hẹn' },
     ],
     image: IMAGES.stats,
   },
@@ -115,7 +115,7 @@ const SLIDES = [
 ]
 
 const INIT_ROT_Y = Math.PI * 1.5
-const END_ROT_Y  = Math.PI * 1.25 - (Math.PI * 2 / 3)
+const END_ROT_Y = Math.PI * 1.25 - (Math.PI * 2 / 3)
 const TRUCK_MODEL_URL = '/models/truck-optimized.glb'
 
 const DEFAULT_ABOUT_INTRO = {
@@ -158,8 +158,8 @@ function CameraSetup() {
 function Truck({ targetRef }) {
   const { scene } = useGLTF(TRUCK_MODEL_URL)
   const meshRef = useRef()
-  const cur     = useRef({ rotY: INIT_ROT_Y, posX: 0 })
-  const ready   = useRef(false)
+  const cur = useRef({ rotY: INIT_ROT_Y, posX: 0 })
+  const ready = useRef(false)
   const [offsetY, setOffsetY] = useState(0)
 
   useEffect(() => {
@@ -189,12 +189,12 @@ useGLTF.preload(TRUCK_MODEL_URL)
 
 // ─── Main ──────────────────────────────────────────────────────────────────
 export default function About() {
-  const sectionRef    = useRef(null)
+  const sectionRef = useRef(null)
   const canvasWrapRef = useRef(null)
-  const slideRefs     = useRef([])
-  const wipeRefs      = useRef([])
-  const bgRef         = useRef(null)
-  const mountedRef    = useRef(true)
+  const slideRefs = useRef([])
+  const wipeRefs = useRef([])
+  const bgRef = useRef(null)
+  const mountedRef = useRef(true)
   const counterTweens = useRef([])
   const invalidateRef = useRef(null)
   const [active, setActive] = useState(0)
@@ -210,7 +210,7 @@ export default function About() {
           ...(res.data?.about_intro || {}),
         })
       })
-      .catch(() => {})
+      .catch(() => { })
     return () => { cancelled = true }
   }, [])
 
@@ -231,7 +231,7 @@ export default function About() {
     })
   }, [aboutIntro])
 
-  const truckTarget   = useRef({ rotY: INIT_ROT_Y, posX: 0 })
+  const truckTarget = useRef({ rotY: INIT_ROT_Y, posX: 0 })
   const [renderQuality] = useState(() => {
     if (typeof window === 'undefined') return { antialias: true, dpr: 1 }
     const cpuCores = navigator.hardwareConcurrency || 8
@@ -248,10 +248,10 @@ export default function About() {
     const t = THEMES[themeName] || THEMES.red
     const root = sectionRef.current
     if (!root) return
-    root.style.setProperty('--accent',     t.accent)
+    root.style.setProperty('--accent', t.accent)
     root.style.setProperty('--accent-rgb', t.accentRgb)
-    root.style.setProperty('--ink',        t.ink)
-    root.style.setProperty('--ink-soft',   t.inkSoft)
+    root.style.setProperty('--ink', t.ink)
+    root.style.setProperty('--ink-soft', t.inkSoft)
     if (bgRef.current) bgRef.current.style.background = t.bgGrad
   }, [])
 
@@ -285,14 +285,14 @@ export default function About() {
     if (!section) return
     slideRefs.current.forEach((el, i) => {
       if (!el) return
-      el.style.position      = 'absolute'
-      el.style.top           = '0'
-      el.style.left          = '0'
-      el.style.width         = '100%'
-      el.style.height        = '100%'
-      el.style.opacity       = i === 0 ? '1' : '0'
+      el.style.position = 'absolute'
+      el.style.top = '0'
+      el.style.left = '0'
+      el.style.width = '100%'
+      el.style.height = '100%'
+      el.style.opacity = i === 0 ? '1' : '0'
       el.style.pointerEvents = i === 0 ? 'auto' : 'none'
-      el.style.transform     = 'none'
+      el.style.transform = 'none'
     })
     wipeRefs.current.forEach(el => {
       if (!el) return
@@ -303,8 +303,8 @@ export default function About() {
 
     let currentSlide = 0
     let pendingSlide = 0
-    let wipeTl       = null
-    let isAnimating  = false
+    let wipeTl = null
+    let isAnimating = false
 
     const goToSlide = (nextIdx) => {
       if (!mountedRef.current) return
@@ -322,42 +322,42 @@ export default function About() {
             y: 0,
           })
         })
-       wipeRefs.current.forEach(el => { if (el) gsap.set(el, { clipPath: 'inset(0 0 0 100%)' }) })
+        wipeRefs.current.forEach(el => { if (el) gsap.set(el, { clipPath: 'inset(0 0 0 100%)' }) })
       }
 
-      const outEl  = slideRefs.current[currentSlide]
-      const inEl   = slideRefs.current[nextIdx]
+      const outEl = slideRefs.current[currentSlide]
+      const inEl = slideRefs.current[nextIdx]
       const wipeEl = wipeRefs.current[nextIdx] ?? wipeRefs.current[0]
-      const dir    = nextIdx > currentSlide ? 1 : -1
+      const dir = nextIdx > currentSlide ? 1 : -1
       if (!inEl || !wipeEl) return
 
       const nt = THEMES[slides[nextIdx]?.theme] || THEMES.red
       wipeEl.style.background = nt.accent
       gsap.set(wipeEl, { clipPath: 'inset(0 100% 0 0)' })
 
-      isAnimating  = true
+      isAnimating = true
       currentSlide = nextIdx
 
-wipeTl = gsap.timeline({
-  onComplete: () => {
-    isAnimating = false; wipeTl = null
-    if (outEl) gsap.set(outEl, { opacity: 0, pointerEvents: 'none' })
-    // Reset wipeBar — xóa màu accent còn đọng lại
-    if (wipeEl) {
-      wipeEl.style.background = 'transparent'
-     gsap.set(wipeEl, { clipPath: 'inset(0 0 0 100%)' })
-    }
-  },
-})
-wipeTl
-  .call(() => {
-    if (!mountedRef.current) return
-    applyTheme(slides[nextIdx].theme)
-    gsap.set(inEl, { opacity: 0, pointerEvents: 'auto' })
-  })
-  .to(outEl, { opacity: 0, duration: 0.5, ease: 'power2.inOut' })
-  .to(inEl,  { opacity: 1, duration: 0.5, ease: 'power2.inOut' }, '-=0.25')
-if (nextIdx === 1) wipeTl.call(animateCounters, [], '+=0.1')
+      wipeTl = gsap.timeline({
+        onComplete: () => {
+          isAnimating = false; wipeTl = null
+          if (outEl) gsap.set(outEl, { opacity: 0, pointerEvents: 'none' })
+          // Reset wipeBar — xóa màu accent còn đọng lại
+          if (wipeEl) {
+            wipeEl.style.background = 'transparent'
+            gsap.set(wipeEl, { clipPath: 'inset(0 0 0 100%)' })
+          }
+        },
+      })
+      wipeTl
+        .call(() => {
+          if (!mountedRef.current) return
+          applyTheme(slides[nextIdx].theme)
+          gsap.set(inEl, { opacity: 0, pointerEvents: 'auto' })
+        })
+        .to(outEl, { opacity: 0, duration: 0.5, ease: 'power2.inOut' })
+        .to(inEl, { opacity: 1, duration: 0.5, ease: 'power2.inOut' }, '-=0.25')
+      if (nextIdx === 1) wipeTl.call(animateCounters, [], '+=0.1')
     }
 
     let lastIdx = 0
@@ -380,14 +380,14 @@ if (nextIdx === 1) wipeTl.call(animateCounters, [], '+=0.1')
             invalidateRef.current?.()
           }
         }
-        if (canvasWrapRef.current) 
+        if (canvasWrapRef.current)
           gsap.set(canvasWrapRef.current, { x: 0, opacity: 1 })
         if (p > 0.85) {
           const last = slideRefs.current[n - 1]
           if (last) gsap.set(last, { opacity: 1 })
         }
-  // ← THÊM LẠI dòng này
-  // ← THÊM LẠI dòng này
+        // ← THÊM LẠI dòng này
+        // ← THÊM LẠI dòng này
       },
     })
 
@@ -477,7 +477,7 @@ if (nextIdx === 1) wipeTl.call(animateCounters, [], '+=0.1')
                     {slide.label}
                   </p>
 
-           <h2 className={styles.title} style={{ color: t.ink }}>
+                  <h2 className={styles.title} style={{ color: t.ink }}>
                     {slide.title}
                     <br />
                     <span className={styles.titleAccentShimmer}>{slide.titleAccent}</span>
@@ -588,7 +588,7 @@ if (nextIdx === 1) wipeTl.call(animateCounters, [], '+=0.1')
               <InvalidateOnScroll invalidateRef={invalidateRef} />
               <CameraSetup />
               <ambientLight intensity={1.2} />
-              <directionalLight position={[5, 8, 5]}  intensity={2.2} />
+              <directionalLight position={[5, 8, 5]} intensity={2.2} />
               <directionalLight position={[-5, 4, -3]} intensity={0.8} />
               <Truck targetRef={truckTarget} />
               <ContactShadows

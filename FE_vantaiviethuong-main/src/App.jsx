@@ -7,6 +7,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { AuthProvider } from './context/AuthContext'
 import ProtectedRoute from './components/Admin/ProtectedRoute'
 import AdminLogin from './components/Admin/AdminLogin'
+import AdminLayout from './components/Admin/AdminLayout'
 import AdminDashboard from './components/Admin/AdminDashboard'
 import AdminBlogs from './components/Admin/AdminBlogs'
 import AdminAbout from './components/Admin/AdminAbout'
@@ -131,116 +132,28 @@ function PublicLayout() {
 function AppInner() {
   const location = useLocation()
   const isAdminArea = location.pathname.startsWith('/admin') || location.pathname === '/login'
+  const adminPage = (element) => (
+    <ProtectedRoute>
+      <AdminLayout>{element}</AdminLayout>
+    </ProtectedRoute>
+  )
 
   if (isAdminArea) {
     return (
       <Routes>
-        {/* Login — không cần bảo vệ, không bọc Navbar/Footer */}
         <Route path="/login" element={<AdminLogin />} />
-
-        {/* Dashboard — cần đăng nhập */}
-        <Route
-          path="/admin"
-          element={
-            <ProtectedRoute>
-              <AdminDashboard />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* Quản lý Blog */}
-        <Route
-          path="/admin/blogs"
-          element={
-            <ProtectedRoute>
-              <AdminBlogs />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* Quản lý trang Giới thiệu (About) */}
-        <Route
-          path="/admin/about"
-          element={
-            <ProtectedRoute>
-              <AdminAbout />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* Quản lý trang Dịch vụ */}
-        <Route
-          path="/admin/services"
-          element={
-            <ProtectedRoute>
-              <AdminServices />
-            </ProtectedRoute>
-          }
-        />
-    <Route
-  path="/admin/faq-content"
-  element={
-    <ProtectedRoute>
-      <AdminFaqContent />
-    </ProtectedRoute>
-  }
-/>
-
-        {/* Cài đặt website */}
-        <Route
-          path="/admin/home"
-          element={
-            <ProtectedRoute>
-              <AdminHome />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/admin/settings"
-          element={<Navigate to="/admin/home" replace />}
-        />
-<Route
-  path="/admin/faq"
-  element={
-    <ProtectedRoute>
-      <AdminFaq />
-    </ProtectedRoute>
-  }
-/>
-        <Route
-          path="/admin/contacts"
-          element={
-            <ProtectedRoute>
-              <AdminContacts />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin/branches"
-          element={
-            <ProtectedRoute>
-              <AdminBranches />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin/profile"
-          element={
-            <ProtectedRoute>
-              <AdminProfile />
-            </ProtectedRoute>
-          }
-        />
-        {/* Fallback admin */}
-        <Route
-          path="/admin/*"
-          element={
-            <ProtectedRoute>
-              <AdminDashboard />
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/admin" element={adminPage(<AdminDashboard />)} />
+        <Route path="/admin/home" element={adminPage(<AdminHome />)} />
+        <Route path="/admin/about" element={adminPage(<AdminAbout />)} />
+        <Route path="/admin/services" element={adminPage(<AdminServices />)} />
+        <Route path="/admin/faq" element={adminPage(<AdminFaq />)} />
+        <Route path="/admin/faq-content" element={adminPage(<AdminFaqContent />)} />
+        <Route path="/admin/blogs" element={adminPage(<AdminBlogs />)} />
+        <Route path="/admin/contacts" element={adminPage(<AdminContacts />)} />
+        <Route path="/admin/branches" element={adminPage(<AdminBranches />)} />
+        <Route path="/admin/profile" element={adminPage(<AdminProfile />)} />
+        <Route path="/admin/settings" element={<Navigate to="/admin/home" replace />} />
+        <Route path="/admin/*" element={adminPage(<AdminDashboard />)} />
       </Routes>
     )
   }
