@@ -20,10 +20,10 @@ $transition: 160ms ease;
   border-right: 1px solid $gray-200;
   display: flex;
   flex-direction: column;
-  position: sticky;
-  top: 0;
+  position: relative;
   height: 100vh;
   overflow-y: auto;
+  overflow-x: hidden;
   flex-shrink: 0;
   transition: width 220ms ease;
 }

@@ -1,6 +1,8 @@
 .shell {
   display: flex;
+  height: 100vh;
   min-height: 100vh;
+  overflow: hidden;
   background: #f4f6f9;
   font-family: 'Be Vietnam Pro', 'Inter', sans-serif;
 }
@@ -8,8 +10,12 @@
 .content {
   flex: 1;
   min-width: 0;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
   display: flex;
   flex-direction: column;
+  scroll-behavior: smooth;
 }
 
 .pageChrome {
@@ -79,6 +85,14 @@
 @media (max-width: 768px) {
   .shell {
     flex-direction: column;
+    height: auto;
+    min-height: 100vh;
+    overflow: visible;
+  }
+
+  .content {
+    height: auto;
+    overflow: visible;
   }
 
   .pageChrome {
