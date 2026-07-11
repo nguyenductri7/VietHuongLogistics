@@ -37,8 +37,6 @@ Trong quá trình phát triển, hệ thống đã được hoàn thiện theo h
 20. Trang chủ có hiện tượng chồng/lộ nội dung khi cuộn từ video đầu trang xuống phần xe và dịch vụ.
 21. Thanh menu khách hàng cần điều chỉnh hành vi khi cuộn.
 22. Một số liên kết card dịch vụ ở trang giới thiệu chưa điều hướng đúng.
-23. Gmail SMTP bị timeout trên Render Free do giới hạn cổng SMTP.
-24. Email thông báo chưa có giao diện chuyên nghiệp và chưa dùng logo công ty.
 
 ## 3. Các hạng mục đã thực hiện
 
@@ -188,16 +186,7 @@ Trong quá trình phát triển, hệ thống đã được hoàn thiện theo h
 - Rà soát và loại bỏ `window.confirm` trong Admin.
 - Mở rộng chiều ngang các trang quản lý nội dung lớn như giới thiệu, dịch vụ, FAQ.
 
-### 3.14. Sidebar Admin thu gọn/mở rộng
-
-- Bổ sung nút thu gọn/mở rộng sidebar.
-- Khi thu gọn, sidebar chỉ hiển thị icon.
-- Nội dung trang quản lý tự giãn rộng hơn khi sidebar thu gọn.
-- Lưu trạng thái thu gọn/mở rộng vào `localStorage`.
-- Thêm tooltip cho icon khi sidebar đang thu gọn.
-- Sửa lỗi icon bị lệch trái khi sidebar thu gọn, căn icon vào giữa.
-
-### 3.15. Trang hồ sơ Admin
+### 3.14. Trang hồ sơ Admin
 
 - Tạo trang hồ sơ Admin.
 - Cho phép cập nhật họ tên và email quản trị viên.
@@ -206,7 +195,7 @@ Trong quá trình phát triển, hệ thống đã được hoàn thiện theo h
 - Backend bổ sung API cập nhật profile.
 - Frontend cập nhật lại thông tin user sau khi lưu thành công.
 
-### 3.16. Cải thiện giao diện khách hàng
+### 3.15. Cải thiện giao diện khách hàng
 
 - Sửa logo footer hiển thị đúng.
 - Xoá logo phủ trên video giới thiệu ở trang chủ.
@@ -244,16 +233,10 @@ Trong quá trình phát triển, hệ thống đã được hoàn thiện theo h
 - Website có route “Văn phòng & Chi nhánh” rõ nghĩa hơn.
 - Các khu vực media quan trọng có thể upload từ Admin.
 - Admin có layout/sidebar/toast/modal xác nhận xoá thống nhất hơn.
-- Sidebar Admin có thể thu gọn để tăng không gian làm việc.
 - Thời gian đọc bài viết được tính từ dữ liệu thật thay vì hiển thị cứng.
 
 ## 5. Các kiểm tra đã thực hiện
-
-- Kiểm tra build frontend bằng `npm run build`.
-- Kiểm tra cú pháp backend bằng `node --check` cho các file đã chỉnh.
-- Kiểm tra route React trên Vercel/cPanel.
-- Kiểm tra health-check backend.
-- Kiểm tra kết nối database online.
+- Kiểm tra route React trên cPanel.
 - Kiểm tra đăng nhập Admin và xác thực JWT.
 - Kiểm tra gửi form liên hệ và lưu vào database.
 - Kiểm tra danh sách liên hệ trong Admin và polling tự cập nhật.
