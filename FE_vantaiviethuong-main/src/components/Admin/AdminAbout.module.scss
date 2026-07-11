@@ -1,9 +1,15 @@
 // src/components/Admin/AdminAbout.module.scss
 
 .page {
-  padding: 32px;
-  max-width: 980px;
+  padding: 28px 36px 48px;
+  width: 100%;
+  max-width: 1440px;
   margin: 0 auto;
+  box-sizing: border-box;
+
+  @media (max-width: 768px) {
+    padding: 20px 16px 36px;
+  }
 }
 
 .pageTitle {

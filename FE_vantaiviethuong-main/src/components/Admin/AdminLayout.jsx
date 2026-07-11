@@ -1,6 +1,8 @@
+import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { ChevronRight, LayoutDashboard } from 'lucide-react'
 import AdminSidebar from './AdminSidebar'
+import { AdminToastProvider } from './AdminToast'
 import styles from './AdminLayout.module.scss'
 
 const PAGE_META = {
@@ -24,30 +26,42 @@ export default function AdminLayout({ children }) {
   const location = useLocation()
   const meta = getMeta(location.pathname)
   const isDashboard = location.pathname === '/admin'
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => (
+    window.localStorage.getItem('vh_admin_sidebar_collapsed') === '1'
+  ))
+
+  useEffect(() => {
+    window.localStorage.setItem('vh_admin_sidebar_collapsed', sidebarCollapsed ? '1' : '0')
+  }, [sidebarCollapsed])
 
   return (
-    <div className={styles.shell}>
-      <AdminSidebar />
-      <main className={styles.content}>
-        <div className={styles.pageChrome}>
-          <div>
-            <nav className={styles.breadcrumb} aria-label="Breadcrumb">
-              <Link to="/admin">Admin</Link>
-              <ChevronRight size={14} />
-              <span>{meta.crumb}</span>
-            </nav>
-            <h1>{meta.title}</h1>
-          </div>
+    <AdminToastProvider>
+      <div className={styles.shell}>
+        <AdminSidebar
+          collapsed={sidebarCollapsed}
+          onToggleCollapse={() => setSidebarCollapsed(value => !value)}
+        />
+        <main className={styles.content}>
+          <div className={styles.pageChrome}>
+            <div>
+              <nav className={styles.breadcrumb} aria-label="Breadcrumb">
+                <Link to="/admin">Admin</Link>
+                <ChevronRight size={14} />
+                <span>{meta.crumb}</span>
+              </nav>
+              <h1>{meta.title}</h1>
+            </div>
 
-          {!isDashboard && (
-            <Link className={styles.dashboardLink} to="/admin">
-              <LayoutDashboard size={15} />
-              Về dashboard
-            </Link>
-          )}
-        </div>
-        {children}
-      </main>
-    </div>
+            {!isDashboard && (
+              <Link className={styles.dashboardLink} to="/admin">
+                <LayoutDashboard size={15} />
+                Về dashboard
+              </Link>
+            )}
+          </div>
+          {children}
+        </main>
+      </div>
+    </AdminToastProvider>
   )
 }

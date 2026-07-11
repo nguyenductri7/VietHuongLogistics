@@ -9,6 +9,7 @@ import {
 import { faqApi } from '../../services/api'
 import { useAuth } from '../../context/AuthContext'
 import styles from './AdminFaq.module.scss'
+import { useAdminToast } from './AdminToast'
 
 const STATUS = {
   pending:    { label: 'Chờ xử lý',   color: '#f59e0b' },
@@ -17,6 +18,7 @@ const STATUS = {
 }
 
 export default function AdminFaq() {
+  const { showToast } = useAdminToast()
   const { logout } = useAuth()
   const navigate   = useNavigate()
 
@@ -27,7 +29,6 @@ export default function AdminFaq() {
   const [expandedId, setExpandedId]     = useState(null)
   const [deleting, setDeleting]         = useState(null)
   const [updating, setUpdating]         = useState(null)
-  const [toast, setToast]               = useState(null)
 
   // ── Fetch ─────────────────────────────────────────────────────
   const fetchData = async () => {
@@ -53,10 +54,6 @@ export default function AdminFaq() {
   }, [search])
 
   // ── Toast ──────────────────────────────────────────────────────
-  const showToast = (msg, type = 'success') => {
-    setToast({ msg, type })
-    setTimeout(() => setToast(null), 3000)
-  }
 
   // ── Change status ──────────────────────────────────────────────
   const changeStatus = async (id, status) => {
@@ -119,16 +116,10 @@ export default function AdminFaq() {
     <div className={styles.page}>
 
       {/* Toast */}
-      {toast && (
-        <div className={`${styles.toast} ${styles[toast.type]}`}>{toast.msg}</div>
-      )}
 
       {/* Header */}
       <div className={styles.header}>
         <div>
-          <button className={styles.backBtn} onClick={() => navigate('/admin')}>
-            <ArrowLeft size={14} /> Quay lại
-          </button>
           <h1 className={styles.title}>
             <HelpCircle size={20} /> Thắc mắc khách hàng
           </h1>

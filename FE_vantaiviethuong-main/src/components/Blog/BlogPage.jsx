@@ -6,6 +6,7 @@ import { Helmet } from 'react-helmet-async'
 import { blogApi, resolveApiMediaUrl } from '../../services/api'
 import { FALLBACK_BLOG_POSTS, getFallbackPosts } from './blogFallback'
 import { ALL_BLOG_CATEGORIES, DEFAULT_BLOG_CATEGORIES } from './blogCategories'
+import { readTimeFromPost } from './blogReadTime'
 import styles from './BlogPage.module.scss'
 
 gsap.registerPlugin(ScrollTrigger)
@@ -70,7 +71,7 @@ function PostCard({ post }) {
           <span className={styles.dot}>·</span>
           <time>{formatDate(post.published_at || post.created_at)}</time>
           <span className={styles.dot}>·</span>
-          <span>{readTimeFromContent(post.content)}</span>
+          <span>{readTimeFromPost(post)}</span>
         </div>
         <h3 className={styles.cardTitle}>{post.title}</h3>
         <p className={styles.excerpt}>{post.excerpt}</p>

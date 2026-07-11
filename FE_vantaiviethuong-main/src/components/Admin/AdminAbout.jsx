@@ -5,19 +5,22 @@ import axios from 'axios'
 import { ArrowLeft, Plus, Trash2 } from 'lucide-react'
 import { normalizeAbout } from '../About/Aboutdetailpage'
 import styles from './AdminAbout.module.scss'
+import { useAdminToast } from './AdminToast'
+import AdminConfirmDialog from './AdminConfirmDialog'
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
 
 const ICON_OPTIONS = ['Truck', 'Plane', 'ShoppingBag', 'Warehouse', 'LineChart', 'Eye', 'Target', 'Shield']
 
 export default function AdminAbout() {
+  const { showToast } = useAdminToast()
   const navigate = useNavigate()
 
   const [data, setData] = useState(() => normalizeAbout())
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState({})
-  const [message, setMessage] = useState(null)
   const [uploadingKey, setUploadingKey] = useState(null)
+  const [deleteTarget, setDeleteTarget] = useState(null)
 
   const token = localStorage.getItem('vh_token')
   const authHeaders = { headers: { Authorization: `Bearer ${token}` } }
@@ -27,16 +30,10 @@ export default function AdminAbout() {
       .then(res => setData(normalizeAbout(res.data?.data)))
       .catch((err) => {
         setData(normalizeAbout())
-        setMessage({ type: 'error', text: err.response?.data?.message || 'Không thể tải nội dung trang Giới thiệu.' })
+        showToast(err.response?.data?.message || 'Không thể tải nội dung trang Giới thiệu.', 'error')
       })
       .finally(() => setLoading(false))
   }, [])
-
-  const showMessage = (type, text) => {
-    setMessage({ type, text })
-    setTimeout(() => setMessage(null), 3500)
-  }
-
   const updateField = useCallback((path, value) => {
     setData(prev => {
       const next = structuredClone(prev)
@@ -58,20 +55,26 @@ export default function AdminAbout() {
   }, [])
 
   const removeListItem = useCallback((sectionKey, index) => {
-    if (!window.confirm('Xóa mục này?')) return
+    setDeleteTarget({ sectionKey, index })
+  }, [])
+
+  const confirmRemoveListItem = useCallback(() => {
+    if (!deleteTarget) return
     setData(prev => ({
       ...prev,
-      [sectionKey]: (prev[sectionKey] || []).filter((_, i) => i !== index),
+      [deleteTarget.sectionKey]: (prev[deleteTarget.sectionKey] || []).filter((_, i) => i !== deleteTarget.index),
     }))
-  }, [])
+    setDeleteTarget(null)
+    showToast('Đã xóa mục. Bấm lưu để cập nhật lên website.', 'success')
+  }, [deleteTarget, showToast])
 
   const saveSection = async (sectionKey) => {
     setSaving(prev => ({ ...prev, [sectionKey]: true }))
     try {
       await axios.put(`${API_BASE}/about`, { [sectionKey]: data[sectionKey] }, authHeaders)
-      showMessage('success', 'Đã lưu thay đổi!')
+      showToast('Đã lưu thay đổi!', 'success')
     } catch (err) {
-      showMessage('error', err.response?.data?.message || 'Lưu thất bại.')
+      showToast(err.response?.data?.message || 'Lưu thất bại.', 'error')
     } finally {
       setSaving(prev => ({ ...prev, [sectionKey]: false }))
     }
@@ -87,9 +90,9 @@ export default function AdminAbout() {
         headers: { ...authHeaders.headers, 'Content-Type': 'multipart/form-data' },
       })
       updateField(path, res.data.url)
-      showMessage('success', 'Upload ảnh thành công!')
+      showToast('Upload ảnh thành công!', 'success')
     } catch (err) {
-      showMessage('error', err.response?.data?.message || 'Upload ảnh thất bại.')
+      showToast(err.response?.data?.message || 'Upload ảnh thất bại.', 'error')
     } finally {
       setUploadingKey(null)
     }
@@ -103,16 +106,10 @@ export default function AdminAbout() {
       {/* ── Header ── */}
       <div className={styles.header}>
         <div>
-          <button className={styles.backBtn} onClick={() => navigate('/admin')}>
-            <ArrowLeft size={14} /> Quay lại
-          </button>
           <h1 className={styles.pageTitle}>Quản Lý Trang Giới Thiệu</h1>
         </div>
       </div>
 
-      {message && (
-        <div className={`${styles.toast} ${styles[message.type]}`}>{message.text}</div>
-      )}
 
       {/* ══════════ HERO ══════════ */}
       <Section title="Banner Hero" onSave={() => saveSection('hero')} saving={saving.hero}>
@@ -265,6 +262,15 @@ export default function AdminAbout() {
           </div>
         ))}
       </Section>
+
+      <AdminConfirmDialog
+        open={!!deleteTarget}
+        title="Xóa mục này?"
+        message="Mục này sẽ bị xóa khỏi nội dung trang Giới thiệu. Bạn cần bấm lưu section để ghi lại thay đổi."
+        target={deleteTarget ? `${deleteTarget.sectionKey} #${deleteTarget.index + 1}` : ''}
+        onCancel={() => setDeleteTarget(null)}
+        onConfirm={confirmRemoveListItem}
+      />
     </div>
   )
 }

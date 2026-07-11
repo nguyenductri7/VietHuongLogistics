@@ -8,6 +8,7 @@ import {
   Phone, BarChart2, Camera, Loader2
 } from 'lucide-react'
 import styles from './AdminSettings.module.scss'
+import { useAdminToast } from './AdminToast'
 
 const SECTIONS = [
   {
@@ -65,6 +66,7 @@ const SECTIONS = [
 ]
 
 export default function AdminSettings() {
+  const { showToast } = useAdminToast()
   const { logout } = useAuth()
   const navigate   = useNavigate()
 
@@ -73,7 +75,6 @@ export default function AdminSettings() {
   const [saving, setSaving]       = useState(false)
   const [uploading, setUploading] = useState({})
   const [activeTab, setActiveTab] = useState('hero')
-  const [toast, setToast]         = useState(null)
   const [previews, setPreviews]   = useState({})
   const fileRefs = useRef({})
 
@@ -87,10 +88,6 @@ export default function AdminSettings() {
       .finally(() => setLoading(false))
   }, [])
 
-  const showToast = (msg, type = 'success') => {
-    setToast({ msg, type })
-    setTimeout(() => setToast(null), 3000)
-  }
 
   const handleChange = (key, value) => setSettings(prev => ({ ...prev, [key]: value }))
 
@@ -132,15 +129,9 @@ export default function AdminSettings() {
 
   return (
     <div className={styles.page}>
-      {toast && (
-        <div className={`${styles.toast} ${styles[toast.type]}`}>{toast.msg}</div>
-      )}
 
       <div className={styles.header}>
         <div>
-          <button className={styles.backBtn} onClick={() => navigate('/admin')}>
-            <ArrowLeft size={14} /> Quay lại
-          </button>
           <h1 className={styles.title}>Cài đặt Website</h1>
         </div>
         <button className={styles.saveBtn} onClick={handleSave} disabled={saving}>

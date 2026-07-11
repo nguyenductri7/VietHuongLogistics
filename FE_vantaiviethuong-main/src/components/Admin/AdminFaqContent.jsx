@@ -9,6 +9,7 @@ import {
 import { faqContentApi } from '../../services/api'
 import { useAuth } from '../../context/AuthContext'
 import styles from './AdminFaqContent.module.scss'
+import { useAdminToast } from './AdminToast'
 
 // ─── Modal chỉnh sửa danh mục ─────────────────────────────────────────────────
 function CategoryModal({ cat, onSave, onClose }) {
@@ -194,15 +195,8 @@ export default function AdminFaqContent() {
   const [catModal, setCatModal]   = useState(null)   // null | 'new' | cat-object
   const [itemModal, setItemModal] = useState(null)   // null | { catId, item? }
   const [delConfirm, setDelConfirm] = useState(null) // { type:'cat'|'item', id, name }
-
-  const [toast, setToast] = useState(null)
-
-  const showToast = (msg, type = 'success') => {
-    setToast({ msg, type })
-    setTimeout(() => setToast(null), 3000)
-  }
-
-  // ── Load categories ──────────────────────────────────────────
+  const { showToast } = useAdminToast()
+// ── Load categories ──────────────────────────────────────────
   const fetchCategories = async () => {
     setLoading(true)
     try {
@@ -289,16 +283,10 @@ export default function AdminFaqContent() {
     <div className={styles.page}>
 
       {/* Toast */}
-      {toast && (
-        <div className={`${styles.toast} ${styles[toast.type]}`}>{toast.msg}</div>
-      )}
 
       {/* Header */}
       <div className={styles.header}>
         <div className={styles.headerLeft}>
-          <button className={styles.backBtn} onClick={() => navigate('/admin')}>
-            <ArrowLeft size={14} /> Quay lại
-          </button>
           <h1 className={styles.title}>
             <FolderOpen size={20} /> Nội dung FAQ
           </h1>

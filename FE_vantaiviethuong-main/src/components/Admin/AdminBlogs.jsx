@@ -10,11 +10,13 @@ import { useAuth } from '../../context/AuthContext'
 import RichTextEditor from './Richtexteditor'
 import { DEFAULT_BLOG_CATEGORIES, DEFAULT_BLOG_CATEGORY } from '../Blog/blogCategories'
 import styles from './AdminBlogs.module.scss'
+import { useAdminToast } from './AdminToast'
 
 const STATUS_LABEL = { draft: 'Nháp', published: 'Đã đăng', archived: 'Lưu trữ' }
 const STATUS_COLOR = { draft: '#8899aa', published: '#52c97a', archived: '#e8a020' }
 
 export default function AdminBlogs() {
+  const { showToast } = useAdminToast()
   const { logout } = useAuth()
   const navigate   = useNavigate()
 
@@ -32,7 +34,6 @@ export default function AdminBlogs() {
   const [deleting, setDeleting] = useState(null)
   const [saving, setSaving]     = useState(false)
   const [loadingEdit, setLoadingEdit] = useState(null)
-  const [toast, setToast]       = useState(null)
 
   // Form state
   const [form, setForm] = useState({
@@ -75,10 +76,6 @@ export default function AdminBlogs() {
   }, [search])
 
   // ── Toast ───────────────────────────────────────────────────
-  const showToast = (msg, type = 'success') => {
-    setToast({ msg, type })
-    setTimeout(() => setToast(null), 3000)
-  }
 
   // ── Mở trang tạo / sửa ─────────────────────────────────────
   const openCreate = () => {
@@ -174,9 +171,6 @@ export default function AdminBlogs() {
   if (view === 'form') {
     return (
       <div className={styles.page}>
-        {toast && (
-          <div className={`${styles.toast} ${styles[toast.type]}`}>{toast.msg}</div>
-        )}
 
         <div className={styles.header}>
           <div>
@@ -317,16 +311,10 @@ export default function AdminBlogs() {
   return (
     <div className={styles.page}>
       {/* Toast */}
-      {toast && (
-        <div className={`${styles.toast} ${styles[toast.type]}`}>{toast.msg}</div>
-      )}
 
       {/* Header */}
       <div className={styles.header}>
         <div>
-          <button className={styles.backBtn} onClick={() => navigate('/admin')}>
-            <ArrowLeft size={14} /> Quay lại
-          </button>
           <h1 className={styles.title}><Newspaper size={20} /> Quản lý Tin tức</h1>
         </div>
         <button className={styles.addBtn} onClick={openCreate}>

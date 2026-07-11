@@ -1,0 +1,147 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10020;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(15, 23, 42, .46);
+  backdrop-filter: blur(3px);
+}
+
+.modal {
+  position: relative;
+  width: min(420px, 100%);
+  padding: 34px 30px 28px;
+  border-radius: 20px;
+  background: #fff;
+  text-align: center;
+  box-shadow: 0 24px 80px rgba(15, 23, 42, .26);
+  animation: popIn .18s ease both;
+
+  h3 {
+    margin: 14px 0 8px;
+    color: #0f172a;
+    font-size: 19px;
+    font-weight: 850;
+    letter-spacing: -.02em;
+  }
+
+  p {
+    margin: 0 0 24px;
+    color: #64748b;
+    font-size: 14px;
+    line-height: 1.65;
+
+    strong {
+      color: #0f172a;
+    }
+  }
+}
+
+.closeBtn {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 10px;
+  background: #f8fafc;
+  color: #94a3b8;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background: #f1f5f9;
+    color: #334155;
+  }
+
+  &:disabled {
+    opacity: .55;
+    cursor: not-allowed;
+  }
+}
+
+.iconWrap {
+  width: 62px;
+  height: 62px;
+  margin: 0 auto;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.cancelBtn,
+.confirmBtn {
+  min-height: 42px;
+  padding: 0 18px;
+  border-radius: 11px;
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 800;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: .65;
+    cursor: not-allowed;
+  }
+}
+
+.cancelBtn {
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  color: #64748b;
+
+  &:hover:not(:disabled) {
+    background: #f8fafc;
+    color: #334155;
+  }
+}
+
+.confirmBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 0;
+  background: #dc2626;
+  color: #fff;
+  box-shadow: 0 12px 26px rgba(220, 38, 38, .18);
+
+  &:hover:not(:disabled) {
+    background: #b91c1c;
+  }
+}
+
+.spin {
+  animation: spin .75s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes popIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}

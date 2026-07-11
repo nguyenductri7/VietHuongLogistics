@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import {
   Building2, FileText, HelpCircle, Home, Info, LayoutDashboard,
-  LogOut, Newspaper, Phone, Truck,
+  LogOut, Newspaper, PanelLeftClose, PanelLeftOpen, Phone, Truck,
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { contactApi } from '../../services/api'
@@ -21,7 +21,7 @@ const navItems = [
   { icon: Phone, label: 'Liên hệ', to: '/admin/contacts' },
 ]
 
-export default function AdminSidebar() {
+export default function AdminSidebar({ collapsed = false, onToggleCollapse }) {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
@@ -60,10 +60,19 @@ export default function AdminSidebar() {
   )
 
   return (
-    <aside className={styles.sidebar}>
+    <aside className={`${styles.sidebar} ${collapsed ? styles.collapsed : ''}`}>
       <div className={styles.sidebarLogo}>
         <img src={logo} alt="Việt Hương Logistics" />
         <span>Admin Panel</span>
+        <button
+          type="button"
+          className={styles.collapseBtn}
+          onClick={onToggleCollapse}
+          aria-label={collapsed ? 'Mở rộng sidebar' : 'Thu gọn sidebar'}
+          title={collapsed ? 'Mở rộng sidebar' : 'Thu gọn sidebar'}
+        >
+          {collapsed ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}
+        </button>
       </div>
 
       <nav className={styles.sideNav}>
@@ -74,6 +83,7 @@ export default function AdminSidebar() {
               key={item.to}
               className={`${styles.navItem} ${isActive(item.to) ? styles.active : ''}`}
               onClick={() => navigate(item.to)}
+              title={collapsed ? item.label : undefined}
             >
               <Icon size={16} strokeWidth={1.8} />
               <span className={styles.navLabel}>{item.label}</span>
@@ -88,12 +98,12 @@ export default function AdminSidebar() {
       <div className={styles.sideFooter}>
         <button className={styles.userInfo} onClick={() => navigate('/admin/profile')}>
           <div className={styles.avatar}>{user?.full_name?.[0] || user?.username?.[0] || 'A'}</div>
-          <div>
+          <div className={styles.userText}>
             <div className={styles.userName}>{user?.full_name || user?.username}</div>
             <div className={styles.userRole}>{user?.role || 'Admin'}</div>
           </div>
         </button>
-        <button className={styles.logoutBtn} onClick={handleLogout}>
+        <button className={styles.logoutBtn} onClick={handleLogout} title={collapsed ? 'Đăng xuất' : undefined}>
           <LogOut size={15} strokeWidth={1.8} />
           Đăng xuất
         </button>

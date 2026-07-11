@@ -11,9 +11,6 @@ router.get('/', getBlogs);
 // Phải đặt trước '/:slugOrId' để "categories" không bị hiểu là slug bài viết.
 router.get('/categories', getBlogCategories);
 
-// GET /api/blogs/:slugOrId
-router.get('/:slugOrId', getBlog);
-
 // ========== ADMIN ROUTES ==========
 // GET /api/admin/blogs (với filter đầy đủ)
 router.get('/admin/list', authMiddleware, (req, res, next) => {
@@ -36,5 +33,9 @@ router.put('/admin/:id', authMiddleware, uploadBlog.single('thumbnail'), updateB
 
 // DELETE /api/admin/blogs/:id
 router.delete('/admin/:id', authMiddleware, deleteBlog);
+
+// GET /api/blogs/:slugOrId
+// Đặt sau các route /admin/* và /categories để không bắt nhầm route tĩnh thành slug.
+router.get('/:slugOrId', getBlog);
 
 module.exports = router;

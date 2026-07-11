@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import {
-  ArrowLeft, Building2, Edit3, Loader2, MapPin, Plus, RefreshCw,
+  Building2, Edit3, Loader2, MapPin, Plus, RefreshCw,
   Save, Trash2, X,
 } from 'lucide-react'
 import { branchApi } from '../../services/api'
 import styles from './AdminBranches.module.scss'
+import { useAdminToast } from './AdminToast'
+import AdminConfirmDialog from './AdminConfirmDialog'
 
 const EMPTY_FORM = {
   name: '',
@@ -21,19 +22,14 @@ const EMPTY_FORM = {
 }
 
 export default function AdminBranches() {
-  const navigate = useNavigate()
   const [branches, setBranches] = useState([])
   const [form, setForm] = useState(EMPTY_FORM)
   const [editingId, setEditingId] = useState(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [deletingId, setDeletingId] = useState(null)
-  const [toast, setToast] = useState(null)
-
-  const showToast = (msg, type = 'success') => {
-    setToast({ msg, type })
-    window.setTimeout(() => setToast(null), 3000)
-  }
+  const [deleteTarget, setDeleteTarget] = useState(null)
+  const { showToast } = useAdminToast()
 
   const fetchBranches = async () => {
     setLoading(true)
@@ -111,12 +107,13 @@ export default function AdminBranches() {
     }
   }
 
-  const deleteBranch = async (branch) => {
-    if (!window.confirm(`Xóa "${branch.name}" khỏi danh sách chi nhánh?`)) return
-
+  const deleteBranch = async () => {
+    if (!deleteTarget) return
+    const branch = deleteTarget
     setDeletingId(branch.id)
     try {
       await branchApi.delete(branch.id)
+      setDeleteTarget(null)
       showToast('Đã xóa chi nhánh.')
       if (editingId === branch.id) resetForm()
       await fetchBranches()
@@ -129,13 +126,9 @@ export default function AdminBranches() {
 
   return (
     <div className={styles.page}>
-      {toast && <div className={`${styles.toast} ${styles[toast.type]}`}>{toast.msg}</div>}
 
       <div className={styles.header}>
         <div>
-          <button className={styles.backBtn} onClick={() => navigate('/admin')}>
-            <ArrowLeft size={14} /> Quay lại
-          </button>
           <h1 className={styles.title}>
             <Building2 size={22} /> Văn phòng & Chi nhánh
           </h1>
@@ -253,7 +246,7 @@ export default function AdminBranches() {
                   </button>
                   <button
                     className={styles.deleteBtn}
-                    onClick={() => deleteBranch(branch)}
+                    onClick={() => setDeleteTarget(branch)}
                     disabled={deletingId === branch.id}
                   >
                     {deletingId === branch.id ? <Loader2 size={14} className={styles.spinIcon} /> : <Trash2 size={14} />}
@@ -265,6 +258,15 @@ export default function AdminBranches() {
           </div>
         )}
       </div>
+      <AdminConfirmDialog
+        open={!!deleteTarget}
+        title="Xóa chi nhánh?"
+        message="Chi nhánh này sẽ bị xóa khỏi trang khách hàng."
+        target={deleteTarget?.name}
+        busy={!!deleteTarget && deletingId === deleteTarget.id}
+        onCancel={() => setDeleteTarget(null)}
+        onConfirm={deleteBranch}
+      />
     </div>
   )
 }

@@ -20,6 +20,26 @@ function createSlug(title) {
     + '-' + Date.now();
 }
 
+function stripHtml(value = '') {
+  return String(value)
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;|&#160;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+}
+
+function getReadingTimeText(...parts) {
+  const text = parts.map(stripHtml).join(' ').trim()
+  const words = text.split(/\s+/).filter(Boolean).length
+  const minutes = Math.max(1, Math.ceil(words / 200))
+  return `${minutes} phút đọc`
+}
+
 const getBlogs = async (req, res) => {
   try {
     const {
@@ -65,14 +85,19 @@ if (!req.user) {
     );
     const total = countResult[0].total;
 
-    const [blogs] = await pool.query(
-      `SELECT id, title, slug, excerpt, thumbnail_url, category, tags, author, 
+    const [rows] = await pool.query(
+      `SELECT id, title, slug, excerpt, content, thumbnail_url, category, tags, author, 
               status, view_count, is_featured, published_at, created_at
        FROM blogs ${whereClause}
        ORDER BY published_at DESC, created_at DESC
        LIMIT ? OFFSET ?`,
       [...params, parseInt(limit), offset]
     );
+
+    const blogs = rows.map(({ content, ...blog }) => ({
+      ...blog,
+      reading_time: getReadingTimeText(content, blog.excerpt, blog.title),
+    }));
 
     res.json({
       success: true,
@@ -110,7 +135,13 @@ const getBlog = async (req, res) => {
       await pool.query('UPDATE blogs SET view_count = view_count + 1 WHERE id = ?', [rows[0].id]);
     }
 
-    res.json({ success: true, data: rows[0] });
+    res.json({
+      success: true,
+      data: {
+        ...rows[0],
+        reading_time: getReadingTimeText(rows[0].content, rows[0].excerpt, rows[0].title),
+      },
+    });
   } catch (err) {
     console.error('getBlog error:', err);
     res.status(500).json({ success: false, message: 'Lỗi server.' });

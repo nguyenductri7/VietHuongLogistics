@@ -11,6 +11,8 @@ import {
 import { CSS } from '@dnd-kit/utilities'
 import { GripVertical, Plus, Trash2, Eye, EyeOff, X, ArrowLeft } from 'lucide-react'
 import styles from './Adminservices.module.scss'
+import { useAdminToast } from './AdminToast'
+import AdminConfirmDialog from './AdminConfirmDialog'
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
 
@@ -95,29 +97,25 @@ function normalizeServiceItems(items) {
 }
 
 export default function AdminServices() {
+  const { showToast } = useAdminToast()
   const navigate = useNavigate()
 
   const [page, setPage] = useState(null)
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState({})
-  const [message, setMessage] = useState(null)
   const [uploadingKey, setUploadingKey] = useState(null)
   const [showForm, setShowForm] = useState(false)
   const [editingItem, setEditingItem] = useState(null)
   const [formData, setFormData] = useState(EMPTY_ITEM)
   const [tagInput, setTagInput] = useState('')
   const [seeding, setSeeding] = useState(false)
+  const [deleteTarget, setDeleteTarget] = useState(null)
+  const [deletingId, setDeletingId] = useState(null)
 
   const token = localStorage.getItem('vh_token')
   const authHeaders = { headers: { Authorization: `Bearer ${token}` } }
-
-  const showMessage = (type, text) => {
-    setMessage({ type, text })
-    setTimeout(() => setMessage(null), 3500)
-  }
-
-  const loadAll = useCallback(() => {
+const loadAll = useCallback(() => {
     setLoading(true)
     Promise.all([
       axios.get(`${API_BASE}/services-page`),
@@ -130,7 +128,7 @@ export default function AdminServices() {
       .catch((err) => {
         setPage(normalizePage())
         setItems([])
-        showMessage('error', err.response?.data?.message || 'Không thể tải dữ liệu trang Dịch vụ.')
+        showToast(err.response?.data?.message || 'Không thể tải dữ liệu trang Dịch vụ.', 'error')
       })
       .finally(() => setLoading(false))
   }, [])
@@ -152,9 +150,9 @@ export default function AdminServices() {
     setSaving(prev => ({ ...prev, [sectionKey]: true }))
     try {
       await axios.put(`${API_BASE}/services-page`, { [sectionKey]: page[sectionKey] }, authHeaders)
-      showMessage('success', 'Đã lưu thay đổi!')
+      showToast('Đã lưu thay đổi!', 'success')
     } catch (err) {
-      showMessage('error', err.response?.data?.message || 'Lưu thất bại.')
+      showToast(err.response?.data?.message || 'Lưu thất bại.', 'error')
     } finally {
       setSaving(prev => ({ ...prev, [sectionKey]: false }))
     }
@@ -170,9 +168,9 @@ export default function AdminServices() {
         headers: { ...authHeaders.headers, 'Content-Type': 'multipart/form-data' },
       })
       onDone(res.data.url)
-      showMessage('success', 'Upload ảnh thành công!')
+      showToast('Upload ảnh thành công!', 'success')
     } catch (err) {
-      showMessage('error', err.response?.data?.message || 'Upload ảnh thất bại.')
+      showToast(err.response?.data?.message || 'Upload ảnh thất bại.', 'error')
     } finally {
       setUploadingKey(null)
     }
@@ -189,10 +187,10 @@ export default function AdminServices() {
     setSeeding(true)
     try {
       const res = await axios.post(`${API_BASE}/services-page/items/seed`, {}, authHeaders)
-      showMessage('success', res.data?.message || 'Đã khởi tạo các dịch vụ mặc định.')
+      showToast(res.data?.message || 'Đã khởi tạo các dịch vụ mặc định.', 'success')
       loadAll()
     } catch (err) {
-      showMessage('error', err.response?.data?.message || 'Không thể khởi tạo dịch vụ mặc định.')
+      showToast(err.response?.data?.message || 'Không thể khởi tạo dịch vụ mặc định.', 'error')
     } finally {
       setSeeding(false)
     }
@@ -219,32 +217,36 @@ export default function AdminServices() {
   const submitForm = async (e) => {
     e.preventDefault()
     if (!formData.title.trim() || !formData.subtitle.trim() || !formData.description.trim() || !formData.image.trim()) {
-      showMessage('error', 'Vui lòng nhập đầy đủ thông tin bắt buộc.')
+      showToast('Vui lòng nhập đầy đủ thông tin bắt buộc.', 'error')
       return
     }
     try {
       if (editingItem) {
         await axios.put(`${API_BASE}/services-page/items/${editingItem.id}`, formData, authHeaders)
-        showMessage('success', 'Đã cập nhật dịch vụ!')
+        showToast('Đã cập nhật dịch vụ!', 'success')
       } else {
         await axios.post(`${API_BASE}/services-page/items`, formData, authHeaders)
-        showMessage('success', 'Đã thêm dịch vụ mới!')
+        showToast('Đã thêm dịch vụ mới!', 'success')
       }
       setShowForm(false)
       loadAll()
     } catch (err) {
-      showMessage('error', err.response?.data?.message || 'Lưu thất bại.')
+      showToast(err.response?.data?.message || 'Lưu thất bại.', 'error')
     }
   }
 
-  const deleteItem = async (item) => {
-    if (!window.confirm(`Xóa dịch vụ "${item.title}"? Hành động này không thể hoàn tác.`)) return
+  const deleteItem = async () => {
+    if (!deleteTarget) return
+    setDeletingId(deleteTarget.id)
     try {
-      await axios.delete(`${API_BASE}/services-page/items/${item.id}`, authHeaders)
-      showMessage('success', 'Đã xóa dịch vụ.')
-      setItems(prev => prev.filter(i => i.id !== item.id))
+      await axios.delete(`${API_BASE}/services-page/items/${deleteTarget.id}`, authHeaders)
+      showToast('Đã xóa dịch vụ.', 'success')
+      setItems(prev => prev.filter(i => i.id !== deleteTarget.id))
+      setDeleteTarget(null)
     } catch (err) {
-      showMessage('error', err.response?.data?.message || 'Xóa thất bại.')
+      showToast(err.response?.data?.message || 'Xóa thất bại.', 'error')
+    } finally {
+      setDeletingId(null)
     }
   }
 
@@ -254,7 +256,7 @@ export default function AdminServices() {
       await axios.put(`${API_BASE}/services-page/items/${item.id}`, { ...item, is_active: next }, authHeaders)
       setItems(prev => prev.map(i => i.id === item.id ? { ...i, is_active: next } : i))
     } catch (err) {
-      showMessage('error', 'Không thể đổi trạng thái hiển thị.')
+      showToast('Không thể đổi trạng thái hiển thị.', 'error')
     }
   }
 
@@ -270,7 +272,7 @@ export default function AdminServices() {
     try {
       await axios.put(`${API_BASE}/services-page/items/reorder`, { order: reordered.map(i => i.id) }, authHeaders)
     } catch (err) {
-      showMessage('error', 'Không thể lưu thứ tự mới.')
+      showToast('Không thể lưu thứ tự mới.', 'error')
       loadAll()
     }
   }
@@ -283,14 +285,10 @@ export default function AdminServices() {
       {/* ── Header ── */}
       <div className={styles.header}>
         <div>
-          <button className={styles.backBtn} onClick={() => navigate('/admin')}>
-            <ArrowLeft size={14} /> Quay lại
-          </button>
           <h1 className={styles.pageTitle}>Quản Lý Trang Dịch Vụ</h1>
         </div>
       </div>
 
-      {message && <div className={`${styles.toast} ${styles[message.type]}`}>{message.text}</div>}
 
       {/* ══════════ BANNER ══════════ */}
       <Section title="Banner Hero" onSave={() => saveSection('banner')} saving={saving.banner}>
@@ -322,7 +320,7 @@ export default function AdminServices() {
                     key={item.id}
                     item={item}
                     onEdit={() => openEditForm(item)}
-                    onDelete={() => deleteItem(item)}
+                    onDelete={() => setDeleteTarget(item)}
                     onToggleActive={() => toggleActive(item)}
                   />
                 ))}
@@ -450,6 +448,15 @@ export default function AdminServices() {
           </div>
         </div>
       )}
+      <AdminConfirmDialog
+        open={!!deleteTarget}
+        title="Xóa dịch vụ?"
+        message="Dịch vụ này sẽ bị xóa khỏi trang Dịch vụ và các khu vực đang lấy dữ liệu dịch vụ."
+        target={deleteTarget?.title}
+        busy={!!deleteTarget && deletingId === deleteTarget.id}
+        onCancel={() => setDeleteTarget(null)}
+        onConfirm={deleteItem}
+      />
     </div>
   )
 }

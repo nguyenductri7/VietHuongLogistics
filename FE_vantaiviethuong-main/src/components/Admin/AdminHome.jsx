@@ -6,6 +6,8 @@ import {
 } from 'lucide-react'
 import { homePageApi, partnerApi, resolveApiMediaUrl } from '../../services/api'
 import styles from './AdminSettings.module.scss'
+import { useAdminToast } from './AdminToast'
+import AdminConfirmDialog from './AdminConfirmDialog'
 
 const DEFAULT_HOME = {
   hero: {
@@ -231,16 +233,19 @@ function normalizeReviews(reviews = []) {
 }
 
 export default function AdminHome() {
+  const { showToast } = useAdminToast()
   const navigate = useNavigate()
   const [home, setHome] = useState(() => normalizeHome())
   const [activeTab, setActiveTab] = useState('hero')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [toast, setToast] = useState(null)
   const [partners, setPartners] = useState([])
   const [partnerLoading, setPartnerLoading] = useState(false)
   const [partnerSaving, setPartnerSaving] = useState(false)
   const [uploadingField, setUploadingField] = useState(null)
+  const [deleteReviewTarget, setDeleteReviewTarget] = useState(null)
+  const [deletePartnerTarget, setDeletePartnerTarget] = useState(null)
+  const [deletingPartnerId, setDeletingPartnerId] = useState(null)
   const [partnerForm, setPartnerForm] = useState({
     name: '',
     website_url: '',
@@ -271,10 +276,6 @@ export default function AdminHome() {
     if (activeTab === 'partners_section') loadPartners()
   }, [activeTab])
 
-  const showToast = (msg, type = 'success') => {
-    setToast({ msg, type })
-    setTimeout(() => setToast(null), 3200)
-  }
 
   const handleChange = (sectionKey, fieldKey, value) => {
     setHome(prev => ({
@@ -329,14 +330,21 @@ export default function AdminHome() {
   }
 
   const handleDeleteReview = (index) => {
-    if (!window.confirm('Xóa đánh giá này?')) return
+    const review = normalizeReviews(home.partners_section?.reviews)[index]
+    setDeleteReviewTarget({ index, name: review?.name || `Đánh giá #${index + 1}` })
+  }
+
+  const confirmDeleteReview = () => {
+    if (!deleteReviewTarget) return
     setHome(prev => ({
       ...prev,
       partners_section: {
         ...prev.partners_section,
-        reviews: normalizeReviews(prev.partners_section?.reviews).filter((_, reviewIndex) => reviewIndex !== index),
+        reviews: normalizeReviews(prev.partners_section?.reviews).filter((_, reviewIndex) => reviewIndex !== deleteReviewTarget.index),
       },
     }))
+    setDeleteReviewTarget(null)
+    showToast('Đã xóa đánh giá. Bấm lưu section để cập nhật lên website.', 'success')
   }
 
   const getSectionPayload = (sectionKey) => {
@@ -420,14 +428,18 @@ export default function AdminHome() {
     }
   }
 
-  const handleDeletePartner = async (id) => {
-    if (!window.confirm('Xóa đối tác này?')) return
+  const handleDeletePartner = async () => {
+    if (!deletePartnerTarget) return
+    setDeletingPartnerId(deletePartnerTarget.id)
     try {
-      await partnerApi.delete(id)
+      await partnerApi.delete(deletePartnerTarget.id)
       showToast('Đã xóa đối tác.')
+      setDeletePartnerTarget(null)
       await loadPartners()
     } catch (err) {
       showToast(err.message || 'Xóa đối tác thất bại.', 'error')
+    } finally {
+      setDeletingPartnerId(null)
     }
   }
 
@@ -436,13 +448,9 @@ export default function AdminHome() {
 
   return (
     <div className={styles.page}>
-      {toast && <div className={`${styles.toast} ${styles[toast.type]}`}>{toast.msg}</div>}
 
       <div className={styles.header}>
         <div>
-          <button className={styles.backBtn} onClick={() => navigate('/admin')}>
-            <ArrowLeft size={14} /> Quay lại
-          </button>
           <h1 className={styles.title}>Quản lý trang chủ</h1>
         </div>
         <button className={styles.saveBtn} onClick={handleSave} disabled={saving || loading}>
@@ -686,7 +694,7 @@ export default function AdminHome() {
                           <button
                             type="button"
                             className={styles.changeImgBtn}
-                            onClick={() => handleDeletePartner(partner.id)}
+                            onClick={() => setDeletePartnerTarget(partner)}
                           >
                             <Trash2 size={13} /> Xóa
                           </button>
@@ -802,6 +810,25 @@ export default function AdminHome() {
           </div>
         </div>
       )}
+
+      <AdminConfirmDialog
+        open={!!deletePartnerTarget}
+        title="Xóa đối tác?"
+        message="Logo đối tác này sẽ bị xóa khỏi trang chủ."
+        target={deletePartnerTarget?.name}
+        busy={!!deletePartnerTarget && deletingPartnerId === deletePartnerTarget.id}
+        onCancel={() => setDeletePartnerTarget(null)}
+        onConfirm={handleDeletePartner}
+      />
+
+      <AdminConfirmDialog
+        open={!!deleteReviewTarget}
+        title="Xóa đánh giá?"
+        message="Đánh giá này sẽ bị xóa khỏi trang chủ. Bạn cần bấm lưu section để ghi lại thay đổi."
+        target={deleteReviewTarget?.name}
+        onCancel={() => setDeleteReviewTarget(null)}
+        onConfirm={confirmDeleteReview}
+      />
     </div>
   )
 }

@@ -7,6 +7,7 @@ import {
 } from 'lucide-react'
 import { contactApi } from '../../services/api'
 import styles from './AdminFaq.module.scss'
+import { useAdminToast } from './AdminToast'
 
 const STATUS = {
   new:      { label: 'Mới',            color: '#f59e0b' },
@@ -36,14 +37,8 @@ export default function AdminContacts() {
   const [updating, setUpdating] = useState(null)
   const [deleting, setDeleting] = useState(null)
   const [deletingBusy, setDeletingBusy] = useState(false)
-  const [toast, setToast] = useState(null)
-
-  const showToast = (msg, type = 'success') => {
-    setToast({ msg, type })
-    window.setTimeout(() => setToast(null), 3000)
-  }
-
-  const fetchData = async ({ silent = false } = {}) => {
+  const { showToast } = useAdminToast()
+const fetchData = async ({ silent = false } = {}) => {
     if (!silent) setLoading(true)
     try {
       const params = { page, limit: 20 }
@@ -133,13 +128,9 @@ export default function AdminContacts() {
 
   return (
     <div className={styles.page}>
-      {toast && <div className={`${styles.toast} ${styles[toast.type]}`}>{toast.msg}</div>}
 
       <div className={styles.header}>
         <div>
-          <button className={styles.backBtn} onClick={() => navigate('/admin')}>
-            <ArrowLeft size={14} /> Quay lại
-          </button>
           <h1 className={styles.title}>
             <MessageSquare size={20} /> Yêu cầu liên hệ
           </h1>

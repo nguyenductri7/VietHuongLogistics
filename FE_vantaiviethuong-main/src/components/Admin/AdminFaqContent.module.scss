@@ -1,11 +1,17 @@
 // src/components/Admin/AdminFaqContent.module.scss
 
 .page {
-  max-width: 900px;
+  width: 100%;
+  max-width: 1440px;
   margin: 0 auto;
-  padding: 28px 20px 60px;
+  padding: 28px 36px 60px;
+  box-sizing: border-box;
   font-family: 'Inter', sans-serif;
   color: #1e293b;
+
+  @media (max-width: 768px) {
+    padding: 20px 16px 40px;
+  }
 }
 
 // ── Toast ──────────────────────────────────────────────────────

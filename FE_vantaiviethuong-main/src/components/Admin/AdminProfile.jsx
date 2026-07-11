@@ -7,6 +7,7 @@ import {
 import { authApi } from '../../services/api'
 import { useAuth } from '../../context/AuthContext'
 import styles from './AdminProfile.module.scss'
+import { useAdminToast } from './AdminToast'
 
 const INITIAL_PASSWORD_FORM = {
   current_password: '',
@@ -15,6 +16,7 @@ const INITIAL_PASSWORD_FORM = {
 }
 
 export default function AdminProfile() {
+  const { showToast } = useAdminToast()
   const navigate = useNavigate()
   const { user, logout, updateUser } = useAuth()
   const [profile, setProfile] = useState({
@@ -25,7 +27,6 @@ export default function AdminProfile() {
   const [savingProfile, setSavingProfile] = useState(false)
   const [savingPassword, setSavingPassword] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
-  const [toast, setToast] = useState(null)
 
   useEffect(() => {
     setProfile({
@@ -44,10 +45,6 @@ export default function AdminProfile() {
       .join('') || 'A'
   }, [user])
 
-  const showToast = (msg, type = 'success') => {
-    setToast({ msg, type })
-    window.setTimeout(() => setToast(null), 3000)
-  }
 
   const handleProfileChange = (key, value) => {
     setProfile(current => ({ ...current, [key]: value }))
@@ -106,13 +103,9 @@ export default function AdminProfile() {
 
   return (
     <div className={styles.page}>
-      {toast && <div className={`${styles.toast} ${styles[toast.type]}`}>{toast.msg}</div>}
 
       <header className={styles.header}>
         <div>
-          <button className={styles.backBtn} onClick={() => navigate('/admin')}>
-            <ArrowLeft size={14} /> Quay lại dashboard
-          </button>
           <h1 className={styles.title}>
             <UserRound size={22} /> Hồ sơ Admin
           </h1>

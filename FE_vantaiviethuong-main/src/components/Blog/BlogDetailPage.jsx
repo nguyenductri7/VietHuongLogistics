@@ -4,6 +4,7 @@ import { gsap } from 'gsap'
 import { Helmet } from 'react-helmet-async'
 import { blogApi, resolveApiMediaInHtml, resolveApiMediaUrl } from '../../services/api'
 import { BLOG_DEFAULT_IMAGE, getFallbackPost, getFallbackRelated } from './blogFallback'
+import { readTimeFromPost } from './blogReadTime'
 import styles from './BlogDetailPage.module.scss'
 
 // Gradient mặc định khi bài viết không có thumbnail_url (đồng bộ với BlogPage.jsx)
@@ -141,7 +142,7 @@ export default function BlogDetailPage() {
   }
 
   const heroImage = resolveApiMediaUrl(post.thumbnail_url) || BLOG_DEFAULT_IMAGE
-  const readTime = readTimeFromContent(post.content)
+  const readTime = readTimeFromPost(post)
   const dateLabel = formatDate(post.published_at || post.created_at)
 
   return (
@@ -219,7 +220,7 @@ export default function BlogDetailPage() {
                         <div className={styles.relatedBody}>
                           <span className={styles.relatedCat}>{r.category}</span>
                           <p className={styles.relatedTitle}>{r.title}</p>
-                          <span className={styles.relatedTime}>{readTimeFromContent(r.content)}</span>
+                          <span className={styles.relatedTime}>{readTimeFromPost(r)}</span>
                         </div>
                       </Link>
                     )
@@ -259,7 +260,7 @@ export default function BlogDetailPage() {
                     </div>
                     <div className={styles.moreBody}>
                       <p className={styles.moreTitle}>{r.title}</p>
-                      <span className={styles.moreTime}>{readTimeFromContent(r.content)}</span>
+                      <span className={styles.moreTime}>{readTimeFromPost(r)}</span>
                     </div>
                   </Link>
                 )
