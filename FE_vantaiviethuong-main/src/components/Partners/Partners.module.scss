@@ -201,11 +201,13 @@
   border-radius: 24px;
   padding: 28px 26px;
   will-change: transform;
-  transition: border-color .3s, box-shadow .3s;
+  transform: translateY(0) scale(1);
+  transition: border-color .3s, box-shadow .3s, transform .35s ease;
 
   &:hover {
     border-color: rgba($black, .22);
     box-shadow: 0 8px 28px rgba($black, .10);
+    transform: translateY(-10px) scale(1.018);
   }
 }
 

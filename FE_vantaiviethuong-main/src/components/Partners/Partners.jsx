@@ -230,7 +230,7 @@ export default function Partners() {
       gsap.fromTo(
         cards,
         { opacity: 0, y: 48, scale: 0.95 },
-        { opacity: 1, y: 0, scale: 1, duration: 0.75, ease: 'power3.out', stagger: 0.12,
+        { opacity: 1, y: 0, scale: 1, duration: 0.75, ease: 'power3.out', stagger: 0.12, clearProps: 'transform',
           scrollTrigger: { trigger: section.querySelector('.js-bento'), start: 'top 82%', once: true } }
       )
     }, section)

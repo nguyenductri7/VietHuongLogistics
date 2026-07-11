@@ -34,7 +34,6 @@
 - Bổ sung cấu hình rewrite cho Vercel để React Router hoạt động khi truy cập trực tiếp đường dẫn.
 - Tạo và đưa `.htaccess` vào bản build để các route React hoạt động trên cPanel.
 - Cấu hình biến môi trường `VITE_API_URL` để frontend gọi đúng backend trên Render.
-- Hướng dẫn quy trình build, nén thư mục `dist` và triển khai lên thư mục tên miền trên AZDIGI/cPanel.
 - Cấu hình tên miền chính `viethuonglogistics.com` và hỗ trợ cả phiên bản `www`.
 
 
