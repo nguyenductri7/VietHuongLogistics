@@ -187,6 +187,37 @@ const SECTIONS = [
   },
 ]
 
+const SECTION_UI = {
+  hero: {
+    desc: 'Video, tiêu đề chính và các nút kêu gọi hành động đầu trang.',
+    source: 'Quản lý trực tiếp',
+  },
+  about_intro: {
+    desc: 'Khối giới thiệu nhanh bên cạnh xe 3D ở trang chủ.',
+    source: 'Quản lý trực tiếp',
+  },
+  services_section: {
+    desc: 'Tiêu đề khu vực dịch vụ nổi bật, danh sách lấy từ quản lý dịch vụ.',
+    source: 'Lấy dữ liệu từ Dịch vụ',
+  },
+  partners_section: {
+    desc: 'Tiêu đề và logo các công ty đối tác hiển thị trên trang chủ.',
+    source: 'Quản lý trực tiếp',
+  },
+  testimonials_section: {
+    desc: 'Tiêu đề, mô tả và danh sách đánh giá từ khách hàng.',
+    source: 'Quản lý trực tiếp',
+  },
+  contact_section: {
+    desc: 'Tiêu đề và mô tả form tư vấn, dữ liệu gửi về quản lý liên hệ.',
+    source: 'Gửi về Liên hệ',
+  },
+  footer: {
+    desc: 'Thông tin công ty, mạng xã hội và văn phòng đại diện ở cuối trang.',
+    source: 'Quản lý trực tiếp',
+  },
+}
+
 function officesToText(offices = []) {
   return Array.isArray(offices)
     ? offices.map(item => `${item.city || ''} | ${item.addr || ''}`).join('\n')
@@ -445,6 +476,37 @@ export default function AdminHome() {
 
   const currentSection = SECTIONS.find(section => section.key === activeTab)
   const activeDataKey = currentSection?.dataKey || activeTab
+  const currentInfo = SECTION_UI[activeTab] || {}
+  const visibleSections = SECTIONS.filter(section => {
+    const dataKey = section.dataKey || section.key
+    return section.key === 'hero' || section.key === 'testimonials_section' || section.key === 'footer'
+      ? true
+      : home[dataKey]?.enabled !== false
+  }).length
+  const reviewCount = normalizeReviews(home.partners_section?.reviews).length
+
+  const getSectionMeta = (section) => {
+    if (section.key === 'partners_section') {
+      return `${partners.length || 0} logo`
+    }
+    if (section.key === 'testimonials_section') {
+      return `${reviewCount} đánh giá`
+    }
+    if (section.key === 'services_section' && home.services_section?.use_service_admin_items) {
+      return 'Lấy từ trang Dịch vụ'
+    }
+    if (section.key === 'contact_section') {
+      return 'Gửi về Admin liên hệ'
+    }
+    return SECTION_UI[section.key]?.source || 'Quản lý trực tiếp'
+  }
+
+  const isSectionEnabled = (section) => {
+    const dataKey = section.dataKey || section.key
+    return section.key === 'hero' || section.key === 'testimonials_section' || section.key === 'footer'
+      ? true
+      : home[dataKey]?.enabled !== false
+  }
 
   return (
     <div className={styles.page}>
@@ -466,25 +528,65 @@ export default function AdminHome() {
           <Loader2 size={18} className={styles.spinner} /> Đang tải...
         </div>
       ) : (
+        <>
+        <div className={styles.overviewGrid}>
+          <div className={styles.overviewCard}>
+            <span>Section</span>
+            <strong>{SECTIONS.length}</strong>
+            <small>Tổng số khối quản lý</small>
+          </div>
+          <div className={styles.overviewCard}>
+            <span>Đang hiển thị</span>
+            <strong>{visibleSections}</strong>
+            <small>Các phần bật ngoài website</small>
+          </div>
+          <div className={styles.overviewCard}>
+            <span>Đánh giá</span>
+            <strong>{reviewCount}</strong>
+            <small>Phản hồi khách hàng</small>
+          </div>
+        </div>
         <div className={styles.layout}>
           <nav className={styles.tabs}>
+            <div className={styles.mapHeader}>
+              <span>Bản đồ trang chủ</span>
+              <small>Chọn một section để chỉnh sửa</small>
+            </div>
             {SECTIONS.map(section => {
               const Icon = section.icon
+              const enabled = isSectionEnabled(section)
               return (
                 <button
                   key={section.key}
                   className={`${styles.tab} ${activeTab === section.key ? styles.tabActive : ''}`}
                   onClick={() => setActiveTab(section.key)}
                 >
-                  <Icon size={15} strokeWidth={1.8} />
-                  {section.label}
+                  <span className={styles.sectionIcon}><Icon size={17} strokeWidth={1.8} /></span>
+                  <span className={styles.sectionText}>
+                    <strong>{section.label}</strong>
+                    <small>{SECTION_UI[section.key]?.desc}</small>
+                    <em>{getSectionMeta(section)}</em>
+                  </span>
+                  <span className={`${styles.stateDot} ${enabled ? styles.stateOn : styles.stateOff}`} />
                 </button>
               )
             })}
           </nav>
 
           <div className={styles.fields}>
-            <h2 className={styles.sectionTitle}>{currentSection.label}</h2>
+            <div className={styles.editorHeader}>
+              <div>
+                <p>{currentInfo.source}</p>
+                <h2 className={styles.sectionTitle}>{currentSection.label}</h2>
+                <span>{currentInfo.desc}</span>
+              </div>
+              <button className={styles.saveBtn} onClick={handleSave} disabled={saving}>
+                {saving
+                  ? <><Loader2 size={15} className={styles.spinner} /> Đang lưu...</>
+                  : <><Save size={15} /> Lưu phần này</>
+                }
+              </button>
+            </div>
 
             {currentSection.fields.map(field => {
               const value = home[activeDataKey]?.[field.key]
@@ -809,6 +911,7 @@ export default function AdminHome() {
             </div>
           </div>
         </div>
+        </>
       )}
 
       <AdminConfirmDialog

@@ -72,7 +72,14 @@ $transition: 160ms ease;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 32px;
+  margin-bottom: 22px;
+  padding: 24px 28px;
+  border: 1px solid rgba($red, .12);
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at top right, rgba($red, .12), transparent 34%),
+    linear-gradient(135deg, #fff 0%, #fff7f7 100%);
+  box-shadow: $shadow-sm;
 }
 
 .backBtn {
@@ -99,6 +106,46 @@ $transition: 160ms ease;
   color: $gray-900;
   margin: 0;
   letter-spacing: -.02em;
+}
+
+.overviewGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.overviewCard {
+  padding: 18px 20px;
+  border: 1px solid $gray-200;
+  border-radius: 18px;
+  background: $white;
+  box-shadow: $shadow-sm;
+
+  span {
+    display: block;
+    margin-bottom: 8px;
+    color: $gray-500;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+  }
+
+  strong {
+    display: block;
+    color: $gray-900;
+    font-size: 30px;
+    font-weight: 900;
+    line-height: 1;
+  }
+
+  small {
+    display: block;
+    margin-top: 7px;
+    color: $gray-400;
+    font-size: 12.5px;
+  }
 }
 
 // ── Save button (header) ───────────────────────────────────────
@@ -142,56 +189,155 @@ $transition: 160ms ease;
 
 // ── Two-column layout ──────────────────────────────────────────
 .layout {
-  display: flex;
-  gap: 24px;
+  display: grid;
+  grid-template-columns: minmax(280px, 340px) minmax(0, 1fr);
+  gap: 20px;
   align-items: flex-start;
   width: 100%;
 }
 
 // ── Tab sidebar ────────────────────────────────────────────────
 .tabs {
-  width: 210px;
-  flex-shrink: 0;
+  width: auto;
   background: $white;
   border: 1.5px solid $gray-200;
-  border-radius: $radius;
+  border-radius: 20px;
   box-shadow: $shadow-sm;
-  padding: 8px;
+  padding: 12px;
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 8px;
   position: sticky;
   top: 24px;
 }
 
+.mapHeader {
+  padding: 4px 6px 10px;
+  border-bottom: 1px solid $gray-100;
+  margin-bottom: 4px;
+
+  span {
+    display: block;
+    color: $gray-900;
+    font-size: 14px;
+    font-weight: 850;
+  }
+
+  small {
+    display: block;
+    margin-top: 4px;
+    color: $gray-400;
+    font-size: 12px;
+  }
+}
+
 .tab {
   display: flex;
-  align-items: center;
-  gap: 9px;
+  align-items: flex-start;
+  gap: 12px;
   width: 100%;
-  padding: 9px 12px;
-  border: none;
-  border-radius: $radius-sm;
+  padding: 13px 12px;
+  border: 1px solid transparent;
+  border-radius: 15px;
   background: transparent;
   color: $gray-600;
-  font-size: 13.5px;
-  font-weight: 500;
   font-family: inherit;
   cursor: pointer;
   text-align: left;
-  transition: background $transition, color $transition;
+  transition: background $transition, color $transition, border-color $transition, transform $transition;
 
   svg { flex-shrink: 0; }
 
   &:hover {
     background: $red-light;
+    border-color: $red-border;
     color: $red;
+    transform: translateY(-1px);
   }
 
   &.tabActive {
-    background: $red;
+    background: linear-gradient(135deg, $red 0%, $red-hover 100%);
+    border-color: $red;
+    color: $white;
+    box-shadow: 0 14px 26px rgba($red, .18);
+  }
+}
+
+.sectionIcon {
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: $gray-50;
+  color: $red;
+  flex: 0 0 34px;
+}
+
+.tabActive .sectionIcon {
+  background: rgba($white, .18);
+  color: $white;
+}
+
+.sectionText {
+  flex: 1;
+  min-width: 0;
+
+  strong {
+    display: block;
+    color: inherit;
+    font-size: 13.5px;
+    font-weight: 850;
+    line-height: 1.25;
+  }
+
+  small {
+    display: block;
+    margin-top: 5px;
+    color: $gray-500;
+    font-size: 11.5px;
+    line-height: 1.45;
+  }
+
+  em {
+    display: inline-flex;
+    margin-top: 8px;
+    padding: 4px 8px;
+    border-radius: 999px;
+    background: $gray-50;
+    color: $gray-500;
+    font-size: 10.5px;
+    font-style: normal;
+    font-weight: 800;
+  }
+}
+
+.tabActive .sectionText {
+  small { color: rgba($white, .78); }
+  em {
+    background: rgba($white, .18);
     color: $white;
   }
+}
+
+.stateDot {
+  width: 9px;
+  height: 9px;
+  margin-top: 12px;
+  border-radius: 999px;
+  flex: 0 0 9px;
+  background: $gray-300;
+  box-shadow: 0 0 0 4px rgba($gray-300, .22);
+}
+
+.stateOn {
+  background: #22c55e;
+  box-shadow: 0 0 0 4px rgba(#22c55e, .14);
+}
+
+.stateOff {
+  background: $gray-300;
 }
 
 // ── Fields panel ───────────────────────────────────────────────
@@ -200,22 +346,49 @@ $transition: 160ms ease;
   min-width: 0;
   background: $white;
   border: 1.5px solid $gray-200;
-  border-radius: $radius;
+  border-radius: 20px;
   box-shadow: $shadow-sm;
-  padding: 24px 28px 28px;
+  padding: 0;
   display: flex;
   flex-direction: column;
   gap: 0;
 }
 
+.editorHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 22px 26px;
+  border-bottom: 1px solid $gray-100;
+  background: linear-gradient(180deg, #fff 0%, #fafafa 100%);
+  border-radius: 20px 20px 0 0;
+
+  p {
+    margin: 0 0 7px;
+    color: $red;
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+  }
+
+  span {
+    display: block;
+    color: $gray-500;
+    font-size: 13px;
+    line-height: 1.55;
+  }
+}
+
 .sectionTitle {
-  font-size: 15px;
+  font-size: 20px;
   font-weight: 800;
   color: $gray-900;
   letter-spacing: -.01em;
-  margin: 0 0 22px;
-  padding-bottom: 14px;
-  border-bottom: 1px solid $gray-100;
+  margin: 0;
+  padding: 0;
+  border-bottom: 0;
 }
 
 // ── Individual field ───────────────────────────────────────────
@@ -226,6 +399,10 @@ $transition: 160ms ease;
   margin-bottom: 20px;
 
   &:last-of-type { margin-bottom: 0; }
+}
+
+.fields > .field {
+  margin: 20px 26px 0;
 }
 
 .label {
@@ -382,7 +559,7 @@ $transition: 160ms ease;
   display: flex;
   justify-content: flex-end;
   margin-top: 28px;
-  padding-top: 20px;
+  padding: 20px 26px 26px;
   border-top: 1px solid $gray-100;
 }
 
