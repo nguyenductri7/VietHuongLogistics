@@ -460,12 +460,6 @@ export default function AdminHome() {
         <div>
           <h1 className={styles.title}>Quản lý trang chủ</h1>
         </div>
-        <button className={styles.saveBtn} onClick={handleSave} disabled={saving || loading}>
-          {saving
-            ? <><Loader2 size={15} className={styles.spinner} /> Đang lưu...</>
-            : <><Save size={15} /> Lưu section</>
-          }
-        </button>
       </div>
 
       {loading ? (
@@ -500,12 +494,6 @@ export default function AdminHome() {
               <div>
                 <h2 className={styles.sectionTitle}>{currentSection.label}</h2>
               </div>
-              <button className={styles.saveBtn} onClick={handleSave} disabled={saving}>
-                {saving
-                  ? <><Loader2 size={15} className={styles.spinner} /> Đang lưu...</>
-                  : <><Save size={15} /> Lưu phần này</>
-                }
-              </button>
             </div>
 
             {currentSection.fields.map(field => {
