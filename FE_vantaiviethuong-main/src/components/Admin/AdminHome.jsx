@@ -599,21 +599,12 @@ export default function AdminHome() {
             })}
 
             {activeTab === 'partners_section' && (
-              <div style={{ borderTop: '1px solid #F3F4F6', marginTop: 8, paddingTop: 22 }}>
+              <div className={styles.sectionAddon}>
                 <h3 style={{ margin: '0 0 14px', fontSize: 15, color: '#111827' }}>
                   Logo công ty đối tác
                 </h3>
 
-                <form
-                  onSubmit={handleCreatePartner}
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: '1.2fr 1.2fr .5fr 1fr auto',
-                    gap: 10,
-                    alignItems: 'end',
-                    marginBottom: 22,
-                  }}
-                >
+                <form onSubmit={handleCreatePartner} className={styles.partnerForm}>
                   <div className={styles.field} style={{ marginBottom: 0 }}>
                     <label className={styles.label}>Tên công ty</label>
                     <input
@@ -729,7 +720,7 @@ export default function AdminHome() {
             )}
 
             {activeTab === 'testimonials_section' && (
-              <div style={{ borderTop: '1px solid #F3F4F6', marginTop: 8, paddingTop: 22 }}>
+              <div className={styles.sectionAddon}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 8 }}>
                   <h3 style={{ margin: 0, fontSize: 15, color: '#111827' }}>
                     Đánh giá khách hàng trên trang chủ

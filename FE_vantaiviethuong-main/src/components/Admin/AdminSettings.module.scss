@@ -352,6 +352,20 @@ $transition: 160ms ease;
   margin: 20px 26px 0;
 }
 
+.sectionAddon {
+  margin: 8px 26px 0;
+  padding-top: 22px;
+  border-top: 1px solid $gray-100;
+}
+
+.partnerForm {
+  display: grid;
+  grid-template-columns: minmax(180px, 1.2fr) minmax(180px, 1.2fr) minmax(110px, .5fr) minmax(180px, 1fr) auto;
+  gap: 12px;
+  align-items: end;
+  margin-bottom: 22px;
+}
+
 .label {
   font-size: 12.5px;
   font-weight: 700;
@@ -557,6 +571,14 @@ $transition: 160ms ease;
 
   .fields > .field {
     margin: 18px 16px 0;
+  }
+
+  .sectionAddon {
+    margin: 8px 16px 0;
+  }
+
+  .partnerForm {
+    grid-template-columns: 1fr;
   }
 
   .saveRow {
