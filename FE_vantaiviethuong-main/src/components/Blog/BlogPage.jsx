@@ -126,8 +126,11 @@ export default function BlogPage() {
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' })
     const ctx = gsap.context(() => {
-      gsap.fromTo('.bp-hero', { opacity: 0, y: 32 },
-        { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out', stagger: 0.1 })
+      const heroItems = gsap.utils.toArray('.bp-hero')
+      if (heroItems.length) {
+        gsap.fromTo(heroItems, { opacity: 0, y: 32 },
+          { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out', stagger: 0.1 })
+      }
     }, sectionRef)
     return () => ctx.revert()
   }, [])
@@ -135,10 +138,13 @@ export default function BlogPage() {
   useEffect(() => {
     if (loading) return
     const ctx = gsap.context(() => {
-      gsap.fromTo('.bp-card',
-        { opacity: 0, y: 28, scale: 0.97 },
-        { opacity: 1, y: 0, scale: 1, duration: 0.55, ease: 'power3.out', stagger: 0.08 }
-      )
+      const cards = gsap.utils.toArray('.bp-card')
+      if (cards.length) {
+        gsap.fromTo(cards,
+          { opacity: 0, y: 28, scale: 0.97 },
+          { opacity: 1, y: 0, scale: 1, duration: 0.55, ease: 'power3.out', stagger: 0.08 }
+        )
+      }
     }, sectionRef)
     return () => ctx.revert()
   }, [loading, posts])

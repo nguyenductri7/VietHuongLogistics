@@ -184,8 +184,14 @@ export default function Services() {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
+      const animateFromTo = (target, fromVars, toVars) => {
+        const elements = gsap.utils.toArray(target)
+        if (!elements.length) return
+        gsap.fromTo(elements, fromVars, toVars)
+      }
+
       // Header reveal
-      gsap.fromTo(
+      animateFromTo(
         `.${styles.headerLabel}`,
         { y: 20, opacity: 0 },
         {
@@ -193,7 +199,7 @@ export default function Services() {
           scrollTrigger: { trigger: sectionRef.current, start: 'top 78%', once: true },
         }
       )
-      gsap.fromTo(
+      animateFromTo(
         `.${styles.headerTitle}`,
         { y: 50, opacity: 0, clipPath: 'inset(100% 0 0 0)' },
         {
@@ -201,7 +207,7 @@ export default function Services() {
           scrollTrigger: { trigger: sectionRef.current, start: 'top 78%', once: true },
         }
       )
-      gsap.fromTo(
+      animateFromTo(
         `.${styles.headerSub}`,
         { y: 20, opacity: 0 },
         {
@@ -226,16 +232,19 @@ export default function Services() {
       })
 
       // Scroll-driven parallax on section bg
-      gsap.to(`.${styles.sectionParallax}`, {
-        yPercent: -15,
-        ease: 'none',
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: 'top bottom',
-          end: 'bottom top',
-          scrub: true,
-        },
-      })
+      const sectionParallax = sectionRef.current?.querySelector(`.${styles.sectionParallax}`)
+      if (sectionParallax) {
+        gsap.to(sectionParallax, {
+          yPercent: -15,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: 'top bottom',
+            end: 'bottom top',
+            scrub: true,
+          },
+        })
+      }
     }, sectionRef)
 
     // Attach magnetic listeners

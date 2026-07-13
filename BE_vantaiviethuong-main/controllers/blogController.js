@@ -41,6 +41,27 @@ function getReadingTimeText(...parts) {
   return `${minutes} phút đọc`
 }
 
+function hasValidDate(value) {
+  if (!value) return false;
+  const raw = String(value).trim();
+  if (!raw || /^0{4}-0{2}-0{2}/.test(raw)) return false;
+  const normalized = raw.replace(' ', 'T');
+  const parsed = value instanceof Date ? value : new Date(normalized);
+  return !Number.isNaN(parsed.getTime());
+}
+
+function withSafeBlogDate(blog) {
+  if (!blog) return blog;
+  const isPublished = blog.status === 'published';
+  const hasPublishedDate = hasValidDate(blog.published_at);
+  return {
+    ...blog,
+    published_at: isPublished && !hasPublishedDate
+      ? (blog.created_at || new Date())
+      : blog.published_at,
+  };
+}
+
 const getBlogs = async (req, res) => {
   try {
     const {
@@ -96,7 +117,7 @@ if (!req.user) {
     );
 
     const blogs = rows.map(({ content, ...blog }) => {
-      const safeBlog = sanitizeLegacyLocalized(blog);
+      const safeBlog = withSafeBlogDate(sanitizeLegacyLocalized(blog));
       const safeContent = sanitizeLegacyLocalized(content);
       return {
         ...safeBlog,
@@ -140,7 +161,7 @@ const getBlog = async (req, res) => {
       await pool.query('UPDATE blogs SET view_count = view_count + 1 WHERE id = ?', [rows[0].id]);
     }
 
-    const safeBlog = sanitizeLegacyLocalized(rows[0]);
+    const safeBlog = withSafeBlogDate(sanitizeLegacyLocalized(rows[0]));
 
     res.json({
       success: true,
@@ -167,7 +188,8 @@ const createBlog = async (req, res) => {
     const slug = createSlug(title);
     const thumbnail_url = req.file?.path || '';
     const thumbnail_public_id = req.file?.filename || '';
-    const published_at = status === 'published' ? new Date() : null;
+    const nextStatus = status || 'draft';
+    const published_at = nextStatus === 'published' ? new Date() : null;
 
     const [result] = await pool.query(
       `INSERT INTO blogs 
@@ -176,13 +198,13 @@ const createBlog = async (req, res) => {
       [
         title, slug, excerpt || '', content || '', thumbnail_url, thumbnail_public_id,
         category || DEFAULT_BLOG_CATEGORY, tags || '', author || req.user.full_name || 'Admin',
-        status || 'draft', is_featured ? 1 : 0, published_at,
+        nextStatus, is_featured ? 1 : 0, published_at,
       ]
     );
 
     const [newBlog] = await pool.query('SELECT * FROM blogs WHERE id = ?', [result.insertId]);
 
-    res.status(201).json({ success: true, message: 'Tạo bài viết thành công!', data: sanitizeLegacyLocalized(newBlog[0]) });
+    res.status(201).json({ success: true, message: 'Tạo bài viết thành công!', data: withSafeBlogDate(sanitizeLegacyLocalized(newBlog[0])) });
   } catch (err) {
     console.error('createBlog error:', err);
     res.status(500).json({ success: false, message: 'Lỗi server.' });
@@ -214,8 +236,9 @@ const updateBlog = async (req, res) => {
       thumbnail_public_id = req.file.filename;
     }
 
+    const nextStatus = status || blog.status;
     const published_at =
-      status === 'published' && blog.status !== 'published'
+      nextStatus === 'published' && (blog.status !== 'published' || !hasValidDate(blog.published_at))
         ? new Date()
         : blog.published_at;
 
@@ -233,7 +256,7 @@ const updateBlog = async (req, res) => {
         category || blog.category,
         tags ?? blog.tags,
         author || blog.author,
-        status || blog.status,
+        nextStatus,
         is_featured !== undefined ? (is_featured ? 1 : 0) : blog.is_featured,
         published_at,
         id,
@@ -241,7 +264,7 @@ const updateBlog = async (req, res) => {
     );
 
     const [updated] = await pool.query('SELECT * FROM blogs WHERE id = ?', [id]);
-    res.json({ success: true, message: 'Cập nhật bài viết thành công!', data: sanitizeLegacyLocalized(updated[0]) });
+    res.json({ success: true, message: 'Cập nhật bài viết thành công!', data: withSafeBlogDate(sanitizeLegacyLocalized(updated[0])) });
   } catch (err) {
     console.error('updateBlog error:', err);
     res.status(500).json({ success: false, message: 'Lỗi server.' });

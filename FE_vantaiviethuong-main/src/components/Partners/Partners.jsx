@@ -210,38 +210,51 @@ export default function Partners() {
     if (!section) return
 
     const ctx = gsap.context(() => {
-      gsap.fromTo(
-        section.querySelector('.js-eyebrow'),
+      const animateFromTo = (target, fromVars, toVars) => {
+        if (!target) return
+        gsap.fromTo(target, fromVars, toVars)
+      }
+
+      const eyebrow = section.querySelector('.js-eyebrow')
+      const title = section.querySelector('.js-title')
+      const sub = section.querySelector('.js-sub')
+      const ticker = section.querySelector('.js-ticker')
+      const bento = section.querySelector('.js-bento')
+
+      animateFromTo(
+        eyebrow,
         { opacity: 0, y: 20 },
         { opacity: 1, y: 0, duration: 0.7, ease: 'power2.out',
           scrollTrigger: { trigger: section, start: 'top 82%', once: true } }
       )
-      gsap.fromTo(
-        section.querySelector('.js-title'),
+      animateFromTo(
+        title,
         { opacity: 0, y: 32, clipPath: 'inset(100% 0 0 0)' },
         { opacity: 1, y: 0, clipPath: 'inset(0% 0 0 0)',
           duration: 0.9, ease: 'power4.out', delay: 0.1,
           scrollTrigger: { trigger: section, start: 'top 82%', once: true } }
       )
-      gsap.fromTo(
-        section.querySelector('.js-sub'),
+      animateFromTo(
+        sub,
         { opacity: 0, y: 16 },
         { opacity: 1, y: 0, duration: 0.7, ease: 'power2.out', delay: 0.22,
           scrollTrigger: { trigger: section, start: 'top 82%', once: true } }
       )
-      gsap.fromTo(
-        section.querySelector('.js-ticker'),
+      animateFromTo(
+        ticker,
         { opacity: 0, y: 24 },
         { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out',
-          scrollTrigger: { trigger: section.querySelector('.js-ticker'), start: 'top 88%', once: true } }
+          scrollTrigger: { trigger: ticker, start: 'top 88%', once: true } }
       )
       const cards = section.querySelectorAll('.js-card')
-      gsap.fromTo(
-        cards,
-        { opacity: 0, y: 48, scale: 0.95 },
-        { opacity: 1, y: 0, scale: 1, duration: 0.75, ease: 'power3.out', stagger: 0.12, clearProps: 'transform',
-          scrollTrigger: { trigger: section.querySelector('.js-bento'), start: 'top 82%', once: true } }
-      )
+      if (cards.length && bento) {
+        gsap.fromTo(
+          cards,
+          { opacity: 0, y: 48, scale: 0.95 },
+          { opacity: 1, y: 0, scale: 1, duration: 0.75, ease: 'power3.out', stagger: 0.12, clearProps: 'transform',
+            scrollTrigger: { trigger: bento, start: 'top 82%', once: true } }
+        )
+      }
     }, section)
 
     const handlers = []

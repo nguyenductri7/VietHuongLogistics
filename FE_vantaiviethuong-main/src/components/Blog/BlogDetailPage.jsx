@@ -81,14 +81,20 @@ export default function BlogDetailPage() {
     if (loading || notFound) return
     window.scrollTo({ top: 0, behavior: 'instant' })
     const ctx = gsap.context(() => {
-      gsap.fromTo('.bd-hero',
-        { opacity: 0, y: 28 },
-        { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out', stagger: 0.1 }
-      )
-      gsap.fromTo('.bd-body',
-        { opacity: 0, y: 20 },
-        { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out', delay: 0.3 }
-      )
+      const heroItems = gsap.utils.toArray('.bd-hero')
+      const bodyItems = gsap.utils.toArray('.bd-body')
+      if (heroItems.length) {
+        gsap.fromTo(heroItems,
+          { opacity: 0, y: 28 },
+          { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out', stagger: 0.1 }
+        )
+      }
+      if (bodyItems.length) {
+        gsap.fromTo(bodyItems,
+          { opacity: 0, y: 20 },
+          { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out', delay: 0.3 }
+        )
+      }
     }, pageRef)
     return () => ctx.revert()
   }, [id, loading, notFound])

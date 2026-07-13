@@ -15,6 +15,20 @@ const navLinks = [
 const GOOGLE_TRANSLATE_SCRIPT_ID = 'google-translate-script'
 const GOOGLE_TRANSLATE_COOKIE = 'googtrans'
 
+function getCookieDomains() {
+  if (typeof window === 'undefined') return ['']
+  const hostname = window.location.hostname
+  const parts = hostname.split('.').filter(Boolean)
+  const domains = ['', hostname, `.${hostname}`]
+
+  if (parts.length >= 2) {
+    const rootDomain = parts.slice(-2).join('.')
+    domains.push(rootDomain, `.${rootDomain}`)
+  }
+
+  return [...new Set(domains)]
+}
+
 function setCookie(name, value) {
   const maxAge = 60 * 60 * 24 * 365
   const encodedValue = encodeURIComponent(value)
@@ -22,7 +36,20 @@ function setCookie(name, value) {
 }
 
 function removeCookie(name) {
-  document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`
+  const expires = 'Thu, 01 Jan 1970 00:00:00 GMT'
+  getCookieDomains().forEach((domain) => {
+    const domainPart = domain ? `; domain=${domain}` : ''
+    document.cookie = `${name}=; path=/${domainPart}; expires=${expires}; SameSite=Lax`
+    document.cookie = `${name}=; path=/;${domainPart}; expires=${expires}`
+  })
+}
+
+function clearGoogleTranslateState() {
+  removeCookie(GOOGLE_TRANSLATE_COOKIE)
+  removeCookie(`googtrans`)
+  localStorage.setItem('siteLanguage', 'vi')
+  document.documentElement.classList.remove('translated-ltr', 'translated-rtl')
+  document.body.classList.remove('translated-ltr', 'translated-rtl')
 }
 
 function getCurrentLanguage() {
@@ -121,8 +148,12 @@ export default function Navbar() {
       setCookie(GOOGLE_TRANSLATE_COOKIE, '/vi/en')
       localStorage.setItem('siteLanguage', 'en')
     } else {
-      removeCookie(GOOGLE_TRANSLATE_COOKIE)
-      localStorage.setItem('siteLanguage', 'vi')
+      const select = document.querySelector('.goog-te-combo')
+      if (select) {
+        select.value = ''
+        select.dispatchEvent(new Event('change'))
+      }
+      clearGoogleTranslateState()
       window.location.reload()
       return
     }
