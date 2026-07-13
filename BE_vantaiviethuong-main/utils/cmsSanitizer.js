@@ -25,6 +25,10 @@ function isLegacyLocalizedObject(value) {
 function sanitizeLegacyLocalized(value) {
   const parsed = tryParseJson(value);
 
+  if (parsed instanceof Date) {
+    return parsed;
+  }
+
   if (isLegacyLocalizedObject(parsed)) {
     return parsed.vi ?? parsed.en ?? '';
   }

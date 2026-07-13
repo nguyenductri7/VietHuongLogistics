@@ -1,5 +1,6 @@
 export function getBlogDateValue(post = {}) {
-  return post.published_at || post.created_at || post.date || post.updated_at || ''
+  const candidates = [post.published_at, post.created_at, post.date, post.updated_at]
+  return candidates.find(value => parseBlogDate(value)) || ''
 }
 
 export function parseBlogDate(value) {
