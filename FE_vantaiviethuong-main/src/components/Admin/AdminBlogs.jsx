@@ -11,41 +11,9 @@ import RichTextEditor from './Richtexteditor'
 import { DEFAULT_BLOG_CATEGORIES, DEFAULT_BLOG_CATEGORY } from '../Blog/blogCategories'
 import styles from './AdminBlogs.module.scss'
 import { useAdminToast } from './AdminToast'
-import { getLocalizedValue, serializeLocalizedValue, toLocalizedString } from '../../i18n/localized'
 
 const STATUS_LABEL = { draft: 'Nháp', published: 'Đã đăng', archived: 'Lưu trữ' }
 const STATUS_COLOR = { draft: '#8899aa', published: '#52c97a', archived: '#e8a020' }
-const ADMIN_LANGUAGES = [
-  { code: 'vi', label: 'Tiếng Việt', shortLabel: 'VI' },
-  { code: 'en', label: 'English', shortLabel: 'EN' },
-]
-
-function LanguageTabs({ value, onChange }) {
-  return (
-    <div style={{ display: 'inline-flex', gap: 6, padding: 4, border: '1px solid #E5E7EB', borderRadius: 999, background: '#F9FAFB' }}>
-      {ADMIN_LANGUAGES.map(lang => (
-        <button
-          key={lang.code}
-          type="button"
-          onClick={() => onChange(lang.code)}
-          title={lang.label}
-          style={{
-            border: 0,
-            borderRadius: 999,
-            padding: '7px 12px',
-            fontWeight: 800,
-            fontSize: 12,
-            cursor: 'pointer',
-            color: value === lang.code ? '#fff' : '#374151',
-            background: value === lang.code ? '#DC2626' : 'transparent',
-          }}
-        >
-          {lang.shortLabel}
-        </button>
-      ))}
-    </div>
-  )
-}
 
 export default function AdminBlogs() {
   const { showToast } = useAdminToast()
@@ -66,7 +34,6 @@ export default function AdminBlogs() {
   const [deleting, setDeleting] = useState(null)
   const [saving, setSaving]     = useState(false)
   const [loadingEdit, setLoadingEdit] = useState(null)
-  const [contentLanguage, setContentLanguage] = useState('vi')
 
   // Form state
   const [form, setForm] = useState({
@@ -76,10 +43,6 @@ export default function AdminBlogs() {
   const [thumbnail, setThumbnail] = useState(null)
   const [preview, setPreview]     = useState('')
   const fileRef = useRef()
-
-  const updateLocalizedFormField = (field, value) => {
-    setForm(current => ({ ...current, [field]: toLocalizedString(current[field], contentLanguage, value) }))
-  }
 
   // ── Load danh sách ──────────────────────────────────────────
   const fetchBlogs = async () => {
@@ -165,17 +128,11 @@ export default function AdminBlogs() {
   // ── Submit form ─────────────────────────────────────────────
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!String(getLocalizedValue(form.title, contentLanguage) || '').trim()) { showToast('Tiêu đề không được để trống', 'error'); return }
+    if (!form.title.trim()) { showToast('Tiêu đề không được để trống', 'error'); return }
     setSaving(true)
     try {
       const fd = new FormData()
-      Object.entries(form).forEach(([k, v]) => {
-        if (['title', 'excerpt', 'content', 'tags'].includes(k)) {
-          fd.append(k, serializeLocalizedValue(v))
-        } else {
-          fd.append(k, v)
-        }
-      })
+      Object.entries(form).forEach(([k, v]) => fd.append(k, v))
       if (thumbnail) fd.append('thumbnail', thumbnail)
 
       if (editing) {
@@ -227,7 +184,6 @@ export default function AdminBlogs() {
               }
             </h1>
           </div>
-          <LanguageTabs value={contentLanguage} onChange={setContentLanguage} />
         </div>
 
         <form className={styles.formPage} onSubmit={handleSubmit}>
@@ -238,8 +194,8 @@ export default function AdminBlogs() {
                 <label>Tiêu đề <span className={styles.req}>*</span></label>
                 <input
                   type="text"
-                  value={getLocalizedValue(form.title, contentLanguage) || ''}
-                  onChange={e => updateLocalizedFormField('title', e.target.value)}
+                  value={form.title}
+                  onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
                   placeholder="Nhập tiêu đề bài viết..."
                 />
               </div>
@@ -248,8 +204,8 @@ export default function AdminBlogs() {
                 <label>Mô tả ngắn</label>
                 <textarea
                   rows={3}
-                  value={getLocalizedValue(form.excerpt, contentLanguage) || ''}
-                  onChange={e => updateLocalizedFormField('excerpt', e.target.value)}
+                  value={form.excerpt}
+                  onChange={e => setForm(f => ({ ...f, excerpt: e.target.value }))}
                   placeholder="Tóm tắt nội dung bài viết..."
                 />
               </div>
@@ -257,8 +213,8 @@ export default function AdminBlogs() {
               <div className={styles.field}>
                 <label>Nội dung</label>
                 <RichTextEditor
-                  value={getLocalizedValue(form.content, contentLanguage) || ''}
-                  onChange={(html) => updateLocalizedFormField('content', html)}
+                  value={form.content}
+                  onChange={(html) => setForm(f => ({ ...f, content: html }))}
                   placeholder="Soạn nội dung bài viết..."
                 />
               </div>
@@ -300,8 +256,8 @@ export default function AdminBlogs() {
                 <label>Tags</label>
                 <input
                   type="text"
-                  value={getLocalizedValue(form.tags, contentLanguage) || ''}
-                  onChange={e => updateLocalizedFormField('tags', e.target.value)}
+                  value={form.tags}
+                  onChange={e => setForm(f => ({ ...f, tags: e.target.value }))}
                   placeholder="vận tải, logistics, ..."
                 />
               </div>
@@ -421,7 +377,7 @@ export default function AdminBlogs() {
                     }
                   </td>
                   <td>
-                    <div className={styles.blogTitle}>{getLocalizedValue(b.title, contentLanguage)}</div>
+                    <div className={styles.blogTitle}>{b.title}</div>
                     {b.is_featured === 1 && (
                       <span className={styles.featuredBadge}>
                         <Star size={11} fill="currentColor" /> Nổi bật
@@ -483,7 +439,7 @@ export default function AdminBlogs() {
           <div className={styles.confirmModal} onClick={e => e.stopPropagation()}>
             <div className={styles.confirmIcon}><Trash size={28} /></div>
             <h3>Xóa bài viết?</h3>
-            <p>Bài viết <strong>"{getLocalizedValue(deleting.title, contentLanguage)}"</strong> sẽ bị xóa vĩnh viễn và không thể khôi phục.</p>
+            <p>Bài viết <strong>"{deleting.title}"</strong> sẽ bị xóa vĩnh viễn và không thể khôi phục.</p>
             <div className={styles.confirmActions}>
               <button className={styles.cancelBtn} onClick={() => setDeleting(null)}>Hủy</button>
               <button className={styles.deleteConfirmBtn} onClick={handleDelete}>Xóa vĩnh viễn</button>

@@ -1,5 +1,5 @@
 // src/components/FAG/Faqpage.jsx
-import { useState, useRef, useEffect, useMemo } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
@@ -7,8 +7,6 @@ import { ChevronDown, Phone, MessageCircle, CheckCircle2 } from 'lucide-react'
 import { Helmet } from 'react-helmet-async'
 import { faqApi, faqContentApi } from '../../services/api'   // ← import faqApi + faqContentApi
 import styles from './Faqpage.module.scss'
-import { useLanguage } from '../../i18n/LanguageContext'
-import { localizeObject } from '../../i18n/localized'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -29,16 +27,11 @@ const GUIDE_SECTIONS = [
 ]
 
 export default function FaqPage() {
-  const { language } = useLanguage()
   const pageRef             = useRef(null)
   const [openMap, setOpenMap]       = useState({})
 
   // ── FAQ lấy từ API ──────────────────────────────────────────
   const [faqCategories, setFaqCategories] = useState([])
-  const localizedFaqCategories = useMemo(
-    () => localizeObject(faqCategories, language) || [],
-    [faqCategories, language],
-  )
   const [faqLoading, setFaqLoading]       = useState(true)
   const [activeTab, setActiveTab]         = useState('')
 
@@ -99,7 +92,7 @@ export default function FaqPage() {
     }
   }
 
-  const currentFaq = localizedFaqCategories.find(c => c.key === activeTab)
+  const currentFaq = faqCategories.find(c => c.key === activeTab)
 
   return (
     <>
@@ -165,12 +158,12 @@ export default function FaqPage() {
 
                 {faqLoading ? (
                   <p style={{ color: '#94a3b8', padding: '20px 0' }}>Đang tải...</p>
-                ) : localizedFaqCategories.length === 0 ? (
+                ) : faqCategories.length === 0 ? (
                   <p style={{ color: '#94a3b8', padding: '20px 0' }}>Chưa có dữ liệu FAQ.</p>
                 ) : (
                   <>
                     <div className={styles.tabRow}>
-                      {localizedFaqCategories.map(cat => (
+                      {faqCategories.map(cat => (
                         <button
                           key={cat.key}
                           className={`${styles.tabBtn} ${activeTab === cat.key ? styles.tabActive : ''}`}
@@ -294,7 +287,7 @@ export default function FaqPage() {
               <div className={styles.sideCard}>
                 <p className={styles.sideLabel}>Danh mục câu hỏi</p>
                 <nav className={styles.sideNav}>
-                  {localizedFaqCategories.map(cat => (
+                  {faqCategories.map(cat => (
                     <button
                       key={cat.key}
                       className={`${styles.sideNavItem} ${activeTab === cat.key ? styles.sideNavActive : ''}`}

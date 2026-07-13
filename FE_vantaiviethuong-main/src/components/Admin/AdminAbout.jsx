@@ -7,15 +7,10 @@ import { normalizeAbout } from '../About/Aboutdetailpage'
 import styles from './AdminAbout.module.scss'
 import { useAdminToast } from './AdminToast'
 import AdminConfirmDialog from './AdminConfirmDialog'
-import { getLocalizedValue, toLocalizedValue } from '../../i18n/localized'
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
 
 const ICON_OPTIONS = ['Truck', 'Plane', 'ShoppingBag', 'Warehouse', 'LineChart', 'Eye', 'Target', 'Shield']
-const ADMIN_LANGUAGES = [
-  { code: 'vi', label: 'Tiếng Việt', shortLabel: 'VI' },
-  { code: 'en', label: 'English', shortLabel: 'EN' },
-]
 
 export default function AdminAbout() {
   const { showToast } = useAdminToast()
@@ -24,7 +19,6 @@ export default function AdminAbout() {
   const [data, setData] = useState(() => normalizeAbout())
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState({})
-  const [contentLanguage, setContentLanguage] = useState('vi')
   const [uploadingKey, setUploadingKey] = useState(null)
   const [deleteTarget, setDeleteTarget] = useState(null)
 
@@ -63,20 +57,6 @@ export default function AdminAbout() {
   const removeListItem = useCallback((sectionKey, index) => {
     setDeleteTarget({ sectionKey, index })
   }, [])
-
-  const updateLocalizedField = useCallback((path, value) => {
-    setData(prev => {
-      const next = structuredClone(prev)
-      const keys = path.split('.')
-      let target = next
-      for (let i = 0; i < keys.length - 1; i++) {
-        target = target[keys[i]]
-      }
-      const lastKey = keys[keys.length - 1]
-      target[lastKey] = toLocalizedValue(target[lastKey], contentLanguage, value)
-      return next
-    })
-  }, [contentLanguage])
 
   const confirmRemoveListItem = useCallback(() => {
     if (!deleteTarget) return
@@ -128,22 +108,21 @@ export default function AdminAbout() {
         <div>
           <h1 className={styles.pageTitle}>Quản Lý Trang Giới Thiệu</h1>
         </div>
-        <LanguageTabs value={contentLanguage} onChange={setContentLanguage} />
       </div>
 
 
       {/* ══════════ HERO ══════════ */}
       <Section title="Banner Hero" onSave={() => saveSection('hero')} saving={saving.hero}>
-        <TextField label="Dòng nhỏ phía trên (eyebrow)" value={getLocalizedValue(data.hero.eyebrow, contentLanguage)}
-          onChange={v => updateLocalizedField('hero.eyebrow', v)} />
-        <TextField label="Tiêu đề dòng 1" value={getLocalizedValue(data.hero.title_line1, contentLanguage)}
-          onChange={v => updateLocalizedField('hero.title_line1', v)} />
-        <TextField label="Tiêu đề nhấn màu (dòng 2)" value={getLocalizedValue(data.hero.title_accent, contentLanguage)}
-          onChange={v => updateLocalizedField('hero.title_accent', v)} />
-        <TextField label="Tiêu đề dòng 3" value={getLocalizedValue(data.hero.title_line3, contentLanguage)}
-          onChange={v => updateLocalizedField('hero.title_line3', v)} />
-        <TextAreaField label="Mô tả phụ" value={getLocalizedValue(data.hero.subtitle, contentLanguage)}
-          onChange={v => updateLocalizedField('hero.subtitle', v)} />
+        <TextField label="Dòng nhỏ phía trên (eyebrow)" value={data.hero.eyebrow}
+          onChange={v => updateField('hero.eyebrow', v)} />
+        <TextField label="Tiêu đề dòng 1" value={data.hero.title_line1}
+          onChange={v => updateField('hero.title_line1', v)} />
+        <TextField label="Tiêu đề nhấn màu (dòng 2)" value={data.hero.title_accent}
+          onChange={v => updateField('hero.title_accent', v)} />
+        <TextField label="Tiêu đề dòng 3" value={data.hero.title_line3}
+          onChange={v => updateField('hero.title_line3', v)} />
+        <TextAreaField label="Mô tả phụ" value={data.hero.subtitle}
+          onChange={v => updateField('hero.subtitle', v)} />
         <ImageField label="Ảnh nền banner" value={data.hero.bg_image}
           uploading={uploadingKey === 'hero.bg_image'}
           onUpload={file => handleImageUpload('hero.bg_image', file)} />
@@ -160,26 +139,26 @@ export default function AdminAbout() {
               <TextField label="Hậu tố (+, %, ...)" value={stat.suffix}
                 onChange={v => updateField(`stats.${i}.suffix`, v)} />
             </div>
-            <TextField label="Mô tả" value={getLocalizedValue(stat.label, contentLanguage)}
-              onChange={v => updateLocalizedField(`stats.${i}.label`, v)} />
+            <TextField label="Mô tả" value={stat.label}
+              onChange={v => updateField(`stats.${i}.label`, v)} />
           </div>
         ))}
       </Section>
 
       {/* ══════════ IDENTITY ══════════ */}
       <Section title="Giới Thiệu Công Ty" onSave={() => saveSection('identity')} saving={saving.identity}>
-        <TextField label="Dòng nhỏ phía trên" value={getLocalizedValue(data.identity.eyebrow, contentLanguage)}
-          onChange={v => updateLocalizedField('identity.eyebrow', v)} />
+        <TextField label="Dòng nhỏ phía trên" value={data.identity.eyebrow}
+          onChange={v => updateField('identity.eyebrow', v)} />
         <div className={styles.row}>
-          <TextField label="Tiêu đề chính" value={getLocalizedValue(data.identity.title_main, contentLanguage)}
-            onChange={v => updateLocalizedField('identity.title_main', v)} />
-          <TextField label="Tiêu đề nhấn màu" value={getLocalizedValue(data.identity.title_accent, contentLanguage)}
-            onChange={v => updateLocalizedField('identity.title_accent', v)} />
+          <TextField label="Tiêu đề chính" value={data.identity.title_main}
+            onChange={v => updateField('identity.title_main', v)} />
+          <TextField label="Tiêu đề nhấn màu" value={data.identity.title_accent}
+            onChange={v => updateField('identity.title_accent', v)} />
         </div>
-        <TextAreaField label="Đoạn giới thiệu 1" value={getLocalizedValue(data.identity.body_1, contentLanguage)}
-          onChange={v => updateLocalizedField('identity.body_1', v)} />
-        <TextAreaField label="Đoạn giới thiệu 2" value={getLocalizedValue(data.identity.body_2, contentLanguage)}
-          onChange={v => updateLocalizedField('identity.body_2', v)} />
+        <TextAreaField label="Đoạn giới thiệu 1" value={data.identity.body_1}
+          onChange={v => updateField('identity.body_1', v)} />
+        <TextAreaField label="Đoạn giới thiệu 2" value={data.identity.body_2}
+          onChange={v => updateField('identity.body_2', v)} />
         <ImageField label="Ảnh minh họa" value={data.identity.image}
           uploading={uploadingKey === 'identity.image'}
           onUpload={file => handleImageUpload('identity.image', file)} />
@@ -196,14 +175,14 @@ export default function AdminAbout() {
             <div className={styles.row}>
               <SelectField label="Icon" value={svc.icon_key} options={ICON_OPTIONS}
                 onChange={v => updateField(`services.${i}.icon_key`, v)} />
-              <TextField label="Tên dịch vụ" value={getLocalizedValue(svc.title, contentLanguage)}
-                onChange={v => updateLocalizedField(`services.${i}.title`, v)} />
+              <TextField label="Tên dịch vụ" value={svc.title}
+                onChange={v => updateField(`services.${i}.title`, v)} />
             </div>
             <ImageField label={'Icon upload (t\u00f9y ch\u1ecdn)'} value={svc.icon_url}
               uploading={uploadingKey === `services.${i}.icon_url`}
               onUpload={file => handleImageUpload(`services.${i}.icon_url`, file)} />
-            <TextAreaField label="Mô tả" value={getLocalizedValue(svc.desc, contentLanguage)}
-              onChange={v => updateLocalizedField(`services.${i}.desc`, v)} />
+            <TextAreaField label="Mô tả" value={svc.desc}
+              onChange={v => updateField(`services.${i}.desc`, v)} />
             <ImageField label="Ảnh minh họa" value={svc.img}
               uploading={uploadingKey === `services.${i}.img`}
               onUpload={file => handleImageUpload(`services.${i}.img`, file)} />
@@ -237,11 +216,11 @@ export default function AdminAbout() {
             <div className={styles.row}>
               <TextField label="Năm" value={m.year}
                 onChange={v => updateField(`timeline.${i}.year`, v)} />
-              <TextField label="Tiêu đề" value={getLocalizedValue(m.title, contentLanguage)}
-                onChange={v => updateLocalizedField(`timeline.${i}.title`, v)} />
+              <TextField label="Tiêu đề" value={m.title}
+                onChange={v => updateField(`timeline.${i}.title`, v)} />
             </div>
-            <TextAreaField label="Mô tả" value={getLocalizedValue(m.desc, contentLanguage)}
-              onChange={v => updateLocalizedField(`timeline.${i}.desc`, v)} />
+            <TextAreaField label="Mô tả" value={m.desc}
+              onChange={v => updateField(`timeline.${i}.desc`, v)} />
             <ImageField label="Ảnh minh họa" value={m.img}
               uploading={uploadingKey === `timeline.${i}.img`}
               onUpload={file => handleImageUpload(`timeline.${i}.img`, file)} />
@@ -275,11 +254,11 @@ export default function AdminAbout() {
             <div className={styles.row}>
               <SelectField label="Icon" value={v.icon_key} options={ICON_OPTIONS}
                 onChange={val => updateField(`values_section.${i}.icon_key`, val)} />
-              <TextField label="Tiêu đề" value={getLocalizedValue(v.title, contentLanguage)}
-                onChange={val => updateLocalizedField(`values_section.${i}.title`, val)} />
+              <TextField label="Tiêu đề" value={v.title}
+                onChange={val => updateField(`values_section.${i}.title`, val)} />
             </div>
-            <TextAreaField label="Nội dung" value={getLocalizedValue(v.text, contentLanguage)}
-              onChange={val => updateLocalizedField(`values_section.${i}.text`, val)} />
+            <TextAreaField label="Nội dung" value={v.text}
+              onChange={val => updateField(`values_section.${i}.text`, val)} />
           </div>
         ))}
       </Section>
@@ -308,33 +287,6 @@ function Section({ title, children, onSave, saving }) {
       </div>
       <div className={styles.sectionBody}>{children}</div>
     </section>
-  )
-}
-
-function LanguageTabs({ value, onChange }) {
-  return (
-    <div style={{ display: 'inline-flex', gap: 6, padding: 4, border: '1px solid #E5E7EB', borderRadius: 999, background: '#F9FAFB' }}>
-      {ADMIN_LANGUAGES.map(lang => (
-        <button
-          key={lang.code}
-          type="button"
-          onClick={() => onChange(lang.code)}
-          title={lang.label}
-          style={{
-            border: 0,
-            borderRadius: 999,
-            padding: '7px 12px',
-            fontWeight: 800,
-            fontSize: 12,
-            cursor: 'pointer',
-            color: value === lang.code ? '#fff' : '#374151',
-            background: value === lang.code ? '#DC2626' : 'transparent',
-          }}
-        >
-          {lang.shortLabel}
-        </button>
-      ))}
-    </div>
   )
 }
 

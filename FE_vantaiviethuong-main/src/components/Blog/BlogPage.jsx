@@ -1,4 +1,4 @@
-import { useRef, useEffect, useMemo, useState } from 'react'
+import { useRef, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
@@ -8,8 +8,6 @@ import { FALLBACK_BLOG_POSTS, getFallbackPosts } from './blogFallback'
 import { ALL_BLOG_CATEGORIES, DEFAULT_BLOG_CATEGORIES } from './blogCategories'
 import { readTimeFromPost } from './blogReadTime'
 import styles from './BlogPage.module.scss'
-import { useLanguage } from '../../i18n/LanguageContext'
-import { localizeObject } from '../../i18n/localized'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -89,12 +87,10 @@ function PostCard({ post }) {
 }
 
 export default function BlogPage() {
-  const { language } = useLanguage()
   const sectionRef = useRef(null)
   const [active, setActive] = useState(ALL_BLOG_CATEGORIES)
   const [categories, setCategories] = useState(DEFAULT_BLOG_CATEGORIES)
   const [posts, setPosts] = useState(FALLBACK_BLOG_POSTS)
-  const localizedPosts = useMemo(() => localizeObject(posts, language) || [], [posts, language])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
@@ -150,7 +146,7 @@ export default function BlogPage() {
       )
     }, sectionRef)
     return () => ctx.revert()
-  }, [loading, localizedPosts])
+  }, [loading, posts])
 
   return (
     <>
@@ -209,7 +205,7 @@ export default function BlogPage() {
             </div>
           ) : (
             <div className={styles.grid}>
-              {localizedPosts.map((post) => (
+              {posts.map((post) => (
                 <div key={post.id} className="bp-card">
                   <PostCard post={post} />
                 </div>

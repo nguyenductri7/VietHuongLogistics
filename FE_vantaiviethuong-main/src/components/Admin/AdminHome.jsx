@@ -8,40 +8,6 @@ import { homePageApi, partnerApi, resolveApiMediaUrl } from '../../services/api'
 import styles from './AdminSettings.module.scss'
 import { useAdminToast } from './AdminToast'
 import AdminConfirmDialog from './AdminConfirmDialog'
-import { getLocalizedValue, isLocalizedValue, toLocalizedValue } from '../../i18n/localized'
-
-const ADMIN_LANGUAGES = [
-  { code: 'vi', label: 'Tiếng Việt', shortLabel: 'VI' },
-  { code: 'en', label: 'English', shortLabel: 'EN' },
-]
-
-const NON_TRANSLATABLE_FIELD_KEYS = new Set([
-  'enabled',
-  'show_video',
-  'show_3d_truck',
-  'use_service_admin_items',
-  'primary_cta_link',
-  'secondary_cta_link',
-  'cta_link',
-  'video_url',
-  'fallback_image_url',
-  'tax_code',
-  'hotline',
-  'email',
-  'facebook_url',
-  'youtube_url',
-  'instagram_url',
-  'zalo_url',
-  'offices_text',
-])
-
-function isTranslatableField(field) {
-  return ['text', 'textarea'].includes(field.type) && !NON_TRANSLATABLE_FIELD_KEYS.has(field.key)
-}
-
-function getEditorValue(value, field, language) {
-  return isTranslatableField(field) ? getLocalizedValue(value, language) : (value || '')
-}
 
 const DEFAULT_HOME = {
   hero: {
@@ -271,7 +237,6 @@ export default function AdminHome() {
   const navigate = useNavigate()
   const [home, setHome] = useState(() => normalizeHome())
   const [activeTab, setActiveTab] = useState('hero')
-  const [contentLanguage, setContentLanguage] = useState('vi')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [partners, setPartners] = useState([])
@@ -322,32 +287,10 @@ export default function AdminHome() {
     }))
   }
 
-  const handleFieldChange = (sectionKey, field, value) => {
-    if (!isTranslatableField(field)) {
-      handleChange(sectionKey, field.key, value)
-      return
-    }
-
-    setHome(prev => ({
-      ...prev,
-      [sectionKey]: {
-        ...prev[sectionKey],
-        [field.key]: toLocalizedValue(prev[sectionKey]?.[field.key], contentLanguage, value),
-      },
-    }))
-  }
-
   const handleReviewChange = (index, fieldKey, value) => {
     setHome(prev => {
       const reviews = normalizeReviews(prev.partners_section?.reviews).map((review, reviewIndex) => (
-        reviewIndex === index
-          ? {
-              ...review,
-              [fieldKey]: fieldKey === 'initials'
-                ? value
-                : toLocalizedValue(review[fieldKey], contentLanguage, value),
-            }
-          : review
+        reviewIndex === index ? { ...review, [fieldKey]: value } : review
       ))
 
       return {
@@ -376,9 +319,9 @@ export default function AdminHome() {
               ...fallback,
               id: `${Date.now()}-${nextIndex}`,
               initials: '',
-              name: { vi: '', en: '' },
-              company: { vi: '', en: '' },
-              quote: { vi: '', en: '' },
+              name: '',
+              company: '',
+              quote: '',
             },
           ],
         },
@@ -388,7 +331,7 @@ export default function AdminHome() {
 
   const handleDeleteReview = (index) => {
     const review = normalizeReviews(home.partners_section?.reviews)[index]
-    setDeleteReviewTarget({ index, name: getLocalizedValue(review?.name, 'vi') || `Đánh giá #${index + 1}` })
+    setDeleteReviewTarget({ index, name: review?.name || `Đánh giá #${index + 1}` })
   }
 
   const confirmDeleteReview = () => {
@@ -551,52 +494,21 @@ export default function AdminHome() {
               <div>
                 <h2 className={styles.sectionTitle}>{currentSection.label}</h2>
               </div>
-              <div style={{ display: 'inline-flex', gap: 6, padding: 4, border: '1px solid #E5E7EB', borderRadius: 999, background: '#F9FAFB' }}>
-                {ADMIN_LANGUAGES.map(lang => (
-                  <button
-                    key={lang.code}
-                    type="button"
-                    onClick={() => setContentLanguage(lang.code)}
-                    title={lang.label}
-                    style={{
-                      border: 0,
-                      borderRadius: 999,
-                      padding: '7px 12px',
-                      fontWeight: 800,
-                      fontSize: 12,
-                      cursor: 'pointer',
-                      color: contentLanguage === lang.code ? '#fff' : '#374151',
-                      background: contentLanguage === lang.code ? '#DC2626' : 'transparent',
-                    }}
-                  >
-                    {lang.shortLabel}
-                  </button>
-                ))}
-              </div>
             </div>
 
             {currentSection.fields.map(field => {
               const value = home[activeDataKey]?.[field.key]
-              const editorValue = getEditorValue(value, field, contentLanguage)
-              const translated = isTranslatableField(field)
 
               return (
                 <div key={field.key} className={styles.field}>
-                  <label className={styles.label}>
-                    {field.label}
-                    {translated && (
-                      <span style={{ marginLeft: 8, color: '#DC2626', fontWeight: 800 }}>
-                        {contentLanguage.toUpperCase()}
-                      </span>
-                    )}
-                  </label>
+                  <label className={styles.label}>{field.label}</label>
 
                   {field.type === 'textarea' ? (
                     <textarea
                       className={styles.textarea}
                       rows={field.key === 'offices_text' ? 8 : 4}
-                      value={editorValue}
-                      onChange={e => handleFieldChange(activeDataKey, field, e.target.value)}
+                      value={value || ''}
+                      onChange={e => handleChange(activeDataKey, field.key, e.target.value)}
                     />
                   ) : field.type === 'image_upload' || field.type === 'video_upload' ? (
                     <div style={{ display: 'grid', gap: 10 }}>
@@ -662,8 +574,8 @@ export default function AdminHome() {
                     <input
                       className={styles.input}
                       type="text"
-                      value={editorValue}
-                      onChange={e => handleFieldChange(activeDataKey, field, e.target.value)}
+                      value={value || ''}
+                      onChange={e => handleChange(activeDataKey, field.key, e.target.value)}
                     />
                   )}
 
@@ -855,7 +767,7 @@ export default function AdminHome() {
                           <label className={styles.label}>Tên khách hàng</label>
                           <input
                             className={styles.input}
-                            value={getLocalizedValue(review.name, contentLanguage) || ''}
+                            value={review.name || ''}
                             onChange={e => handleReviewChange(index, 'name', e.target.value)}
                             placeholder="Tên khách hàng"
                           />
@@ -866,7 +778,7 @@ export default function AdminHome() {
                         <label className={styles.label}>Công ty / chức vụ</label>
                         <input
                           className={styles.input}
-                          value={getLocalizedValue(review.company, contentLanguage) || ''}
+                          value={review.company || ''}
                           onChange={e => handleReviewChange(index, 'company', e.target.value)}
                           placeholder="VD: CEO — ABC Logistics"
                         />
@@ -877,7 +789,7 @@ export default function AdminHome() {
                         <textarea
                           className={styles.textarea}
                           rows={4}
-                          value={getLocalizedValue(review.quote, contentLanguage) || ''}
+                          value={review.quote || ''}
                           onChange={e => handleReviewChange(index, 'quote', e.target.value)}
                           placeholder="Nhập nội dung đánh giá..."
                         />

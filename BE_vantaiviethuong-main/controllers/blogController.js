@@ -8,7 +8,7 @@ const getBlogCategories = (req, res) => {
 
 // Tạo slug từ tiêu đề
 function createSlug(title) {
-  return getLocalizedPlainText(title)
+  return title
     .toLowerCase()
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
@@ -18,19 +18,6 @@ function createSlug(title) {
     .replace(/\s+/g, '-')
     .replace(/-+/g, '-')
     + '-' + Date.now();
-}
-
-function getLocalizedPlainText(value) {
-  if (typeof value !== 'string') return String(value || '');
-  const trimmed = value.trim();
-  if (!trimmed.startsWith('{') || !trimmed.endsWith('}')) return value;
-
-  try {
-    const parsed = JSON.parse(trimmed);
-    return parsed.vi || parsed.en || value;
-  } catch {
-    return value;
-  }
 }
 
 function stripHtml(value = '') {

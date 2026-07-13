@@ -10,15 +10,9 @@ import { faqContentApi } from '../../services/api'
 import { useAuth } from '../../context/AuthContext'
 import styles from './AdminFaqContent.module.scss'
 import { useAdminToast } from './AdminToast'
-import { getLocalizedValue, serializeLocalizedValue, toLocalizedString } from '../../i18n/localized'
-
-const ADMIN_LANGUAGES = [
-  { code: 'vi', label: 'Tiếng Việt', shortLabel: 'VI' },
-  { code: 'en', label: 'English', shortLabel: 'EN' },
-]
 
 // ─── Modal chỉnh sửa danh mục ─────────────────────────────────────────────────
-function CategoryModal({ cat, language, onSave, onClose }) {
+function CategoryModal({ cat, onSave, onClose }) {
   const [form, setForm] = useState({
     key:        cat?.key        ?? '',
     label:      cat?.label      ?? '',
@@ -28,15 +22,15 @@ function CategoryModal({ cat, language, onSave, onClose }) {
   const [saving, setSaving] = useState(false)
 
   const handleSave = async () => {
-    if (!form.key.trim() || !String(getLocalizedValue(form.label, language) || '').trim()) return
+    if (!form.key.trim() || !form.label.trim()) return
     setSaving(true)
     try {
       if (cat) {
         await faqContentApi.updateCategory(cat.id, {
-          label: serializeLocalizedValue(form.label), sort_order: form.sort_order, is_active: form.is_active,
+          label: form.label, sort_order: form.sort_order, is_active: form.is_active,
         })
       } else {
-        await faqContentApi.createCategory({ ...form, label: serializeLocalizedValue(form.label) })
+        await faqContentApi.createCategory(form)
       }
       onSave()
     } finally {
@@ -65,8 +59,8 @@ function CategoryModal({ cat, language, onSave, onClose }) {
           <div className={styles.field}>
             <label>Tên hiển thị <span>*</span></label>
             <input
-              value={getLocalizedValue(form.label, language) || ''}
-              onChange={e => setForm(p => ({ ...p, label: toLocalizedString(p.label, language, e.target.value) }))}
+              value={form.label}
+              onChange={e => setForm(p => ({ ...p, label: e.target.value }))}
               placeholder="vd: Tổng quan dịch vụ"
             />
           </div>
@@ -104,7 +98,7 @@ function CategoryModal({ cat, language, onSave, onClose }) {
 }
 
 // ─── Modal chỉnh sửa câu hỏi ──────────────────────────────────────────────────
-function ItemModal({ item, catId, language, onSave, onClose }) {
+function ItemModal({ item, catId, onSave, onClose }) {
   const [form, setForm] = useState({
     question:   item?.question   ?? '',
     answer:     item?.answer     ?? '',
@@ -114,21 +108,13 @@ function ItemModal({ item, catId, language, onSave, onClose }) {
   const [saving, setSaving] = useState(false)
 
   const handleSave = async () => {
-    if (
-      !String(getLocalizedValue(form.question, language) || '').trim() ||
-      !String(getLocalizedValue(form.answer, language) || '').trim()
-    ) return
+    if (!form.question.trim() || !form.answer.trim()) return
     setSaving(true)
     try {
-      const payload = {
-        ...form,
-        question: serializeLocalizedValue(form.question),
-        answer: serializeLocalizedValue(form.answer),
-      }
       if (item) {
-        await faqContentApi.updateItem(item.id, payload)
+        await faqContentApi.updateItem(item.id, form)
       } else {
-        await faqContentApi.createItem(catId, payload)
+        await faqContentApi.createItem(catId, form)
       }
       onSave()
     } finally {
@@ -148,8 +134,8 @@ function ItemModal({ item, catId, language, onSave, onClose }) {
             <label>Câu hỏi <span>*</span></label>
             <textarea
               rows={2}
-              value={getLocalizedValue(form.question, language) || ''}
-              onChange={e => setForm(p => ({ ...p, question: toLocalizedString(p.question, language, e.target.value) }))}
+              value={form.question}
+              onChange={e => setForm(p => ({ ...p, question: e.target.value }))}
               placeholder="Nhập câu hỏi..."
             />
           </div>
@@ -157,8 +143,8 @@ function ItemModal({ item, catId, language, onSave, onClose }) {
             <label>Câu trả lời <span>*</span></label>
             <textarea
               rows={5}
-              value={getLocalizedValue(form.answer, language) || ''}
-              onChange={e => setForm(p => ({ ...p, answer: toLocalizedString(p.answer, language, e.target.value) }))}
+              value={form.answer}
+              onChange={e => setForm(p => ({ ...p, answer: e.target.value }))}
               placeholder="Nhập câu trả lời chi tiết..."
             />
           </div>
@@ -196,33 +182,6 @@ function ItemModal({ item, catId, language, onSave, onClose }) {
 }
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
-function LanguageTabs({ value, onChange }) {
-  return (
-    <div style={{ display: 'inline-flex', gap: 6, padding: 4, border: '1px solid #E5E7EB', borderRadius: 999, background: '#F9FAFB' }}>
-      {ADMIN_LANGUAGES.map(lang => (
-        <button
-          key={lang.code}
-          type="button"
-          onClick={() => onChange(lang.code)}
-          title={lang.label}
-          style={{
-            border: 0,
-            borderRadius: 999,
-            padding: '7px 12px',
-            fontWeight: 800,
-            fontSize: 12,
-            cursor: 'pointer',
-            color: value === lang.code ? '#fff' : '#374151',
-            background: value === lang.code ? '#DC2626' : 'transparent',
-          }}
-        >
-          {lang.shortLabel}
-        </button>
-      ))}
-    </div>
-  )
-}
-
 export default function AdminFaqContent() {
   const { logout }   = useAuth()
   const navigate     = useNavigate()
@@ -232,7 +191,6 @@ export default function AdminFaqContent() {
   const [itemsMap, setItemsMap]       = useState({})      // { [catId]: [...items] }
   const [loading, setLoading]         = useState(true)
   const [loadingItems, setLoadingItems] = useState(null)  // catId đang load items
-  const [contentLanguage, setContentLanguage] = useState('vi')
 
   const [catModal, setCatModal]   = useState(null)   // null | 'new' | cat-object
   const [itemModal, setItemModal] = useState(null)   // null | { catId, item? }
@@ -335,7 +293,6 @@ export default function AdminFaqContent() {
           <p className={styles.subtitle}>Quản lý danh mục và câu hỏi hiển thị trên trang FAQ</p>
         </div>
         <div className={styles.headerRight}>
-          <LanguageTabs value={contentLanguage} onChange={setContentLanguage} />
           <button className={styles.refreshBtn} onClick={fetchCategories}>
             <RefreshCw size={14} /> Làm mới
           </button>
@@ -401,7 +358,7 @@ export default function AdminFaqContent() {
                   </button>
 
                   <div className={styles.catInfo}>
-                    <span className={styles.catLabel}>{getLocalizedValue(cat.label, contentLanguage)}</span>
+                    <span className={styles.catLabel}>{cat.label}</span>
                     <span className={styles.catKey}>{cat.key}</span>
                     <span className={styles.catCount}>
                       {items.length > 0 ? `${items.length} câu hỏi` : 'Chưa tải'}
@@ -429,7 +386,7 @@ export default function AdminFaqContent() {
                     <button
                       className={`${styles.iconBtn} ${styles.danger}`}
                       title="Xóa danh mục"
-                      onClick={() => setDelConfirm({ type: 'cat', id: cat.id, name: getLocalizedValue(cat.label, contentLanguage) })}
+                      onClick={() => setDelConfirm({ type: 'cat', id: cat.id, name: cat.label })}
                     >
                       <Trash2 size={14} />
                     </button>
@@ -457,8 +414,8 @@ export default function AdminFaqContent() {
                                 <GripVertical size={14} className={styles.grip} />
                                 <span className={styles.itemIdx}>{idx + 1}</span>
                                 <div className={styles.itemContent}>
-                                  <p className={styles.itemQ}>{getLocalizedValue(item.question, contentLanguage)}</p>
-                                  <p className={styles.itemA}>{getLocalizedValue(item.answer, contentLanguage)}</p>
+                                  <p className={styles.itemQ}>{item.question}</p>
+                                  <p className={styles.itemA}>{item.answer}</p>
                                 </div>
                                 <div className={styles.itemActions}>
                                   {!item.is_active && (
@@ -484,7 +441,7 @@ export default function AdminFaqContent() {
                                     onClick={() => setDelConfirm({
                                       type: 'item', id: item.id,
                                       catId: cat.id,
-                                      name: String(getLocalizedValue(item.question, contentLanguage) || '').slice(0, 50),
+                                      name: item.question.slice(0, 50),
                                     })}
                                   >
                                     <Trash2 size={13} />
@@ -515,7 +472,6 @@ export default function AdminFaqContent() {
       {catModal && (
         <CategoryModal
           cat={catModal === 'new' ? null : catModal}
-          language={contentLanguage}
           onSave={() => { setCatModal(null); fetchCategories(); showToast('Lưu danh mục thành công!') }}
           onClose={() => setCatModal(null)}
         />
@@ -525,7 +481,6 @@ export default function AdminFaqContent() {
         <ItemModal
           catId={itemModal.catId}
           item={itemModal.item}
-          language={contentLanguage}
           onSave={() => {
             setItemModal(null)
             reloadItems(itemModal.catId)

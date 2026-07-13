@@ -1,12 +1,10 @@
-import { useEffect, useRef, useCallback, useMemo, useState } from 'react'
+import { useEffect, useRef, useCallback, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import styles from './Hero.module.scss'
 import heroSlide1 from '../../assets/hero-slide-1.png'
 import { homePageApi } from '../../services/api'
-import { useLanguage } from '../../i18n/LanguageContext'
-import { localizeObject } from '../../i18n/localized'
 gsap.registerPlugin(ScrollTrigger)
 
 // FIX: Tắt lag compensation — animation đều hơn ở mọi frame rate
@@ -34,7 +32,6 @@ const DEFAULT_HERO_CONTENT = {
 
 // ─── COMPONENT ────────────────────────────────────────────
 export default function Hero() {
-  const { language } = useLanguage()
   const skipVideo = sessionStorage.getItem('skipHeroVideo') === '1'
   const layerARef  = useRef(null)
   const layerBRef  = useRef(null)
@@ -54,12 +51,8 @@ export default function Hero() {
   const [phase, setPhase] = useState('video')
   const [showSkipVideo, setShowSkipVideo] = useState(false)
   const [heroContent, setHeroContent] = useState(DEFAULT_HERO_CONTENT)
-  const localizedHeroContent = useMemo(
-    () => ({ ...DEFAULT_HERO_CONTENT, ...localizeObject(heroContent, language) }),
-    [heroContent, language],
-  )
-  const heroChars = (localizedHeroContent.title || DEFAULT_HERO_CONTENT.title).split('')
-  const heroDescriptionLines = String(localizedHeroContent.description || DEFAULT_HERO_CONTENT.description).split('\n')
+  const heroChars = (heroContent.title || DEFAULT_HERO_CONTENT.title).split('')
+  const heroDescriptionLines = String(heroContent.description || DEFAULT_HERO_CONTENT.description).split('\n')
 
   useEffect(() => {
     let cancelled = false
@@ -420,26 +413,22 @@ useEffect(() => {
         </h1>
         <div className={styles.logisticsRow}>
           <span className={styles.logLine} />
-          {localizedHeroContent.subtitle || DEFAULT_HERO_CONTENT.subtitle}
+          {heroContent.subtitle || DEFAULT_HERO_CONTENT.subtitle}
           <span className={styles.logLine} />
         </div>
         <p className={styles.desc}>
-          {heroDescriptionLines.map((line, index) => (
-            <span key={index}>
-              {line}
-              {index < heroDescriptionLines.length - 1 && <br />}
-            </span>
-          ))}
+          Kết nối toàn quốc — vươn tầm quốc tế.<br />
+          Vận chuyển chuyên nghiệp, nhanh chóng và an toàn.
         </p>
         <div className={styles.ctas}>
-          <Link to={localizedHeroContent.primary_cta_link || '/dich-vu#lien-he'} className={styles.btnRed} ref={(node) => { setupMagnetic(node) }}>
-            {localizedHeroContent.primary_cta_label || DEFAULT_HERO_CONTENT.primary_cta_label}
+          <Link to="/dich-vu#lien-he" className={styles.btnRed} ref={(node) => { setupMagnetic(node) }}>
+            Yêu Cầu Báo Giá
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
               <path d="M5 12h14M12 5l7 7-7 7" />
             </svg>
           </Link>
-          <Link to={localizedHeroContent.secondary_cta_link || '/dich-vu'} className={styles.btnGhost} ref={(node) => { setupMagnetic(node) }}>
-            {localizedHeroContent.secondary_cta_label || DEFAULT_HERO_CONTENT.secondary_cta_label}
+          <Link to="/dich-vu" className={styles.btnGhost} ref={(node) => { setupMagnetic(node) }}>
+            Xem Dịch Vụ
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M9 18l6-6-6-6" />
             </svg>

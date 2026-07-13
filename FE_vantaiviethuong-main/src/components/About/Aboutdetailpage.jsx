@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import axios from 'axios'
 import { gsap } from 'gsap'
@@ -8,8 +8,6 @@ import {
   Phone, ArrowRight, Eye, Target, Shield,
 } from 'lucide-react'
 import styles from './Aboutdetailpage.module.scss'
-import { useLanguage } from '../../i18n/LanguageContext'
-import { localizeObject } from '../../i18n/localized'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -130,12 +128,7 @@ function getServiceLink(service, index) {
 }
 
 export default function AboutDetailPage() {
-  const { language } = useLanguage()
   const [about, setAbout] = useState(FALLBACK_ABOUT)
-  const localizedAbout = useMemo(
-    () => normalizeAbout(localizeObject(about, language)),
-    [about, language],
-  )
   const [loadError] = useState(false)
 
   const heroRef       = useRef(null)
@@ -316,7 +309,7 @@ export default function AboutDetailPage() {
     )
   }
 
-  const { hero, stats, identity, services, timeline, values_section: values } = localizedAbout
+  const { hero, stats, identity, services, timeline, values_section: values } = about
 
   return (
     <main className={styles.page}>

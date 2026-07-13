@@ -1,10 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { MapPin, Mail, Phone, Building2, ChevronRight, Star } from 'lucide-react'
 import { Helmet } from 'react-helmet-async'
 import { branchApi } from '../../services/api'
 import styles from './ContactDetail.module.scss'
-import { useLanguage } from '../../i18n/LanguageContext'
-import { localizeObject } from '../../i18n/localized'
 
 // ── Trụ sở chính ─────────────────────────────────────────────
 const HEADQUARTER = {
@@ -67,7 +65,6 @@ const VN_GEOJSON_URL =
   'https://raw.githubusercontent.com/wmgeolab/geoBoundaries/main/releaseData/gbOpen/VNM/ADM0/geoBoundaries-VNM-ADM0.geojson'
 
 export default function ContactDetail() {
-  const { language } = useLanguage()
   const mapRef = useRef(null)
   const leafletMap = useRef(null)
   const markersRef = useRef([])
@@ -75,9 +72,7 @@ export default function ContactDetail() {
   const [active, setActive] = useState('hq')
   const [headquarter, setHeadquarter] = useState(HEADQUARTER)
   const [branches, setBranches] = useState(BRANCHES)
-  const localizedHeadquarter = useMemo(() => localizeObject(headquarter, language), [headquarter, language])
-  const localizedBranches = useMemo(() => localizeObject(branches, language), [branches, language])
-  const allLocations = [localizedHeadquarter, ...localizedBranches]
+  const allLocations = [headquarter, ...branches]
 
   useEffect(() => {
     let cancelled = false
@@ -166,7 +161,7 @@ export default function ContactDetail() {
 
       // Markers — tất cả locations
       allLocations.forEach((loc, i) => {
-        const isHQ = loc.is_headquarter || String(loc.id) === String(localizedHeadquarter.id)
+        const isHQ = loc.is_headquarter || String(loc.id) === String(headquarter.id)
         const icon = window.L.divIcon({
           className: '',
           html: `<div class="cd-marker ${isHQ ? 'cd-marker--hq' : ''}">
@@ -212,7 +207,7 @@ export default function ContactDetail() {
     return () => {
       if (leafletMap.current) { leafletMap.current.remove(); leafletMap.current = null }
     }
-  }, [localizedHeadquarter, localizedBranches])
+  }, [headquarter, branches])
 
   function handleLocationClick(loc, index) {
     setActive(String(loc.id))
@@ -260,27 +255,27 @@ export default function ContactDetail() {
               Trụ Sở Chính
             </div>
             <div
-              className={`${styles.cardHq} ${String(active) === String(localizedHeadquarter.id) ? styles.cardHqActive : ''}`}
-              onClick={() => handleLocationClick(localizedHeadquarter, 0)}
+              className={`${styles.cardHq} ${String(active) === String(headquarter.id) ? styles.cardHqActive : ''}`}
+              onClick={() => handleLocationClick(headquarter, 0)}
             >
               <div className={styles.cardHqThumb}>
-                <img src={localizedHeadquarter.image_url} alt={localizedHeadquarter.name} />
+                <img src={headquarter.image_url} alt={headquarter.name} />
                 <div className={styles.cardHqThumbOverlay} />
                 <span className={styles.hqBadge}>TRỤ SỞ CHÍNH</span>
               </div>
               <div className={styles.cardHqContent}>
-                <h3 className={styles.cardHqName}>{localizedHeadquarter.name}</h3>
+                <h3 className={styles.cardHqName}>{headquarter.name}</h3>
                 <div className={styles.cardRow}>
                   <MapPin size={13} className={styles.cardIcon} />
-                  <span>{localizedHeadquarter.address}</span>
+                  <span>{headquarter.address}</span>
                 </div>
                 <div className={styles.cardRow}>
                   <Mail size={13} className={styles.cardIcon} />
-                  <span>{localizedHeadquarter.email}</span>
+                  <span>{headquarter.email}</span>
                 </div>
                 <div className={styles.cardRow}>
                   <Phone size={13} className={styles.cardIcon} />
-                  <span>{localizedHeadquarter.phone}</span>
+                  <span>{headquarter.phone}</span>
                 </div>
                 <div className={styles.cardFooter}>
                   <span className={styles.cardCta}>
@@ -296,7 +291,7 @@ export default function ContactDetail() {
               Văn Phòng Đại Diện
             </div>
             <div className={styles.cards}>
-              {localizedBranches.map((branch, i) => (
+              {branches.map((branch, i) => (
                 <div
                   key={branch.id}
                   className={`${styles.card} ${String(active) === String(branch.id) ? styles.cardActive : ''}`}

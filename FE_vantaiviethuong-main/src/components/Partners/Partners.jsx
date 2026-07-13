@@ -3,8 +3,6 @@ import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import styles from './Partners.module.scss'
 import { homePageApi, partnerApi, resolveApiMediaUrl } from '../../services/api'
-import { useLanguage } from '../../i18n/LanguageContext'
-import { getLocalizedValue, localizeObject } from '../../i18n/localized'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -118,7 +116,6 @@ function Avatar({ initials, bg, color, size }) {
 }
 
 export default function Partners() {
-  const { language } = useLanguage()
   const sectionRef = useRef(null)
   const tickerRef  = useRef(null)
   const tickerTl   = useRef(null)
@@ -134,16 +131,14 @@ export default function Partners() {
     [managedLogos],
   )
   const displayReviews = useMemo(
-    () => localizeObject(normalizeReviews(reviewContent.reviews), language),
-    [reviewContent.reviews, language],
+    () => normalizeReviews(reviewContent.reviews),
+    [reviewContent.reviews],
   )
   const leadReview = displayReviews[0]
   const topReviews = displayReviews.slice(1, 3)
   const wideReview = displayReviews[3]
   const extraReviews = displayReviews.slice(4)
-  const localizedReviewTitle = getLocalizedValue(reviewContent.title, language) || DEFAULT_REVIEWS_TITLE
-  const localizedReviewSubtitle = getLocalizedValue(reviewContent.subtitle, language) || DEFAULT_REVIEWS_SUBTITLE
-  const reviewTitle = splitHighlightTitle(localizedReviewTitle)
+  const reviewTitle = splitHighlightTitle(reviewContent.title || DEFAULT_REVIEWS_TITLE)
 
   useEffect(() => {
     let cancelled = false
@@ -308,7 +303,7 @@ export default function Partners() {
             {reviewTitle.main && <>{reviewTitle.main} </>}
             <em className={styles.accent}>{reviewTitle.accent}</em>
           </h2>
-          <p className={styles.reviewSub}>{localizedReviewSubtitle}</p>
+          <p className={styles.reviewSub}>{reviewContent.subtitle || DEFAULT_REVIEWS_SUBTITLE}</p>
         </div>
 
         {displayReviews.length > 0 ? (

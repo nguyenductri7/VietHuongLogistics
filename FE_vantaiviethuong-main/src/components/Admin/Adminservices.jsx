@@ -13,7 +13,6 @@ import { GripVertical, Plus, Trash2, Eye, EyeOff, X, ArrowLeft } from 'lucide-re
 import styles from './Adminservices.module.scss'
 import { useAdminToast } from './AdminToast'
 import AdminConfirmDialog from './AdminConfirmDialog'
-import { getLocalizedValue, serializeLocalizedValue, toLocalizedString, toLocalizedValue } from '../../i18n/localized'
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
 
@@ -23,10 +22,6 @@ const ICON_OPTIONS = [
 ]
 
 const EMPTY_ITEM = { title: '', subtitle: '', description: '', icon_key: 'Truck', image: '', tags: [] }
-const ADMIN_LANGUAGES = [
-  { code: 'vi', label: 'Tiếng Việt', shortLabel: 'VI' },
-  { code: 'en', label: 'English', shortLabel: 'EN' },
-]
 
 const DEFAULT_PAGE = {
   banner: {
@@ -109,7 +104,6 @@ export default function AdminServices() {
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState({})
-  const [contentLanguage, setContentLanguage] = useState('vi')
   const [uploadingKey, setUploadingKey] = useState(null)
   const [showForm, setShowForm] = useState(false)
   const [editingItem, setEditingItem] = useState(null)
@@ -212,7 +206,7 @@ const loadAll = useCallback(() => {
   const addTag = () => {
     const v = tagInput.trim()
     if (!v) return
-    setFormData(prev => ({ ...prev, tags: [...prev.tags, toLocalizedString('', contentLanguage, v)] }))
+    setFormData(prev => ({ ...prev, tags: [...prev.tags, v] }))
     setTagInput('')
   }
 
@@ -222,28 +216,16 @@ const loadAll = useCallback(() => {
 
   const submitForm = async (e) => {
     e.preventDefault()
-    if (
-      !String(getLocalizedValue(formData.title, contentLanguage) || '').trim() ||
-      !String(getLocalizedValue(formData.subtitle, contentLanguage) || '').trim() ||
-      !String(getLocalizedValue(formData.description, contentLanguage) || '').trim() ||
-      !formData.image.trim()
-    ) {
+    if (!formData.title.trim() || !formData.subtitle.trim() || !formData.description.trim() || !formData.image.trim()) {
       showToast('Vui lòng nhập đầy đủ thông tin bắt buộc.', 'error')
       return
     }
     try {
-      const payload = {
-        ...formData,
-        title: serializeLocalizedValue(formData.title),
-        subtitle: serializeLocalizedValue(formData.subtitle),
-        description: serializeLocalizedValue(formData.description),
-        tags: Array.isArray(formData.tags) ? formData.tags.map(serializeLocalizedValue) : [],
-      }
       if (editingItem) {
-        await axios.put(`${API_BASE}/services-page/items/${editingItem.id}`, payload, authHeaders)
+        await axios.put(`${API_BASE}/services-page/items/${editingItem.id}`, formData, authHeaders)
         showToast('Đã cập nhật dịch vụ!', 'success')
       } else {
-        await axios.post(`${API_BASE}/services-page/items`, payload, authHeaders)
+        await axios.post(`${API_BASE}/services-page/items`, formData, authHeaders)
         showToast('Đã thêm dịch vụ mới!', 'success')
       }
       setShowForm(false)
@@ -266,25 +248,6 @@ const loadAll = useCallback(() => {
     } finally {
       setDeletingId(null)
     }
-  }
-
-  const updateLocalizedPageField = (path, value) => {
-    setPage(prev => {
-      const next = structuredClone(prev)
-      const keys = path.split('.')
-      let target = next
-      for (let i = 0; i < keys.length - 1; i++) target = target[keys[i]]
-      const lastKey = keys[keys.length - 1]
-      target[lastKey] = toLocalizedValue(target[lastKey], contentLanguage, value)
-      return next
-    })
-  }
-
-  const updateLocalizedFormField = (field, value) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: toLocalizedString(prev[field], contentLanguage, value),
-    }))
   }
 
   const toggleActive = async (item) => {
@@ -324,20 +287,19 @@ const loadAll = useCallback(() => {
         <div>
           <h1 className={styles.pageTitle}>Quản Lý Trang Dịch Vụ</h1>
         </div>
-        <LanguageTabs value={contentLanguage} onChange={setContentLanguage} />
       </div>
 
 
       {/* ══════════ BANNER ══════════ */}
       <Section title="Banner Hero" onSave={() => saveSection('banner')} saving={saving.banner}>
-        <TextField label="Tiêu đề dòng 1" value={getLocalizedValue(page.banner.title_line1, contentLanguage)}
-          onChange={v => updateLocalizedPageField('banner.title_line1', v)} />
-        <TextField label="Tiêu đề nhấn màu (dòng 2)" value={getLocalizedValue(page.banner.title_accent, contentLanguage)}
-          onChange={v => updateLocalizedPageField('banner.title_accent', v)} />
-        <TextField label="Tiêu đề dòng 3" value={getLocalizedValue(page.banner.title_line3, contentLanguage)}
-          onChange={v => updateLocalizedPageField('banner.title_line3', v)} />
-        <TextAreaField label="Mô tả phụ" value={getLocalizedValue(page.banner.subtitle, contentLanguage)}
-          onChange={v => updateLocalizedPageField('banner.subtitle', v)} />
+        <TextField label="Tiêu đề dòng 1" value={page.banner.title_line1}
+          onChange={v => updatePageField('banner.title_line1', v)} />
+        <TextField label="Tiêu đề nhấn màu (dòng 2)" value={page.banner.title_accent}
+          onChange={v => updatePageField('banner.title_accent', v)} />
+        <TextField label="Tiêu đề dòng 3" value={page.banner.title_line3}
+          onChange={v => updatePageField('banner.title_line3', v)} />
+        <TextAreaField label="Mô tả phụ" value={page.banner.subtitle}
+          onChange={v => updatePageField('banner.subtitle', v)} />
       </Section>
 
       {/* ══════════ DANH SÁCH DỊCH VỤ ══════════ */}
@@ -357,7 +319,6 @@ const loadAll = useCallback(() => {
                   <SortableServiceCard
                     key={item.id}
                     item={item}
-                    language={contentLanguage}
                     onEdit={() => openEditForm(item)}
                     onDelete={() => setDeleteTarget(item)}
                     onToggleActive={() => toggleActive(item)}
@@ -386,14 +347,14 @@ const loadAll = useCallback(() => {
               <SelectField label="Icon" value={step.icon_key}
                 options={ICON_OPTIONS}
                 onChange={v => updatePageField(`process_steps.${i}.icon_key`, v)} />
-              <TextField label="Tiêu đề" value={getLocalizedValue(step.title, contentLanguage)}
-                onChange={v => updateLocalizedPageField(`process_steps.${i}.title`, v)} />
+              <TextField label="Tiêu đề" value={step.title}
+                onChange={v => updatePageField(`process_steps.${i}.title`, v)} />
             </div>
             <ImageField label={"Icon upload (t\u00f9y ch\u1ecdn)"} value={step.icon_url}
               uploading={uploadingKey === `process_steps.${i}.icon_url`}
               onUpload={file => uploadImageFile(file, `process_steps.${i}.icon_url`, url => updatePageField(`process_steps.${i}.icon_url`, url))} />
-            <TextAreaField label="Mô tả" value={getLocalizedValue(step.desc, contentLanguage)}
-              onChange={v => updateLocalizedPageField(`process_steps.${i}.desc`, v)} />
+            <TextAreaField label="Mô tả" value={step.desc}
+              onChange={v => updatePageField(`process_steps.${i}.desc`, v)} />
           </div>
         ))}
       </Section>
@@ -401,10 +362,10 @@ const loadAll = useCallback(() => {
       {/* ══════════ CONTACT INFO ══════════ */}
       <Section title="Thông Tin Liên Hệ" onSave={() => saveSection('contact_info')} saving={saving.contact_info}>
         <div className={styles.row}>
-          <TextField label="Tên công ty" value={getLocalizedValue(page.contact_info.company_name, contentLanguage)}
-            onChange={v => updateLocalizedPageField('contact_info.company_name', v)} />
-          <TextField label="Slogan" value={getLocalizedValue(page.contact_info.tagline, contentLanguage)}
-            onChange={v => updateLocalizedPageField('contact_info.tagline', v)} />
+          <TextField label="Tên công ty" value={page.contact_info.company_name}
+            onChange={v => updatePageField('contact_info.company_name', v)} />
+          <TextField label="Slogan" value={page.contact_info.tagline}
+            onChange={v => updatePageField('contact_info.tagline', v)} />
         </div>
         <ImageField label="Ảnh minh họa cột trái" value={page.contact_info.left_image}
           uploading={uploadingKey === 'contact_info.left_image'}
@@ -417,11 +378,11 @@ const loadAll = useCallback(() => {
               <SelectField label="Icon" value={info.icon_key}
                 options={ICON_OPTIONS}
                 onChange={v => updatePageField(`contact_info.items.${i}.icon_key`, v)} />
-              <TextField label="Nhãn" value={getLocalizedValue(info.label, contentLanguage)}
-                onChange={v => updateLocalizedPageField(`contact_info.items.${i}.label`, v)} />
+              <TextField label="Nhãn" value={info.label}
+                onChange={v => updatePageField(`contact_info.items.${i}.label`, v)} />
             </div>
-            <TextField label="Giá trị" value={getLocalizedValue(info.value, contentLanguage)}
-              onChange={v => updateLocalizedPageField(`contact_info.items.${i}.value`, v)} />
+            <TextField label="Giá trị" value={info.value}
+              onChange={v => updatePageField(`contact_info.items.${i}.value`, v)} />
           </div>
         ))}
       </Section>
@@ -442,12 +403,12 @@ const loadAll = useCallback(() => {
                 </p>
               )}
 
-              <TextField label="Tiêu đề dịch vụ *" value={getLocalizedValue(formData.title, contentLanguage)}
-                onChange={v => updateLocalizedFormField('title', v)} />
-              <TextField label="Phụ đề *" value={getLocalizedValue(formData.subtitle, contentLanguage)}
-                onChange={v => updateLocalizedFormField('subtitle', v)} />
-              <TextAreaField label="Mô tả chi tiết *" value={getLocalizedValue(formData.description, contentLanguage)}
-                onChange={v => updateLocalizedFormField('description', v)} />
+              <TextField label="Tiêu đề dịch vụ *" value={formData.title}
+                onChange={v => setFormData(p => ({ ...p, title: v }))} />
+              <TextField label="Phụ đề *" value={formData.subtitle}
+                onChange={v => setFormData(p => ({ ...p, subtitle: v }))} />
+              <TextAreaField label="Mô tả chi tiết *" value={formData.description}
+                onChange={v => setFormData(p => ({ ...p, description: v }))} />
               <SelectField label="Icon" value={formData.icon_key} options={ICON_OPTIONS}
                 onChange={v => setFormData(p => ({ ...p, icon_key: v }))} />
 
@@ -470,7 +431,7 @@ const loadAll = useCallback(() => {
                 <div className={styles.tagList}>
                   {formData.tags.map((tag, i) => (
                     <span key={i} className={styles.tagChip}>
-                      {getLocalizedValue(tag, contentLanguage)}
+                      {tag}
                       <button type="button" onClick={() => removeTag(i)}><X size={12} /></button>
                     </span>
                   ))}
@@ -501,7 +462,7 @@ const loadAll = useCallback(() => {
 }
 
 // ── Card dịch vụ có thể kéo-thả ──────────────────────────────
-function SortableServiceCard({ item, language = 'vi', onEdit, onDelete, onToggleActive }) {
+function SortableServiceCard({ item, onEdit, onDelete, onToggleActive }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item.id })
 
   const style = {
@@ -516,13 +477,13 @@ function SortableServiceCard({ item, language = 'vi', onEdit, onDelete, onToggle
         <GripVertical size={18} />
       </button>
 
-      <img src={item.image} alt={getLocalizedValue(item.title, language)} className={styles.serviceCardThumb} />
+      <img src={item.image} alt={item.title} className={styles.serviceCardThumb} />
 
       <div className={styles.serviceCardInfo}>
-        <p className={styles.serviceCardTitle}>{getLocalizedValue(item.title, language)}</p>
-        <p className={styles.serviceCardSubtitle}>{getLocalizedValue(item.subtitle, language)}</p>
+        <p className={styles.serviceCardTitle}>{item.title}</p>
+        <p className={styles.serviceCardSubtitle}>{item.subtitle}</p>
         <div className={styles.serviceCardTags}>
-          {item.tags.map((t, i) => <span key={i} className={styles.miniTag}>{getLocalizedValue(t, language)}</span>)}
+          {item.tags.map((t, i) => <span key={i} className={styles.miniTag}>{t}</span>)}
         </div>
       </div>
 
@@ -551,33 +512,6 @@ function Section({ title, children, onSave, saving }) {
       </div>
       <div className={styles.sectionBody}>{children}</div>
     </section>
-  )
-}
-
-function LanguageTabs({ value, onChange }) {
-  return (
-    <div style={{ display: 'inline-flex', gap: 6, padding: 4, border: '1px solid #E5E7EB', borderRadius: 999, background: '#F9FAFB' }}>
-      {ADMIN_LANGUAGES.map(lang => (
-        <button
-          key={lang.code}
-          type="button"
-          onClick={() => onChange(lang.code)}
-          title={lang.label}
-          style={{
-            border: 0,
-            borderRadius: 999,
-            padding: '7px 12px',
-            fontWeight: 800,
-            fontSize: 12,
-            cursor: 'pointer',
-            color: value === lang.code ? '#fff' : '#374151',
-            background: value === lang.code ? '#DC2626' : 'transparent',
-          }}
-        >
-          {lang.shortLabel}
-        </button>
-      ))}
-    </div>
   )
 }
 

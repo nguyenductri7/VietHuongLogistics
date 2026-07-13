@@ -1,4 +1,4 @@
-import { useRef, useEffect, useMemo, useState } from 'react'
+import { useRef, useEffect, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { gsap } from 'gsap'
 import { Helmet } from 'react-helmet-async'
@@ -6,8 +6,6 @@ import { blogApi, resolveApiMediaInHtml, resolveApiMediaUrl } from '../../servic
 import { BLOG_DEFAULT_IMAGE, getFallbackPost, getFallbackRelated } from './blogFallback'
 import { readTimeFromPost } from './blogReadTime'
 import styles from './BlogDetailPage.module.scss'
-import { useLanguage } from '../../i18n/LanguageContext'
-import { localizeObject } from '../../i18n/localized'
 
 // Gradient mặc định khi bài viết không có thumbnail_url (đồng bộ với BlogPage.jsx)
 const FALLBACK_GRADIENTS = [
@@ -37,15 +35,12 @@ function readTimeFromContent(content = '') {
 }
 
 export default function BlogDetailPage() {
-  const { language } = useLanguage()
   const { id } = useParams() // có thể là slug hoặc id, tuỳ route bạn khai báo
   const navigate = useNavigate()
   const pageRef = useRef(null)
 
   const [post, setPost] = useState(null)
   const [related, setRelated] = useState([])
-  const localizedPost = useMemo(() => localizeObject(post, language), [post, language])
-  const localizedRelated = useMemo(() => localizeObject(related, language) || [], [related, language])
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
 
@@ -113,7 +108,7 @@ export default function BlogDetailPage() {
     )
   }
 
-  if (notFound || !localizedPost) {
+  if (notFound || !post) {
     return (
       <main className={styles.notFound}>
         <div className="container">
@@ -146,15 +141,15 @@ export default function BlogDetailPage() {
     })
   }
 
-  const heroImage = resolveApiMediaUrl(localizedPost.thumbnail_url) || BLOG_DEFAULT_IMAGE
-  const readTime = readTimeFromPost(localizedPost)
-  const dateLabel = formatDate(localizedPost.published_at || localizedPost.created_at)
+  const heroImage = resolveApiMediaUrl(post.thumbnail_url) || BLOG_DEFAULT_IMAGE
+  const readTime = readTimeFromPost(post)
+  const dateLabel = formatDate(post.published_at || post.created_at)
 
   return (
     <>
       <Helmet>
-        <title>{localizedPost.title} | Việt Hương Logistics</title>
-        <meta name="description" content={localizedPost.excerpt} />
+        <title>{post.title} | Việt Hương Logistics</title>
+        <meta name="description" content={post.excerpt} />
       </Helmet>
 
       <main ref={pageRef} className={styles.page}>
@@ -176,8 +171,8 @@ export default function BlogDetailPage() {
           style={{ backgroundImage: `url('${heroImage}')`, backgroundSize: 'cover', backgroundPosition: 'center' }}
         >
           <div className={`container ${styles.bannerContent}`}>
-            <span className={`${styles.catBadge} bd-hero`}>{localizedPost.category}</span>
-            <h1 className={`${styles.title} bd-hero`}>{localizedPost.title}</h1>
+            <span className={`${styles.catBadge} bd-hero`}>{post.category}</span>
+            <h1 className={`${styles.title} bd-hero`}>{post.title}</h1>
             <div className={`${styles.meta} bd-hero`}>
               <time>{dateLabel}</time>
               <span className={styles.dot}>·</span>
@@ -197,9 +192,9 @@ export default function BlogDetailPage() {
           <div className={styles.layout}>
             {/* Article */}
             <article className={`${styles.article} bd-body`}>
-              <p className={styles.lead}>{localizedPost.excerpt}</p>
+              <p className={styles.lead}>{post.excerpt}</p>
               <div className={styles.content}>
-                {renderContent(localizedPost.content)}
+                {renderContent(post.content)}
               </div>
             </article>
 
@@ -208,7 +203,7 @@ export default function BlogDetailPage() {
               <div className={styles.sideCard}>
                 <p className={styles.sideLabel}>Bài viết liên quan</p>
                 <div className={styles.relatedList}>
-                  {localizedRelated.map(r => {
+                  {related.map(r => {
                     const [gradFrom, gradTo] = gradientFor(r.id)
                     const imageUrl = resolveApiMediaUrl(r.thumbnail_url)
                     const hasImg = !!imageUrl
@@ -247,7 +242,7 @@ export default function BlogDetailPage() {
           <div className="container">
             <p className={styles.moreLabel}>Khám phá thêm</p>
             <div className={styles.moreGrid}>
-              {localizedRelated.map(r => {
+              {related.map(r => {
                 const [gradFrom, gradTo] = gradientFor(r.id)
                 const imageUrl = resolveApiMediaUrl(r.thumbnail_url)
                 const hasImg = !!imageUrl

@@ -105,7 +105,7 @@ function normalizeServicesPage(row = {}) {
 
 // ── Tạo slug không dấu từ tiếng Việt, dùng cho service_items.slug ──
 function slugify(str) {
-  return String(str || '')
+  return str
     .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // bỏ dấu
     .replace(/đ/g, 'd').replace(/Đ/g, 'D')
     .toLowerCase()
@@ -113,19 +113,6 @@ function slugify(str) {
     .trim()
     .replace(/\s+/g, '-')
     .replace(/-+/g, '-');
-}
-
-function getLocalizedPlainText(value) {
-  if (typeof value !== 'string') return String(value || '');
-  const trimmed = value.trim();
-  if (!trimmed.startsWith('{') || !trimmed.endsWith('}')) return value;
-
-  try {
-    const parsed = JSON.parse(trimmed);
-    return parsed.vi || parsed.en || value;
-  } catch {
-    return value;
-  }
 }
 
 // ═══════════ PHẦN CỐ ĐỊNH (banner / process_steps / contact_info) ═══════════
@@ -227,7 +214,7 @@ const createServiceItem = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Vui lòng nhập đầy đủ thông tin bắt buộc.' });
     }
 
-    let slug = slugify(getLocalizedPlainText(title));
+    let slug = slugify(title);
     if (!slug) slug = `dich-vu-${Date.now()}`;
 
     // Đảm bảo slug không trùng — nếu trùng thì gắn số đếm phía sau

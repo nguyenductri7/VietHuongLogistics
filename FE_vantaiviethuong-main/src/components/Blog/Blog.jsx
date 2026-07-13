@@ -1,12 +1,10 @@
-import { useRef, useEffect, useMemo, useState } from 'react'
+import { useRef, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { blogApi, resolveApiMediaUrl } from '../../services/api'
 import { FALLBACK_BLOG_POSTS } from './blogFallback'
 import styles from './Blog.module.scss'
-import { useLanguage } from '../../i18n/LanguageContext'
-import { localizeObject } from '../../i18n/localized'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -113,13 +111,11 @@ function BlogCard({ post }) {
 }
 
 export default function Blog() {
-  const { language } = useLanguage()
   const sectionRef = useRef(null)
   const trackRef   = useRef(null)
   const tickerTl   = useRef(null)
   const navigate   = useNavigate()
   const [posts, setPosts] = useState(FALLBACK_BLOG_POSTS)
-  const localizedPosts = useMemo(() => localizeObject(posts, language) || [], [posts, language])
 
   // Dùng cùng nguồn bài đã xuất bản với trang /tin-tuc.
   useEffect(() => {
@@ -191,7 +187,7 @@ export default function Blog() {
         aria-label="Tin tức mới nhất"
       >
         <div className={styles.tickerTrack} ref={trackRef}>
-          {[...localizedPosts, ...localizedPosts].map((post, i) => (
+          {[...posts, ...posts].map((post, i) => (
             <BlogCard key={i} post={post} />
           ))}
         </div>
@@ -200,7 +196,7 @@ export default function Blog() {
       </div>
 
       <div className={styles.dots} aria-hidden="true">
-        {localizedPosts.map((_, i) => (
+        {posts.map((_, i) => (
           <span key={i} className={i === 0 ? styles.dotActive : styles.dotInactive} />
         ))}
       </div>
