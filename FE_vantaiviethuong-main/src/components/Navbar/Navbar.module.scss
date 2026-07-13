@@ -26,6 +26,7 @@
   .ctaBtn   { background: $red; border-color: $red; color: $white; }
   .logoMark { background: $red; }
   .hamburger span { background: $gray-800; }
+  .langBtn { border-color: rgba($gray-800, 0.16); }
 
   &.scrolled {
     background: rgba($white, 0.97);
@@ -42,6 +43,7 @@
     .ctaBtn   { background: $red; border-color: $red; color: $white; }
     .logoMark { background: $red; }
     .hamburger span { background: $gray-800; }
+    .langBtn { border-color: rgba($gray-800, 0.16); }
   }
 
   &.transparent {
@@ -68,6 +70,25 @@
     }
 
     .hamburger span { background: $white; }
+
+    .languageSwitcher {
+      background: rgba($white, 0.12);
+      border-color: rgba($white, 0.18);
+    }
+
+    .langBtn {
+      color: $white;
+      border-color: rgba($white, 0.18);
+
+      &:hover {
+        background: rgba($white, 0.16);
+      }
+    }
+
+    .langActive {
+      background: rgba($white, 0.95);
+      color: $red;
+    }
   }
 }
 
@@ -182,6 +203,54 @@
   &:hover { background: $red-dark; border-color: $red-dark; transform: translateY(-1px); }
 }
 
+.languageSwitcher {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid rgba($gray-900, 0.08);
+  border-radius: 999px;
+  background: rgba($white, 0.88);
+  flex-shrink: 0;
+}
+
+.langBtn {
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba($gray-900, 0.12);
+  border-radius: 999px;
+  background: transparent;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: rgba($red, 0.08);
+    transform: translateY(-1px);
+  }
+}
+
+.flagSvg {
+  width: 23px;
+  height: 16px;
+  display: block;
+  border-radius: 4px;
+  box-shadow: 0 0 0 1px rgba($black, 0.08);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.langActive {
+  background: $red;
+  border-color: $red;
+  color: $white;
+  box-shadow: 0 8px 18px rgba($red, 0.22);
+}
+
 /* ── Hamburger ───────────────────────────────────── */
 .hamburger {
   display: none;
@@ -237,6 +306,72 @@
   .btnPrimary { margin-top: 16px; width: fit-content; }
 }
 
+.mobileLanguageSwitcher {
+  display: flex;
+  gap: 10px;
+  padding: 12px 0;
+
+  .langBtn {
+    width: auto;
+    min-width: 120px;
+    height: 40px;
+    gap: 8px;
+    padding: 0 14px;
+    font-size: 14px;
+    font-weight: 700;
+    color: $gray-800;
+  }
+
+  .langActive {
+    color: $white;
+  }
+}
+
+.googleTranslateElement {
+  position: fixed;
+  width: 1px;
+  height: 1px;
+  left: -9999px;
+  top: -9999px;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+:global(.goog-te-banner-frame),
+:global(.goog-te-balloon-frame),
+:global(#goog-gt-tt),
+:global(iframe.skiptranslate),
+:global(body > .skiptranslate),
+:global(.goog-te-gadget),
+:global(.goog-te-gadget-icon),
+:global(.goog-logo-link),
+:global(.VIpgJd-ZVi9od-ORHb-OEVmcd),
+:global(.VIpgJd-ZVi9od-aZ2wEe-wOHMyf),
+:global(.VIpgJd-ZVi9od-xl07Ob-OEVmcd),
+:global(.VIpgJd-ZVi9od-l4eHX-hSRGPd) {
+  display: none !important;
+}
+
+:global(.goog-text-highlight) {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+:global(html.translated-ltr),
+:global(html.translated-rtl) {
+  margin-top: 0 !important;
+}
+
+:global(body) {
+  top: 0 !important;
+  min-height: 0 !important;
+}
+
+:global(.skiptranslate) {
+  display: none !important;
+}
+
 /* ── Responsive ──────────────────────────────────── */
 @media (max-width: 1100px) {
   .navLink { font-size: 12px; padding: 6px 8px; }
@@ -244,7 +379,7 @@
 }
 
 @media (max-width: 820px) {
-  .nav, .ctaBtn { display: none; }
+  .nav, .ctaBtn, .languageSwitcher { display: none; }
   .hamburger { display: flex; }
   .mobileMenu { display: block; }
 }

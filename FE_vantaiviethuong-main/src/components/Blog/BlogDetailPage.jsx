@@ -5,6 +5,7 @@ import { Helmet } from 'react-helmet-async'
 import { blogApi, resolveApiMediaInHtml, resolveApiMediaUrl } from '../../services/api'
 import { BLOG_DEFAULT_IMAGE, getFallbackPost, getFallbackRelated } from './blogFallback'
 import { readTimeFromPost } from './blogReadTime'
+import { formatBlogDate, getBlogDateValue } from './blogDate'
 import styles from './BlogDetailPage.module.scss'
 
 // Gradient mặc định khi bài viết không có thumbnail_url (đồng bộ với BlogPage.jsx)
@@ -20,12 +21,6 @@ const FALLBACK_GRADIENTS = [
 function gradientFor(id) {
   const hash = String(id).split('').reduce((a, c) => a + c.charCodeAt(0), 0)
   return FALLBACK_GRADIENTS[hash % FALLBACK_GRADIENTS.length]
-}
-
-function formatDate(dateStr) {
-  if (!dateStr) return ''
-  const d = new Date(dateStr)
-  return d.toLocaleDateString('vi-VN', { day: 'numeric', month: 'long', year: 'numeric' })
 }
 
 function readTimeFromContent(content = '') {
@@ -143,7 +138,7 @@ export default function BlogDetailPage() {
 
   const heroImage = resolveApiMediaUrl(post.thumbnail_url) || BLOG_DEFAULT_IMAGE
   const readTime = readTimeFromPost(post)
-  const dateLabel = formatDate(post.published_at || post.created_at)
+  const dateLabel = formatBlogDate(getBlogDateValue(post), { fallback: 'Đang cập nhật' })
 
   return (
     <>

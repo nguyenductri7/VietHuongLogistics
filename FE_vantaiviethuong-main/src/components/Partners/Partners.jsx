@@ -26,6 +26,7 @@ const DEFAULT_REVIEWS = [
     company: 'BITI France',
     avatarBg: '#dbeafe',
     avatarColor: '#a5cacd',
+    avatar_url: '',
     gradFrom: '#9dcccb',
     sunColor: 'rgba(100,180,255,0.22)',
     quote: 'Tôi rất hài lòng với dịch vụ logistics của Việt Hương. Các nhân viên hỗ trợ tận tình, chuyên nghiệp. Thời gian giao nhận hàng luôn được đảm bảo chính xác.',
@@ -37,6 +38,7 @@ const DEFAULT_REVIEWS = [
     company: 'BITI VN',
     avatarBg: '#fef3c7',
     avatarColor: '#92400e',
+    avatar_url: '',
     gradFrom: '#f1dc88',
     sunColor: 'rgba(255,200,80,0.24)',
     quote: 'Dịch vụ chuyên nghiệp và đáng tin cậy. Hệ thống vận chuyển tiên tiến mang lại sự hài lòng tuyệt đối. Đảm bảo an toàn hàng hóa là điều tôi thích nhất.',
@@ -48,6 +50,7 @@ const DEFAULT_REVIEWS = [
     company: 'Unilever VN',
     avatarBg: '#d1fae5',
     avatarColor: '#065f46',
+    avatar_url: '',
     gradFrom: '#6ab388',
     sunColor: 'rgba(147, 167, 198, 0.22)',
     quote: 'Rất chuyên nghiệp trong xử lý hàng hóa. Vận chuyển an toàn, đúng hạn — tôi hoàn toàn tin tưởng và sẽ tiếp tục hợp tác lâu dài.',
@@ -59,6 +62,7 @@ const DEFAULT_REVIEWS = [
     company: 'CFO — Masan Group',
     avatarBg: '#fce7f3',
     avatarColor: '#9d174d',
+    avatar_url: '',
     gradFrom: '#a0748c',
     sunColor: 'rgba(200,100,255,0.20)',
     quote: 'Từ khi hợp tác với Việt Hương, chi phí vận chuyển giảm 18% trong khi chất lượng dịch vụ tăng lên rõ rệt. Đó là điều hiếm thấy trên thị trường.',
@@ -72,6 +76,7 @@ function normalizeReviews(reviews = []) {
     return {
       ...fallback,
       ...(review || {}),
+      avatar_url: review?.avatar_url || review?.avatar || review?.image_url || fallback.avatar_url || '',
     }
   })
 }
@@ -102,15 +107,19 @@ function Stars() {
   )
 }
 
-function Avatar({ initials, bg, color, size }) {
+function Avatar({ initials, bg, color, size, imageUrl, name }) {
   const s = size || 52
   return (
     <div
       className={styles.avatar}
       style={{ width: s, height: s, background: bg, color: color }}
-      aria-hidden="true"
+      aria-hidden={!imageUrl}
     >
-      {initials}
+      {imageUrl ? (
+        <img src={resolveApiMediaUrl(imageUrl)} alt={name || 'Khách hàng'} />
+      ) : (
+        initials
+      )}
     </div>
   )
 }
@@ -319,7 +328,7 @@ export default function Partners() {
                 <span className={styles.openQuote}>"</span>
                 <p className={styles.quoteLg}>{leadReview.quote}</p>
                 <footer className={styles.cardFooter}>
-                  <Avatar initials={leadReview.initials} bg={leadReview.avatarBg} color={leadReview.avatarColor} />
+                  <Avatar initials={leadReview.initials} bg={leadReview.avatarBg} color={leadReview.avatarColor} imageUrl={leadReview.avatar_url} name={leadReview.name} />
                   <div>
                     <strong className={styles.name}>{leadReview.name}</strong>
                     <span className={styles.role}>{leadReview.company}</span>
@@ -340,7 +349,7 @@ export default function Partners() {
                         style={{ '--grad-from': r.gradFrom, '--sun-color': r.sunColor }}
                       >
                         <Stars />
-                        <Avatar initials={r.initials} bg={r.avatarBg} color={r.avatarColor} size={48} />
+                        <Avatar initials={r.initials} bg={r.avatarBg} color={r.avatarColor} size={48} imageUrl={r.avatar_url} name={r.name} />
                         <strong className={styles.name} style={{ marginTop: 10 }}>{r.name}</strong>
                         <span className={styles.role}>{r.company}</span>
                         <p className={styles.quoteSm}>"{r.quote}"</p>
@@ -356,7 +365,7 @@ export default function Partners() {
                     style={{ '--grad-from': wideReview.gradFrom, '--sun-color': wideReview.sunColor }}
                   >
                     <div className={styles.wideLeft}>
-                      <Avatar initials={wideReview.initials} bg={wideReview.avatarBg} color={wideReview.avatarColor} size={52} />
+                      <Avatar initials={wideReview.initials} bg={wideReview.avatarBg} color={wideReview.avatarColor} size={52} imageUrl={wideReview.avatar_url} name={wideReview.name} />
                       <div>
                         <strong className={styles.name}>{wideReview.name}</strong>
                         <span className={styles.role}>{wideReview.company}</span>
@@ -377,7 +386,7 @@ export default function Partners() {
                         style={{ '--grad-from': r.gradFrom, '--sun-color': r.sunColor }}
                       >
                         <Stars />
-                        <Avatar initials={r.initials} bg={r.avatarBg} color={r.avatarColor} size={48} />
+                        <Avatar initials={r.initials} bg={r.avatarBg} color={r.avatarColor} size={48} imageUrl={r.avatar_url} name={r.name} />
                         <strong className={styles.name} style={{ marginTop: 10 }}>{r.name}</strong>
                         <span className={styles.role}>{r.company}</span>
                         <p className={styles.quoteSm}>"{r.quote}"</p>

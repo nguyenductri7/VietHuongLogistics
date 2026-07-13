@@ -7,6 +7,7 @@ import { blogApi, resolveApiMediaUrl } from '../../services/api'
 import { FALLBACK_BLOG_POSTS, getFallbackPosts } from './blogFallback'
 import { ALL_BLOG_CATEGORIES, DEFAULT_BLOG_CATEGORIES } from './blogCategories'
 import { readTimeFromPost } from './blogReadTime'
+import { formatBlogDate, getBlogDateValue } from './blogDate'
 import styles from './BlogPage.module.scss'
 
 gsap.registerPlugin(ScrollTrigger)
@@ -25,12 +26,6 @@ function gradientFor(id) {
   // băm id thành index ổn định, để mỗi bài luôn ra cùng 1 gradient
   const hash = String(id).split('').reduce((a, c) => a + c.charCodeAt(0), 0)
   return FALLBACK_GRADIENTS[hash % FALLBACK_GRADIENTS.length]
-}
-
-function formatDate(dateStr) {
-  if (!dateStr) return ''
-  const d = new Date(dateStr)
-  return d.toLocaleDateString('vi-VN', { day: 'numeric', month: 'long', year: 'numeric' })
 }
 
 function readTimeFromContent(content = '') {
@@ -69,7 +64,7 @@ function PostCard({ post }) {
         <div className={styles.meta}>
           <span className={styles.catText}>{post.category}</span>
           <span className={styles.dot}>·</span>
-          <time>{formatDate(post.published_at || post.created_at)}</time>
+          <time>{formatBlogDate(getBlogDateValue(post), { fallback: 'Đang cập nhật' })}</time>
           <span className={styles.dot}>·</span>
           <span>{readTimeFromPost(post)}</span>
         </div>

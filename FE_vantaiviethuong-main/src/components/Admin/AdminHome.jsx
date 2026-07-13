@@ -51,24 +51,28 @@ const DEFAULT_HOME = {
         initials: 'TQ',
         name: 'Tony Quoc',
         company: 'BITI France',
+        avatar_url: '',
         quote: 'Tôi rất hài lòng với dịch vụ logistics của Việt Hương. Các nhân viên hỗ trợ tận tình, chuyên nghiệp. Thời gian giao nhận hàng luôn được đảm bảo chính xác.',
       },
       {
         initials: 'BN',
         name: 'Bảo Nguyên',
         company: 'BITI VN',
+        avatar_url: '',
         quote: 'Dịch vụ chuyên nghiệp và đáng tin cậy. Hệ thống vận chuyển tiên tiến mang lại sự hài lòng tuyệt đối. Đảm bảo an toàn hàng hóa là điều tôi thích nhất.',
       },
       {
         initials: 'JT',
         name: 'Jessie Truong',
         company: 'Unilever VN',
+        avatar_url: '',
         quote: 'Rất chuyên nghiệp trong xử lý hàng hóa. Vận chuyển an toàn, đúng hạn — tôi hoàn toàn tin tưởng và sẽ tiếp tục hợp tác lâu dài.',
       },
       {
         initials: 'PH',
         name: 'Phạm Quốc Hùng',
         company: 'CFO — Masan Group',
+        avatar_url: '',
         quote: 'Từ khi hợp tác với Việt Hương, chi phí vận chuyển giảm 18% trong khi chất lượng dịch vụ tăng lên rõ rệt. Đó là điều hiếm thấy trên thị trường.',
       },
     ],
@@ -227,6 +231,7 @@ function normalizeReviews(reviews = []) {
     return {
     ...fallback,
     ...(review || {}),
+    avatar_url: review?.avatar_url || review?.avatar || review?.image_url || fallback.avatar_url || '',
     id: review?.id || `${Date.now()}-${index}`,
   }
   })
@@ -321,6 +326,7 @@ export default function AdminHome() {
               initials: '',
               name: '',
               company: '',
+              avatar_url: '',
               quote: '',
             },
           ],
@@ -382,6 +388,21 @@ export default function AdminHome() {
       showToast('Upload thành công! Bấm “Lưu section” để lưu thay đổi.')
     } catch (err) {
       showToast(err.message || 'Upload thất bại.', 'error')
+    } finally {
+      setUploadingField(null)
+    }
+  }
+
+  const handleReviewAvatarUpload = async (index, file) => {
+    if (!file) return
+    const fieldKey = `review-avatar-${index}`
+    setUploadingField(fieldKey)
+    try {
+      const res = await homePageApi.uploadImage(file)
+      handleReviewChange(index, 'avatar_url', res.url)
+      showToast('Upload ảnh khách hàng thành công! Bấm “Lưu section” để lưu thay đổi.')
+    } catch (err) {
+      showToast(err.message || 'Upload ảnh khách hàng thất bại.', 'error')
     } finally {
       setUploadingField(null)
     }
@@ -782,6 +803,45 @@ export default function AdminHome() {
                           onChange={e => handleReviewChange(index, 'company', e.target.value)}
                           placeholder="VD: CEO — ABC Logistics"
                         />
+                      </div>
+
+                      <div className={styles.field} style={{ marginTop: 10 }}>
+                        <label className={styles.label}>Ảnh khách hàng</label>
+                        <div className={styles.reviewAvatarUploader}>
+                          <div className={styles.reviewAvatarPreview}>
+                            {review.avatar_url ? (
+                              <img src={resolveApiMediaUrl(review.avatar_url)} alt={review.name || `Khách hàng ${index + 1}`} />
+                            ) : (
+                              <span>{review.initials || 'KH'}</span>
+                            )}
+                          </div>
+
+                          <div className={styles.reviewAvatarActions}>
+                            <label className={styles.changeImgBtn}>
+                              {uploadingField === `review-avatar-${index}`
+                                ? <><Loader2 size={14} className={styles.spinner} /> Đang upload...</>
+                                : <><Upload size={14} /> Chọn ảnh</>
+                              }
+                              <input
+                                type="file"
+                                accept="image/*"
+                                disabled={uploadingField === `review-avatar-${index}`}
+                                onChange={e => handleReviewAvatarUpload(index, e.target.files?.[0])}
+                                style={{ display: 'none' }}
+                              />
+                            </label>
+
+                            {review.avatar_url && (
+                              <button
+                                type="button"
+                                className={styles.changeImgBtn}
+                                onClick={() => handleReviewChange(index, 'avatar_url', '')}
+                              >
+                                <Trash2 size={13} /> Xóa ảnh
+                              </button>
+                            )}
+                          </div>
+                        </div>
                       </div>
 
                       <div className={styles.field} style={{ marginBottom: 0 }}>

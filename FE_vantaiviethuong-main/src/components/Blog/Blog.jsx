@@ -4,16 +4,10 @@ import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { blogApi, resolveApiMediaUrl } from '../../services/api'
 import { FALLBACK_BLOG_POSTS } from './blogFallback'
+import { formatBlogDate, getBlogDateValue } from './blogDate'
 import styles from './Blog.module.scss'
 
 gsap.registerPlugin(ScrollTrigger)
-
-function formatDate(value) {
-  if (!value) return ''
-  return new Date(value).toLocaleDateString('vi-VN', {
-    day: 'numeric', month: 'long', year: 'numeric',
-  })
-}
 
 const posts = [
   {
@@ -95,7 +89,7 @@ function BlogCard({ post }) {
         <div className={styles.meta}>
           <span className={styles.cat}>{post.category}</span>
           <span className={styles.dot}>·</span>
-          <time>{formatDate(post.published_at || post.created_at)}</time>
+          <time>{formatBlogDate(getBlogDateValue(post), { fallback: 'Đang cập nhật' })}</time>
         </div>
         <h3 className={styles.title}>{post.title}</h3>
         <p className={styles.excerpt}>{post.excerpt}</p>

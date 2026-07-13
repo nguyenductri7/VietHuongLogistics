@@ -4,28 +4,75 @@ import styles from './Navbar.module.scss'
 import logoImg from '../../assets/logo viet huong.png'
 
 const navLinks = [
-  { label: 'TRANG CHỦ',    href: '#hero',     to: null },
-  { label: 'VỀ CHÚNG TÔI', href: null,        to: '/ve-chung-toi' },
-  { label: 'DỊCH VỤ',      href: null,        to: '/dich-vu' },
-  { label: 'GIẢI ĐÁP',     href: null,        to: '/giai-dap' },  // ← sửa
-  { label: 'TIN TỨC',      href: null,        to: '/tin-tuc' },
+  { label: 'TRANG CHỦ', href: '#hero', to: null },
+  { label: 'VỀ CHÚNG TÔI', href: null, to: '/ve-chung-toi' },
+  { label: 'DỊCH VỤ', href: null, to: '/dich-vu' },
+  { label: 'GIẢI ĐÁP', href: null, to: '/giai-dap' },
+  { label: 'TIN TỨC', href: null, to: '/tin-tuc' },
   { label: 'VĂN PHÒNG & CHI NHÁNH', href: null, to: '/chi-nhanh' },
 ]
 
+const GOOGLE_TRANSLATE_SCRIPT_ID = 'google-translate-script'
+const GOOGLE_TRANSLATE_COOKIE = 'googtrans'
+
+function setCookie(name, value) {
+  const maxAge = 60 * 60 * 24 * 365
+  const encodedValue = encodeURIComponent(value)
+  document.cookie = `${name}=${encodedValue}; path=/; max-age=${maxAge}; SameSite=Lax`
+}
+
+function removeCookie(name) {
+  document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`
+}
+
+function getCurrentLanguage() {
+  const match = document.cookie.match(new RegExp(`(?:^|; )${GOOGLE_TRANSLATE_COOKIE}=([^;]*)`))
+  const value = match ? decodeURIComponent(match[1]) : ''
+  return value.includes('/en') ? 'en' : 'vi'
+}
+
+function FlagVietnam() {
+  return (
+    <svg className={styles.flagSvg} viewBox="0 0 64 44" aria-hidden="true" focusable="false">
+      <rect width="64" height="44" rx="7" fill="#da251d" />
+      <path
+        fill="#ff0"
+        d="M32 9.2l3.54 10.9h11.46l-9.27 6.73 3.54 10.9L32 31l-9.27 6.73 3.54-10.9L17 20.1h11.46L32 9.2z"
+      />
+    </svg>
+  )
+}
+
+function FlagUnitedKingdom() {
+  return (
+    <svg className={styles.flagSvg} viewBox="0 0 64 44" aria-hidden="true" focusable="false">
+      <clipPath id="uk-flag-clip">
+        <rect width="64" height="44" rx="7" />
+      </clipPath>
+      <g clipPath="url(#uk-flag-clip)">
+        <rect width="64" height="44" fill="#012169" />
+        <path d="M0 0l64 44M64 0L0 44" stroke="#fff" strokeWidth="8" />
+        <path d="M0 0l64 44M64 0L0 44" stroke="#c8102e" strokeWidth="4.8" />
+        <path d="M32 0v44M0 22h64" stroke="#fff" strokeWidth="13" />
+        <path d="M32 0v44M0 22h64" stroke="#c8102e" strokeWidth="8" />
+      </g>
+    </svg>
+  )
+}
+
 export default function Navbar() {
-  const navRef     = useRef(null)
+  const navRef = useRef(null)
   const [menuOpen, setMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [transparent, setTransparent] = useState(false)
+  const [language, setLanguage] = useState(getCurrentLanguage)
 
   const navigate = useNavigate()
   const location = useLocation()
 
   useEffect(() => {
     const handleScroll = () => {
-      const cur = window.scrollY
-      const isAwayFromTop = cur > 16
-
+      const isAwayFromTop = window.scrollY > 16
       setScrolled(isAwayFromTop)
       setTransparent(isAwayFromTop)
     }
@@ -40,6 +87,55 @@ export default function Navbar() {
     setScrolled(isAwayFromTop)
     setTransparent(isAwayFromTop)
   }, [location.pathname])
+
+  useEffect(() => {
+    window.googleTranslateElementInit = () => {
+      if (!window.google?.translate?.TranslateElement) return
+
+      new window.google.translate.TranslateElement(
+        {
+          pageLanguage: 'vi',
+          includedLanguages: 'vi,en',
+          autoDisplay: false,
+        },
+        'google_translate_element',
+      )
+    }
+
+    if (!document.getElementById(GOOGLE_TRANSLATE_SCRIPT_ID)) {
+      const script = document.createElement('script')
+      script.id = GOOGLE_TRANSLATE_SCRIPT_ID
+      script.src = '//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit'
+      script.async = true
+      document.body.appendChild(script)
+    } else if (window.google?.translate?.TranslateElement) {
+      window.googleTranslateElementInit()
+    }
+  }, [])
+
+  const applyLanguage = (nextLanguage) => {
+    setMenuOpen(false)
+    setLanguage(nextLanguage)
+
+    if (nextLanguage === 'en') {
+      setCookie(GOOGLE_TRANSLATE_COOKIE, '/vi/en')
+      localStorage.setItem('siteLanguage', 'en')
+    } else {
+      removeCookie(GOOGLE_TRANSLATE_COOKIE)
+      localStorage.setItem('siteLanguage', 'vi')
+      window.location.reload()
+      return
+    }
+
+    const select = document.querySelector('.goog-te-combo')
+    if (select) {
+      select.value = nextLanguage === 'en' ? 'en' : 'vi'
+      select.dispatchEvent(new Event('change'))
+      return
+    }
+
+    window.location.reload()
+  }
 
   const handleAnchorClick = (e, href) => {
     e.preventDefault()
@@ -74,7 +170,6 @@ export default function Navbar() {
       role="banner"
     >
       <div className={`container ${styles.inner}`}>
-
         <a
           href="#hero"
           className={styles.logo}
@@ -117,6 +212,27 @@ export default function Navbar() {
           Gọi Ngay
         </a>
 
+        <div className={styles.languageSwitcher} aria-label="Chọn ngôn ngữ">
+          <button
+            type="button"
+            className={`${styles.langBtn} ${language === 'vi' ? styles.langActive : ''}`}
+            onClick={() => applyLanguage('vi')}
+            aria-label="Tiếng Việt"
+            title="Tiếng Việt"
+          >
+            <FlagVietnam />
+          </button>
+          <button
+            type="button"
+            className={`${styles.langBtn} ${language === 'en' ? styles.langActive : ''}`}
+            onClick={() => applyLanguage('en')}
+            aria-label="English"
+            title="English"
+          >
+            <FlagUnitedKingdom />
+          </button>
+        </div>
+
         <button
           className={`${styles.hamburger} ${menuOpen ? styles.open : ''}`}
           onClick={() => setMenuOpen(!menuOpen)}
@@ -144,9 +260,29 @@ export default function Navbar() {
               </li>
             ))}
           </ul>
+
+          <div className={styles.mobileLanguageSwitcher} aria-label="Chọn ngôn ngữ">
+            <button
+              type="button"
+              className={`${styles.langBtn} ${language === 'vi' ? styles.langActive : ''}`}
+              onClick={() => applyLanguage('vi')}
+            >
+              <FlagVietnam /> Tiếng Việt
+            </button>
+            <button
+              type="button"
+              className={`${styles.langBtn} ${language === 'en' ? styles.langActive : ''}`}
+              onClick={() => applyLanguage('en')}
+            >
+              <FlagUnitedKingdom /> English
+            </button>
+          </div>
+
           <a href="tel:0905386888" className="btn-primary">Gọi Hotline</a>
         </nav>
       </div>
+
+      <div id="google_translate_element" className={styles.googleTranslateElement} aria-hidden="true" />
     </header>
   )
 }

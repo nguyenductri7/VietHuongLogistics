@@ -9,6 +9,7 @@ import { blogApi } from '../../services/api'
 import { useAuth } from '../../context/AuthContext'
 import RichTextEditor from './Richtexteditor'
 import { DEFAULT_BLOG_CATEGORIES, DEFAULT_BLOG_CATEGORY } from '../Blog/blogCategories'
+import { formatBlogDate, getBlogDateValue } from '../Blog/blogDate'
 import styles from './AdminBlogs.module.scss'
 import { useAdminToast } from './AdminToast'
 
@@ -395,10 +396,10 @@ export default function AdminBlogs() {
                   </td>
                   <td className={styles.views}>{b.view_count?.toLocaleString()}</td>
                   <td className={styles.date}>
-                    {b.published_at
-                      ? new Date(b.published_at).toLocaleDateString('vi-VN')
-                      : '—'
-                    }
+                    {formatBlogDate(getBlogDateValue(b), {
+                      fallback: b.status === 'published' ? 'Chưa có ngày' : '—',
+                      month: '2-digit',
+                    })}
                   </td>
                   <td>
                     <div className={styles.actions}>
