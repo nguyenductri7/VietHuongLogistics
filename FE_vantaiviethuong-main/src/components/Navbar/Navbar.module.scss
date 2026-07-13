@@ -26,6 +26,11 @@
   .ctaBtn   { background: $red; border-color: $red; color: $white; }
   .logoMark { background: $red; }
   .hamburger span { background: $gray-800; }
+  .langSwitch {
+    background: rgba($gray-100, 0.92);
+    border-color: rgba($gray-200, 0.95);
+    button { color: $gray-700; }
+  }
 
   &.scrolled {
     background: rgba($white, 0.97);
@@ -42,6 +47,11 @@
     .ctaBtn   { background: $red; border-color: $red; color: $white; }
     .logoMark { background: $red; }
     .hamburger span { background: $gray-800; }
+    .langSwitch {
+      background: rgba($gray-100, 0.92);
+      border-color: rgba($gray-200, 0.95);
+      button { color: $gray-700; }
+    }
   }
 
   &.transparent {
@@ -68,6 +78,11 @@
     }
 
     .hamburger span { background: $white; }
+    .langSwitch {
+      background: rgba($white, 0.12);
+      border-color: rgba($white, 0.22);
+      button { color: rgba($white, 0.82); }
+    }
   }
 }
 
@@ -182,6 +197,103 @@
   &:hover { background: $red-dark; border-color: $red-dark; transform: translateY(-1px); }
 }
 
+.langSwitch,
+.mobileLangSwitch {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid rgba($white, 0.2);
+  border-radius: 999px;
+  background: rgba($white, 0.12);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  flex-shrink: 0;
+
+  button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-width: 42px;
+    height: 30px;
+    padding: 0 9px 0 6px;
+    border-radius: 999px;
+    background: transparent;
+    color: rgba($white, 0.9);
+    font-family: $font-body;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    transition: all 0.2s $ease-out;
+
+    &:hover {
+      background: rgba($red, 0.12);
+      color: $red;
+    }
+  }
+
+  .langItemWrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+  }
+
+  .langDivider {
+    width: 1px;
+    height: 14px;
+    background: currentColor;
+    opacity: 0.18;
+  }
+
+  .langActive {
+    background: $red;
+    color: $white !important;
+    box-shadow: 0 8px 18px rgba($red, 0.22);
+  }
+}
+
+.flagIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 21px;
+  height: 21px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: $white;
+  box-shadow: 0 0 0 1px rgba($black, 0.08);
+  font-size: 17px;
+  line-height: 1;
+}
+
+.flagSvg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.flagFallback {
+  font-size: 9px;
+  font-weight: 900;
+  color: $gray-800;
+}
+
+.langCode {
+  line-height: 1;
+}
+
+.mobileLangSwitch {
+  width: fit-content;
+  margin: 12px 0 8px;
+  background: $gray-100;
+  border-color: $gray-200;
+
+  button {
+    color: $gray-700;
+  }
+}
+
 /* ── Hamburger ───────────────────────────────────── */
 .hamburger {
   display: none;
@@ -241,10 +353,14 @@
 @media (max-width: 1100px) {
   .navLink { font-size: 12px; padding: 6px 8px; }
   .inner { gap: 16px; }
+  .langSwitch button {
+    min-width: 29px;
+    padding: 0 7px;
+  }
 }
 
 @media (max-width: 820px) {
-  .nav, .ctaBtn { display: none; }
+  .nav, .ctaBtn, .langSwitch { display: none; }
   .hamburger { display: flex; }
   .mobileMenu { display: block; }
 }

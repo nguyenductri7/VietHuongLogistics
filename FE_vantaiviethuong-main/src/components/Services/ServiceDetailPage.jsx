@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, Link, Navigate } from 'react-router-dom';
 import axios from 'axios';
 import {
@@ -11,6 +11,8 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { contactApi } from '../../services/api';
 import { TIMELINE_SERVICES } from './ServicesDetailPage';
 import s from './ServiceDetailPage.module.scss';
+import { useLanguage } from '../../i18n/LanguageContext';
+import { localizeObject } from '../../i18n/localized';
 
 const API_BASE = import.meta.env.VITE_API_URL || ''
 
@@ -27,10 +29,19 @@ gsap.registerPlugin(ScrollTrigger);
    PAGE — lấy data theo :id
    ════════════════════════════════════════════════════════════ */
 export default function ServiceDetailPage() {
+  const { language } = useLanguage()
   const { id } = useParams();
   const [service, setService] = useState(null)
   const [allServices, setAllServices] = useState(TIMELINE_SERVICES)
   const [loading, setLoading] = useState(true)
+  const localizedService = useMemo(
+    () => localizeObject(service, language),
+    [service, language],
+  )
+  const localizedAllServices = useMemo(
+    () => localizeObject(allServices, language),
+    [allServices, language],
+  )
 
   useEffect(() => {
     axios.get(`${API_BASE}/services-page/items`)
@@ -54,9 +65,9 @@ export default function ServiceDetailPage() {
 
   return (
     <>
-      <ServiceDetailHero service={service} />
-      <ServiceDetailContent service={service} allServices={allServices} />
-      <ServiceDetailCTA service={service} />
+      <ServiceDetailHero service={localizedService} />
+      <ServiceDetailContent service={localizedService} allServices={localizedAllServices} />
+      <ServiceDetailCTA service={localizedService} />
     </>
   );
 }

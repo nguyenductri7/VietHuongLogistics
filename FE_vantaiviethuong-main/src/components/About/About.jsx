@@ -7,6 +7,8 @@ import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import styles from './About.module.scss'
 import { homePageApi } from '../../services/api'
+import { useLanguage } from '../../i18n/LanguageContext'
+import { localizeObject } from '../../i18n/localized'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -189,6 +191,7 @@ useGLTF.preload(TRUCK_MODEL_URL)
 
 // ─── Main ──────────────────────────────────────────────────────────────────
 export default function About() {
+  const { language } = useLanguage()
   const sectionRef = useRef(null)
   const canvasWrapRef = useRef(null)
   const slideRefs = useRef([])
@@ -199,6 +202,10 @@ export default function About() {
   const invalidateRef = useRef(null)
   const [active, setActive] = useState(0)
   const [aboutIntro, setAboutIntro] = useState(DEFAULT_ABOUT_INTRO)
+  const localizedAboutIntro = useMemo(
+    () => ({ ...DEFAULT_ABOUT_INTRO, ...localizeObject(aboutIntro, language) }),
+    [aboutIntro, language],
+  )
 
   useEffect(() => {
     let cancelled = false
@@ -215,21 +222,21 @@ export default function About() {
   }, [])
 
   const slides = useMemo(() => {
-    const introPills = normalizePills(aboutIntro.pills)
+    const introPills = normalizePills(localizedAboutIntro.pills)
     return SLIDES.map((slide, index) => {
       if (index !== 0) return slide
       return {
         ...slide,
-        label: aboutIntro.section_label || slide.label,
-        title: aboutIntro.title || slide.title,
-        titleAccent: aboutIntro.title_accent || slide.titleAccent,
-        body: aboutIntro.description || slide.body,
+        label: localizedAboutIntro.section_label || slide.label,
+        title: localizedAboutIntro.title || slide.title,
+        titleAccent: localizedAboutIntro.title_accent || slide.titleAccent,
+        body: localizedAboutIntro.description || slide.body,
         pills: introPills.length ? introPills : slide.pills,
-        ctaLabel: aboutIntro.cta_label || 'Tìm Hiểu Thêm',
-        ctaLink: aboutIntro.cta_link || '/dich-vu#lien-he',
+        ctaLabel: localizedAboutIntro.cta_label || 'Tìm Hiểu Thêm',
+        ctaLink: localizedAboutIntro.cta_link || '/dich-vu#lien-he',
       }
     })
-  }, [aboutIntro])
+  }, [localizedAboutIntro])
 
   const truckTarget = useRef({ rotY: INIT_ROT_Y, posX: 0 })
   const [renderQuality] = useState(() => {

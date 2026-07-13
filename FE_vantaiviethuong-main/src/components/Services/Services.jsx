@@ -4,6 +4,8 @@ import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { homePageApi, resolveApiMediaUrl, servicePageApi } from '../../services/api'
 import styles from './Services.module.scss'
+import { useLanguage } from '../../i18n/LanguageContext'
+import { localizeObject } from '../../i18n/localized'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -105,13 +107,18 @@ function normalizeServiceItems(items) {
 }
 
 export default function Services() {
+  const { language } = useLanguage()
   const sectionRef = useRef(null)
   const cardsRef = useRef([])
   const [section, setSection] = useState(DEFAULT_SECTION)
   const [managedServices, setManagedServices] = useState([])
+  const localizedSection = useMemo(
+    () => ({ ...DEFAULT_SECTION, ...localizeObject(section, language) }),
+    [section, language],
+  )
   const displayedServices = useMemo(
-    () => (managedServices.length ? managedServices : services),
-    [managedServices],
+    () => localizeObject(managedServices.length ? managedServices : services, language),
+    [managedServices, language],
   )
 
   useEffect(() => {
@@ -272,14 +279,14 @@ export default function Services() {
           <div className={styles.headerLeft}>
           
 <h2 className={styles.headerTitle}>
-  Giải Pháp Vận Tải
-  <em className={styles.accent}>Toàn Diện</em>
+  {localizedSection.title || DEFAULT_SECTION.title}
+  <em className={styles.accent}>{localizedSection.accent || DEFAULT_SECTION.accent}</em>
 </h2>
           </div>
           <div className={styles.headerRight}>
         
-            <Link to={section.cta_link || DEFAULT_SECTION.cta_link} className={styles.headerCta}>
-              Tư Vấn Miễn Phí
+            <Link to={localizedSection.cta_link || DEFAULT_SECTION.cta_link} className={styles.headerCta}>
+              {localizedSection.cta_label || DEFAULT_SECTION.cta_label}
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M5 12h14M12 5l7 7-7 7" />
               </svg>

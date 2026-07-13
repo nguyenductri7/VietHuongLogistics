@@ -7,6 +7,7 @@ import { branchApi } from '../../services/api'
 import styles from './AdminBranches.module.scss'
 import { useAdminToast } from './AdminToast'
 import AdminConfirmDialog from './AdminConfirmDialog'
+import { getLocalizedValue, serializeLocalizedValue, toLocalizedString } from '../../i18n/localized'
 
 const EMPTY_FORM = {
   name: '',
@@ -21,12 +22,18 @@ const EMPTY_FORM = {
   sort_order: 0,
 }
 
+const ADMIN_LANGUAGES = [
+  { code: 'vi', label: 'Tiếng Việt', shortLabel: 'VI' },
+  { code: 'en', label: 'English', shortLabel: 'EN' },
+]
+
 export default function AdminBranches() {
   const [branches, setBranches] = useState([])
   const [form, setForm] = useState(EMPTY_FORM)
   const [editingId, setEditingId] = useState(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [contentLanguage, setContentLanguage] = useState('vi')
   const [deletingId, setDeletingId] = useState(null)
   const [deleteTarget, setDeleteTarget] = useState(null)
   const { showToast } = useAdminToast()
@@ -49,6 +56,10 @@ export default function AdminBranches() {
 
   const updateField = (key, value) => {
     setForm(current => ({ ...current, [key]: value }))
+  }
+
+  const updateLocalizedField = (key, value) => {
+    setForm(current => ({ ...current, [key]: toLocalizedString(current[key], contentLanguage, value) }))
   }
 
   const resetForm = () => {
@@ -76,7 +87,10 @@ export default function AdminBranches() {
   const saveBranch = async (event) => {
     event.preventDefault()
 
-    if (!form.name.trim() || !form.address.trim()) {
+    if (
+      !String(getLocalizedValue(form.name, contentLanguage) || '').trim() ||
+      !String(getLocalizedValue(form.address, contentLanguage) || '').trim()
+    ) {
       showToast('Vui lòng nhập tên và địa chỉ chi nhánh.', 'error')
       return
     }
@@ -85,6 +99,8 @@ export default function AdminBranches() {
     try {
       const payload = {
         ...form,
+        name: serializeLocalizedValue(form.name),
+        address: serializeLocalizedValue(form.address),
         lat: Number(form.lat) || 16.0707,
         lng: Number(form.lng) || 108.1526,
         sort_order: Number.parseInt(form.sort_order, 10) || 0,
@@ -136,6 +152,7 @@ export default function AdminBranches() {
             Quản lý các địa điểm hiển thị trên trang khách hàng /chi-nhanh.
           </p>
         </div>
+        <LanguageTabs value={contentLanguage} onChange={setContentLanguage} />
         <button className={styles.refreshBtn} onClick={fetchBranches} disabled={loading}>
           <RefreshCw size={14} /> Làm mới
         </button>
@@ -154,7 +171,7 @@ export default function AdminBranches() {
         <div className={styles.grid}>
           <label>
             Tên văn phòng/chi nhánh *
-            <input value={form.name} onChange={e => updateField('name', e.target.value)} />
+            <input value={getLocalizedValue(form.name, contentLanguage) || ''} onChange={e => updateLocalizedField('name', e.target.value)} />
           </label>
           <label>
             Số điện thoại
@@ -162,7 +179,7 @@ export default function AdminBranches() {
           </label>
           <label className={styles.wide}>
             Địa chỉ *
-            <input value={form.address} onChange={e => updateField('address', e.target.value)} />
+            <input value={getLocalizedValue(form.address, contentLanguage) || ''} onChange={e => updateLocalizedField('address', e.target.value)} />
           </label>
           <label>
             Email / Facebook
@@ -228,15 +245,15 @@ export default function AdminBranches() {
             {branches.map(branch => (
               <div key={branch.id} className={`${styles.branchItem} ${!branch.is_active ? styles.inactive : ''}`}>
                 <div className={styles.thumb}>
-                  {branch.image_url ? <img src={branch.image_url} alt={branch.name} /> : <Building2 size={24} />}
+                  {branch.image_url ? <img src={branch.image_url} alt={getLocalizedValue(branch.name, contentLanguage)} /> : <Building2 size={24} />}
                 </div>
                 <div className={styles.branchInfo}>
                   <div className={styles.branchTitle}>
-                    <h3>{branch.name}</h3>
+                    <h3>{getLocalizedValue(branch.name, contentLanguage)}</h3>
                     {branch.is_headquarter && <span className={styles.badge}>Trụ sở chính</span>}
                     {!branch.is_active && <span className={styles.badgeMuted}>Đang ẩn</span>}
                   </div>
-                  <p><MapPin size={13} /> {branch.address}</p>
+                  <p><MapPin size={13} /> {getLocalizedValue(branch.address, contentLanguage)}</p>
                   <p>{branch.phone || 'Chưa có SĐT'} · {branch.email || 'Chưa có email'}</p>
                   <small>Lat: {branch.lat} · Lng: {branch.lng} · Thứ tự: {branch.sort_order}</small>
                 </div>
@@ -267,6 +284,33 @@ export default function AdminBranches() {
         onCancel={() => setDeleteTarget(null)}
         onConfirm={deleteBranch}
       />
+    </div>
+  )
+}
+
+function LanguageTabs({ value, onChange }) {
+  return (
+    <div style={{ display: 'inline-flex', gap: 6, padding: 4, border: '1px solid #E5E7EB', borderRadius: 999, background: '#F9FAFB' }}>
+      {ADMIN_LANGUAGES.map(lang => (
+        <button
+          key={lang.code}
+          type="button"
+          onClick={() => onChange(lang.code)}
+          title={lang.label}
+          style={{
+            border: 0,
+            borderRadius: 999,
+            padding: '7px 12px',
+            fontWeight: 800,
+            fontSize: 12,
+            cursor: 'pointer',
+            color: value === lang.code ? '#fff' : '#374151',
+            background: value === lang.code ? '#DC2626' : 'transparent',
+          }}
+        >
+          {lang.shortLabel}
+        </button>
+      ))}
     </div>
   )
 }

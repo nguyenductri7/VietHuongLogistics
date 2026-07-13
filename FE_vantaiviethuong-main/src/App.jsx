@@ -34,6 +34,7 @@ import AdminFaqContent from './components/Admin/AdminFaqContent'
 import AdminContacts from './components/Admin/AdminContacts'
 import AdminBranches from './components/Admin/AdminBranches'
 import AdminProfile from './components/Admin/AdminProfile'
+import { LanguageProvider, useLanguage } from './i18n/LanguageContext'
 gsap.registerPlugin(ScrollTrigger)
 
 // ─── Helpers ─────────────────────────────────────────────────
@@ -66,14 +67,24 @@ function FadePage({ children }) {
 function HomePage() {
   const prevPath = usePrevPath()
   const skipVideo = prevPath !== null && prevPath !== '/'
+  const { language } = useLanguage()
   useLayoutEffect(() => {
     sessionStorage.setItem('skipHeroVideo', skipVideo ? '1' : '0')
   }, [skipVideo])
   return (
     <FadePage>
       <Helmet>
-        <title>Vận Tải Việt Hương | Logistics & Vận Chuyển Hàng Hóa Toàn Quốc</title>
-        <meta name="description" content="Việt Hương - Đơn vị vận tải hàng đầu Việt Nam." />
+        <title>
+          {language === 'en'
+            ? 'Viet Huong Logistics | Nationwide Logistics & Freight Transport'
+            : 'Vận Tải Việt Hương | Logistics & Vận Chuyển Hàng Hóa Toàn Quốc'}
+        </title>
+        <meta
+          name="description"
+          content={language === 'en'
+            ? 'Viet Huong - A trusted logistics and transport provider in Vietnam.'
+            : 'Việt Hương - Đơn vị vận tải hàng đầu Việt Nam.'}
+        />
       </Helmet>
       <div id="page-wrap">
         <div id="hero-sticky-shell" style={{
@@ -158,7 +169,11 @@ function AppInner() {
     )
   }
 
-  return <PublicLayout />
+  return (
+    <LanguageProvider>
+      <PublicLayout />
+    </LanguageProvider>
+  )
 }
 
 // ─── Root ────────────────────────────────────────────────────

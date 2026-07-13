@@ -267,8 +267,10 @@ Trong quá trình phát triển, hệ thống đã được hoàn thiện theo h
 8. Nếu cần real-time thật, có thể triển khai WebSocket/SSE; hiện tại polling 30 giây là lựa chọn phù hợp với Render Free.
 9. Tối ưu SEO nâng cao cho bài viết: schema, sitemap, Open Graph, canonical URL.
 10. Tối ưu hình ảnh và video để giảm thời gian tải trang đầu.
+11. Làm song ngữ cho website.
+
 
 ---
 
 **Người lập báo cáo:** Nguyễn Đức Trí  
-**Ngày lập/cập nhật:** 11/07/2026
+**Ngày lập/cập nhật:** 13/07/2026

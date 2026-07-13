@@ -1,7 +1,9 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import axios from 'axios';
 import { Link, useLocation } from 'react-router-dom';
 import { contactApi } from '../../services/api';
+import { useLanguage } from '../../i18n/LanguageContext';
+import { localizeObject } from '../../i18n/localized';
 
 const API_BASE = import.meta.env.VITE_API_URL || ''
 
@@ -743,10 +745,19 @@ export const ContactSection = ({ contactData }) => {
    DEFAULT EXPORT
    ════════════════════════════════════════════════════════════ */
 export default function ServicesSections() {
+  const { language } = useLanguage()
   const { hash } = useLocation()
   const [pageData, setPageData] = useState(null)
   const [services, setServices] = useState(null)
   const [dataReady, setDataReady] = useState(false)
+  const localizedPageData = useMemo(
+    () => localizeObject(pageData, language),
+    [pageData, language],
+  )
+  const localizedServices = useMemo(
+    () => localizeObject(services || TIMELINE_SERVICES, language),
+    [services, language],
+  )
 
   useEffect(() => {
     if (!hash || !dataReady) return
@@ -779,10 +790,10 @@ export default function ServicesSections() {
 
   return (
     <>
-      <ServicesBanner  bannerData={pageData?.banner} />
-      <ServiceTimeline services={services || TIMELINE_SERVICES} />
-      <ProcessStepper  stepsData={pageData?.process_steps || PROCESS_STEPS} />
-      <ContactSection  contactData={pageData?.contact_info} />
+      <ServicesBanner  bannerData={localizedPageData?.banner} />
+      <ServiceTimeline services={localizedServices} />
+      <ProcessStepper  stepsData={localizedPageData?.process_steps || PROCESS_STEPS} />
+      <ContactSection  contactData={localizedPageData?.contact_info} />
     </>
   )
 }
