@@ -1,4 +1,5 @@
 const { pool } = require('../config/database');
+const { sanitizeLegacyLocalized } = require('../utils/cmsSanitizer');
 
 const JSON_FIELDS = [
   'hero',
@@ -120,7 +121,7 @@ function normalizeHomePage(row = {}) {
     data[field] = parseJson(row[field], DEFAULT_HOME_PAGE[field]);
   });
 
-  return {
+  return sanitizeLegacyLocalized({
     id: row.id || null,
     hero: mergeObject(DEFAULT_HOME_PAGE.hero, data.hero),
     about_intro: mergeObject(DEFAULT_HOME_PAGE.about_intro, data.about_intro),
@@ -135,7 +136,7 @@ function normalizeHomePage(row = {}) {
         : DEFAULT_HOME_PAGE.footer.offices,
     },
     updated_at: row.updated_at || null,
-  };
+  });
 }
 
 async function ensureHomePageRow() {

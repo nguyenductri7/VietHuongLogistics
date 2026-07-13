@@ -1,5 +1,6 @@
 // src/controllers/aboutController.js
 const { pool } = require('../config/database');
+const { sanitizeLegacyLocalized } = require('../utils/cmsSanitizer');
 
 // ── Các field JSON hợp lệ trong bảng, dùng để validate khi update ──
 const JSON_FIELDS = ['hero', 'stats', 'identity', 'services', 'timeline', 'values_section'];
@@ -43,11 +44,11 @@ const getAbout = async (req, res) => {
 
     res.json({
       success: true,
-      data: {
+      data: sanitizeLegacyLocalized({
         id: row.id,
         ...parsed,
         updated_at: row.updated_at,
-      },
+      }),
     });
   } catch (err) {
     console.error('Get about error:', err);

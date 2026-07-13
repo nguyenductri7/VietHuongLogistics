@@ -1,5 +1,6 @@
 // controllers/faqContentController.js
 const { pool } = require('../config/database')
+const { sanitizeLegacyLocalized } = require('../utils/cmsSanitizer')
 
 // ═══════════════════════════════════════════════════════════════
 //  PUBLIC
@@ -21,7 +22,7 @@ const getPublicContent = async (req, res) => {
        ORDER BY category_id ASC, sort_order ASC`
     )
     // Gom items vào từng category
-    const result = cats.map(cat => ({
+    const result = cats.map(cat => sanitizeLegacyLocalized({
       ...cat,
       items: items.filter(i => i.category_id === cat.id),
     }))
@@ -42,7 +43,7 @@ const getCategories = async (req, res) => {
     const [rows] = await pool.query(
       `SELECT * FROM faq_categories ORDER BY sort_order ASC`
     )
-    return res.json(rows)
+    return res.json(sanitizeLegacyLocalized(rows))
   } catch (err) {
     console.error('[FAQ-CONTENT] getCategories error:', err)
     return res.status(500).json({ message: 'Lỗi tải dữ liệu.' })
@@ -117,7 +118,7 @@ const getItems = async (req, res) => {
       `SELECT * FROM faq_items WHERE category_id = ? ORDER BY sort_order ASC`,
       [req.params.catId]
     )
-    return res.json(rows)
+    return res.json(sanitizeLegacyLocalized(rows))
   } catch (err) {
     console.error('[FAQ-CONTENT] getItems error:', err)
     return res.status(500).json({ message: 'Lỗi tải dữ liệu.' })

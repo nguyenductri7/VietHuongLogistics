@@ -1,4 +1,5 @@
 const { pool } = require('../config/database');
+const { sanitizeLegacyLocalized } = require('../utils/cmsSanitizer');
 
 const toBoolInt = (value, fallback = 0) => {
   if (value === undefined || value === null || value === '') return fallback;
@@ -8,7 +9,7 @@ const toBoolInt = (value, fallback = 0) => {
 };
 
 const normalizeBranch = (row) => ({
-  ...row,
+  ...sanitizeLegacyLocalized(row),
   lat: Number(row.lat),
   lng: Number(row.lng),
   is_headquarter: Number(row.is_headquarter) === 1,

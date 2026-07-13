@@ -1,6 +1,7 @@
 const { pool } = require('../config/database');
 const { deleteFromCloudinary, getPublicIdFromUrl } = require('../config/cloudinary');
 const { BLOG_CATEGORIES, DEFAULT_BLOG_CATEGORY } = require('../config/blogCategories');
+const { sanitizeLegacyLocalized } = require('../utils/cmsSanitizer');
 
 const getBlogCategories = (req, res) => {
   res.json({ success: true, data: BLOG_CATEGORIES });
@@ -94,10 +95,14 @@ if (!req.user) {
       [...params, parseInt(limit), offset]
     );
 
-    const blogs = rows.map(({ content, ...blog }) => ({
-      ...blog,
-      reading_time: getReadingTimeText(content, blog.excerpt, blog.title),
-    }));
+    const blogs = rows.map(({ content, ...blog }) => {
+      const safeBlog = sanitizeLegacyLocalized(blog);
+      const safeContent = sanitizeLegacyLocalized(content);
+      return {
+        ...safeBlog,
+        reading_time: getReadingTimeText(safeContent, safeBlog.excerpt, safeBlog.title),
+      };
+    });
 
     res.json({
       success: true,
@@ -135,11 +140,13 @@ const getBlog = async (req, res) => {
       await pool.query('UPDATE blogs SET view_count = view_count + 1 WHERE id = ?', [rows[0].id]);
     }
 
+    const safeBlog = sanitizeLegacyLocalized(rows[0]);
+
     res.json({
       success: true,
       data: {
-        ...rows[0],
-        reading_time: getReadingTimeText(rows[0].content, rows[0].excerpt, rows[0].title),
+        ...safeBlog,
+        reading_time: getReadingTimeText(safeBlog.content, safeBlog.excerpt, safeBlog.title),
       },
     });
   } catch (err) {
@@ -175,7 +182,7 @@ const createBlog = async (req, res) => {
 
     const [newBlog] = await pool.query('SELECT * FROM blogs WHERE id = ?', [result.insertId]);
 
-    res.status(201).json({ success: true, message: 'Tạo bài viết thành công!', data: newBlog[0] });
+    res.status(201).json({ success: true, message: 'Tạo bài viết thành công!', data: sanitizeLegacyLocalized(newBlog[0]) });
   } catch (err) {
     console.error('createBlog error:', err);
     res.status(500).json({ success: false, message: 'Lỗi server.' });
@@ -234,7 +241,7 @@ const updateBlog = async (req, res) => {
     );
 
     const [updated] = await pool.query('SELECT * FROM blogs WHERE id = ?', [id]);
-    res.json({ success: true, message: 'Cập nhật bài viết thành công!', data: updated[0] });
+    res.json({ success: true, message: 'Cập nhật bài viết thành công!', data: sanitizeLegacyLocalized(updated[0]) });
   } catch (err) {
     console.error('updateBlog error:', err);
     res.status(500).json({ success: false, message: 'Lỗi server.' });

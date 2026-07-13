@@ -1,5 +1,6 @@
 const { pool } = require('../config/database');
 const { deleteFromCloudinary } = require('../config/cloudinary');
+const { sanitizeLegacyLocalized } = require('../utils/cmsSanitizer');
 
 const parseBooleanFlag = (value) => {
   if (value === undefined) return undefined;
@@ -16,7 +17,7 @@ const getPartners = async (req, res) => {
     const [rows] = await pool.query(
       'SELECT * FROM partners WHERE is_active = 1 ORDER BY sort_order ASC, id ASC'
     );
-    res.json({ success: true, data: rows });
+    res.json({ success: true, data: sanitizeLegacyLocalized(rows) });
   } catch (err) {
     console.error('getPartners error:', err);
     res.status(500).json({ success: false, message: 'Lỗi server.' });
@@ -27,7 +28,7 @@ const getPartners = async (req, res) => {
 const getAllPartners = async (req, res) => {
   try {
     const [rows] = await pool.query('SELECT * FROM partners ORDER BY sort_order ASC, id ASC');
-    res.json({ success: true, data: rows });
+    res.json({ success: true, data: sanitizeLegacyLocalized(rows) });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Lỗi server.' });
   }
@@ -48,7 +49,7 @@ const createPartner = async (req, res) => {
     );
 
     const [newPartner] = await pool.query('SELECT * FROM partners WHERE id = ?', [result.insertId]);
-    res.status(201).json({ success: true, message: 'Thêm đối tác thành công!', data: newPartner[0] });
+    res.status(201).json({ success: true, message: 'Thêm đối tác thành công!', data: sanitizeLegacyLocalized(newPartner[0]) });
   } catch (err) {
     console.error('createPartner error:', err);
     res.status(500).json({ success: false, message: 'Lỗi server.' });
@@ -89,7 +90,7 @@ const updatePartner = async (req, res) => {
     );
 
     const [updated] = await pool.query('SELECT * FROM partners WHERE id = ?', [id]);
-    res.json({ success: true, message: 'Cập nhật đối tác thành công!', data: updated[0] });
+    res.json({ success: true, message: 'Cập nhật đối tác thành công!', data: sanitizeLegacyLocalized(updated[0]) });
   } catch (err) {
     console.error('updatePartner error:', err);
     res.status(500).json({ success: false, message: 'Lỗi server.' });

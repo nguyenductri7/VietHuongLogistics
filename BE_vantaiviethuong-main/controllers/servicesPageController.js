@@ -1,5 +1,6 @@
 // src/controllers/servicesPageController.js
 const { pool } = require('../config/database');
+const { sanitizeLegacyLocalized } = require('../utils/cmsSanitizer');
 
 const JSON_FIELDS = ['banner', 'process_steps', 'contact_info'];
 
@@ -83,7 +84,7 @@ function normalizeServicesPage(row = {}) {
   const processSteps = parseJson(row.process_steps, []);
   const contactInfo = parseJson(row.contact_info, {});
 
-  return {
+  return sanitizeLegacyLocalized({
     id: row.id || null,
     banner: {
       ...DEFAULT_SERVICES_PAGE.banner,
@@ -100,7 +101,7 @@ function normalizeServicesPage(row = {}) {
         : DEFAULT_SERVICES_PAGE.contact_info.items,
     },
     updated_at: row.updated_at || null,
-  };
+  });
 }
 
 // ── Tạo slug không dấu từ tiếng Việt, dùng cho service_items.slug ──
@@ -179,7 +180,7 @@ const listServiceItems = async (req, res) => {
     const [rows] = await pool.query(
       'SELECT * FROM service_items WHERE is_active = 1 ORDER BY sort_order ASC, id ASC'
     );
-    const items = rows.map(r => ({
+    const items = rows.map(r => sanitizeLegacyLocalized({
       ...r,
       tags: typeof r.tags === 'string' ? JSON.parse(r.tags) : r.tags,
     }));
@@ -194,7 +195,7 @@ const listServiceItems = async (req, res) => {
 const listServiceItemsAdmin = async (req, res) => {
   try {
     const [rows] = await pool.query('SELECT * FROM service_items ORDER BY sort_order ASC, id ASC');
-    const items = rows.map(r => ({
+    const items = rows.map(r => sanitizeLegacyLocalized({
       ...r,
       tags: typeof r.tags === 'string' ? JSON.parse(r.tags) : r.tags,
     }));
