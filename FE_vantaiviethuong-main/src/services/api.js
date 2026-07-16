@@ -34,32 +34,8 @@ function authHeader() {
   return token ? { Authorization: `Bearer ${token}` } : {}
 }
 
-function getCmsPreviewResponse(path, method = 'GET') {
-  if (method !== 'GET' || typeof window === 'undefined') return null
-  const module = new URLSearchParams(window.location.search).get('cms-preview')
-  if (!['home', 'about', 'services'].includes(module)) return null
-
-  try {
-    const snapshot = JSON.parse(localStorage.getItem(`vh_cms_preview_${module}`) || 'null')
-    if (!snapshot) return null
-
-    if (module === 'home' && path === '/home-page') return { success: true, data: snapshot }
-    if (module === 'home' && path === '/partners') return { success: true, data: snapshot.partners || [] }
-    if (module === 'about' && path === '/about') return { success: true, data: snapshot }
-    if (module === 'services' && path === '/services-page') return { success: true, data: snapshot }
-    if (module === 'services' && path === '/services-page/items') {
-      return { success: true, data: (snapshot.service_items || []).filter(item => item.is_active !== 0) }
-    }
-  } catch {
-    localStorage.removeItem(`vh_cms_preview_${module}`)
-  }
-  return null
-}
-
 // ─── Helper: fetch wrapper ───────────────────────────────────
 async function request(path, options = {}) {
-  const preview = getCmsPreviewResponse(path, options.method || 'GET')
-  if (preview) return preview
   const res = await fetch(`${BASE_URL}${path}`, {
     ...options,
     headers: {
@@ -162,22 +138,12 @@ export const homePageApi = {
   },
 }
 
-export const cmsRevisionApi = {
-  history: (module, limit = 30) => request(`/cms-revisions/${module}?limit=${limit}`),
-  getOne: (module, id) => request(`/cms-revisions/${module}/${id}`),
-  latestDraft: (module) => request(`/cms-revisions/${module}/draft/latest`),
-  saveDraft: (module, snapshot, summary = '') =>
-    request(`/cms-revisions/${module}/draft`, {
-      method: 'POST',
-      body: JSON.stringify({ snapshot, summary }),
-    }),
-  publish: (module, snapshot, summary = '') =>
-    request(`/cms-revisions/${module}/publish`, {
-      method: 'POST',
-      body: JSON.stringify({ snapshot, summary }),
-    }),
-  restore: (module, id) =>
-    request(`/cms-revisions/${module}/${id}/restore`, { method: 'POST', body: '{}' }),
+export const cmsHistoryApi = {
+  getList: ({ module = '', limit = 50 } = {}) => {
+    const params = new URLSearchParams({ limit: String(limit) })
+    if (module) params.set('module', module)
+    return request(`/cms-revisions?${params.toString()}`)
+  },
 }
 
 export const aboutPageApi = {

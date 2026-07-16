@@ -16,6 +16,7 @@ const PAGE_META = {
   '/admin/branches': { title: 'Văn phòng & Chi nhánh', crumb: 'Chi nhánh' },
   '/admin/contacts': { title: 'Yêu cầu liên hệ', crumb: 'Liên hệ' },
   '/admin/profile': { title: 'Hồ sơ Admin', crumb: 'Hồ sơ' },
+  '/admin/history': { title: 'Lịch sử chỉnh sửa', crumb: 'Lịch sử chỉnh sửa' },
 }
 
 function getMeta(pathname) {

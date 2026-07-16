@@ -34,6 +34,7 @@ import AdminFaqContent from './components/Admin/AdminFaqContent'
 import AdminContacts from './components/Admin/AdminContacts'
 import AdminBranches from './components/Admin/AdminBranches'
 import AdminProfile from './components/Admin/AdminProfile'
+import AdminCmsHistory from './components/Admin/AdminCmsHistory'
 gsap.registerPlugin(ScrollTrigger)
 
 // ─── Helpers ─────────────────────────────────────────────────
@@ -152,6 +153,7 @@ function AppInner() {
         <Route path="/admin/contacts" element={adminPage(<AdminContacts />)} />
         <Route path="/admin/branches" element={adminPage(<AdminBranches />)} />
         <Route path="/admin/profile" element={adminPage(<AdminProfile />)} />
+        <Route path="/admin/history" element={adminPage(<AdminCmsHistory />)} />
         <Route path="/admin/settings" element={<Navigate to="/admin/home" replace />} />
         <Route path="/admin/*" element={adminPage(<AdminDashboard />)} />
       </Routes>

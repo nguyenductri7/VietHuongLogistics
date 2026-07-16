@@ -13,7 +13,6 @@ import { GripVertical, Plus, Trash2, Eye, EyeOff, X, ArrowLeft } from 'lucide-re
 import styles from './Adminservices.module.scss'
 import { useAdminToast } from './AdminToast'
 import AdminConfirmDialog from './AdminConfirmDialog'
-import CmsRevisionToolbar from './CmsRevisionToolbar'
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
 
@@ -289,17 +288,6 @@ const loadAll = useCallback(() => {
           <h1 className={styles.pageTitle}>Quản Lý Trang Dịch Vụ</h1>
         </div>
       </div>
-
-      <CmsRevisionToolbar
-        module="services"
-        snapshot={{ ...page, service_items: items }}
-        previewPath="/dich-vu"
-        onApplied={snapshot => {
-          if (!snapshot) return
-          setPage(normalizePage(snapshot))
-          if (Array.isArray(snapshot.service_items)) setItems(normalizeServiceItems(snapshot.service_items))
-        }}
-      />
 
 
       {/* ══════════ BANNER ══════════ */}

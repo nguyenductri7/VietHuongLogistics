@@ -8,7 +8,6 @@ import { homePageApi, partnerApi, resolveApiMediaUrl } from '../../services/api'
 import styles from './AdminSettings.module.scss'
 import { useAdminToast } from './AdminToast'
 import AdminConfirmDialog from './AdminConfirmDialog'
-import CmsRevisionToolbar from './CmsRevisionToolbar'
 
 const DEFAULT_HOME = {
   hero: {
@@ -278,7 +277,9 @@ export default function AdminHome() {
     }
   }
 
-  useEffect(() => { loadPartners() }, [])
+  useEffect(() => {
+    if (activeTab === 'partners_section') loadPartners()
+  }, [activeTab])
 
 
   const handleChange = (sectionKey, fieldKey, value) => {
@@ -465,18 +466,6 @@ export default function AdminHome() {
 
   const currentSection = SECTIONS.find(section => section.key === activeTab)
   const activeDataKey = currentSection?.dataKey || activeTab
-  const cmsSnapshot = {
-    ...home,
-    footer: getSectionPayload('footer'),
-    ...(partners.length ? { partners } : {}),
-  }
-
-  const applyCmsSnapshot = (snapshot) => {
-    if (!snapshot) return
-    setHome(normalizeHome(snapshot))
-    if (Array.isArray(snapshot.partners)) setPartners(snapshot.partners)
-  }
-
   const isSectionEnabled = (section) => {
     const dataKey = section.dataKey || section.key
     return section.key === 'hero' || section.key === 'testimonials_section' || section.key === 'footer'
@@ -492,15 +481,6 @@ export default function AdminHome() {
           <h1 className={styles.title}>Quản lý trang chủ</h1>
         </div>
       </div>
-
-      {!loading && (
-        <CmsRevisionToolbar
-          module="home"
-          snapshot={cmsSnapshot}
-          previewPath="/"
-          onApplied={applyCmsSnapshot}
-        />
-      )}
 
       {loading ? (
         <div className={styles.loadingBox}>
