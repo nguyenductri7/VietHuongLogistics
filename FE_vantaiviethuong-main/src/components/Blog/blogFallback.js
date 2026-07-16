@@ -1,5 +1,5 @@
-import heroOne from '../../assets/hero-slide-1.png'
-import heroTwo from '../../assets/hero-slide-2.png'
+import heroOne from '../../assets/hero-slide-1.webp'
+import heroTwo from '../../assets/hero-slide-2.webp'
 
 export const BLOG_DEFAULT_IMAGE = heroOne
 

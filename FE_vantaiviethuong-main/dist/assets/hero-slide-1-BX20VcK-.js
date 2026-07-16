@@ -1,0 +1,1 @@
+var e=`/assets/hero-slide-1-BXu4LKWp.webp`;export{e as t};

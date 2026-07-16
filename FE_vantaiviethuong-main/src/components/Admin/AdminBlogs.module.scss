@@ -642,6 +642,19 @@
 .success { background: #2ea86c; }
 .error   { background: #c0392b; }
 
+.editorLoading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 220px;
+  border: 1px dashed $gray-200;
+  border-radius: 14px;
+  background: #f8fafc;
+  color: $gray-500;
+  font-size: 14px;
+  font-weight: 600;
+}
+
 @keyframes slideIn {
   from { opacity: 0; transform: translateX(20px); }
   to   { opacity: 1; transform: translateX(0); }

@@ -1,6 +1,6 @@
 import styles from './Footer.module.scss'
 import { MapPin } from 'lucide-react'
-import logoFooter from '../../assets/logofooter.png'
+import logoFooter from '../../assets/logofooter.webp'
 
 export default function Footer() {
   return (

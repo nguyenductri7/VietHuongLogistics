@@ -1,5 +1,5 @@
 // src/components/Admin/AdminBlogs.jsx
-import { useState, useEffect, useRef } from 'react'
+import { lazy, Suspense, useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Newspaper, Plus, Search, Image as ImageIcon, Star,
@@ -7,11 +7,12 @@ import {
 } from 'lucide-react'
 import { blogApi } from '../../services/api'
 import { useAuth } from '../../context/AuthContext'
-import RichTextEditor from './Richtexteditor'
 import { DEFAULT_BLOG_CATEGORIES, DEFAULT_BLOG_CATEGORY } from '../Blog/blogCategories'
 import { formatBlogDate, getBlogDateValue } from '../Blog/blogDate'
 import styles from './AdminBlogs.module.scss'
 import { useAdminToast } from './AdminToast'
+
+const RichTextEditor = lazy(() => import('./Richtexteditor'))
 
 const STATUS_LABEL = { draft: 'Nháp', published: 'Đã đăng', archived: 'Lưu trữ' }
 const STATUS_COLOR = { draft: '#8899aa', published: '#52c97a', archived: '#e8a020' }
@@ -19,21 +20,21 @@ const STATUS_COLOR = { draft: '#8899aa', published: '#52c97a', archived: '#e8a02
 export default function AdminBlogs() {
   const { showToast } = useAdminToast()
   const { logout } = useAuth()
-  const navigate   = useNavigate()
+  const navigate = useNavigate()
 
-  const [blogs, setBlogs]       = useState([])
-  const [loading, setLoading]   = useState(true)
-  const [search, setSearch]     = useState('')
+  const [blogs, setBlogs] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
-  const [page, setPage]         = useState(1)
+  const [page, setPage] = useState(1)
   const [pagination, setPagination] = useState({})
   const [categoryOptions, setCategoryOptions] = useState(DEFAULT_BLOG_CATEGORIES)
 
   // view: 'list' | 'form'  — thay cho modal cũ
-  const [view, setView]         = useState('list')
-  const [editing, setEditing]   = useState(null)
+  const [view, setView] = useState('list')
+  const [editing, setEditing] = useState(null)
   const [deleting, setDeleting] = useState(null)
-  const [saving, setSaving]     = useState(false)
+  const [saving, setSaving] = useState(false)
   const [loadingEdit, setLoadingEdit] = useState(null)
 
   // Form state
@@ -42,7 +43,7 @@ export default function AdminBlogs() {
     category: DEFAULT_BLOG_CATEGORY, tags: '', status: 'draft', is_featured: false,
   })
   const [thumbnail, setThumbnail] = useState(null)
-  const [preview, setPreview]     = useState('')
+  const [preview, setPreview] = useState('')
   const fileRef = useRef()
 
   // ── Load danh sách ──────────────────────────────────────────
@@ -50,7 +51,7 @@ export default function AdminBlogs() {
     setLoading(true)
     try {
       const params = { page, limit: 10 }
-      if (search)       params.search = search
+      if (search) params.search = search
       if (statusFilter) params.status = statusFilter
       const res = await blogApi.adminList(params)
       setBlogs(res.data)
@@ -69,7 +70,7 @@ export default function AdminBlogs() {
       .then((res) => {
         if (Array.isArray(res.data) && res.data.length) setCategoryOptions(res.data)
       })
-      .catch(() => {})
+      .catch(() => { })
   }, [])
   useEffect(() => {
     const t = setTimeout(() => { setPage(1); fetchBlogs() }, 400)
@@ -95,12 +96,12 @@ export default function AdminBlogs() {
 
       setEditing(detail)
       setForm({
-        title:       detail.title || '',
-        excerpt:     detail.excerpt || '',
-        content:     detail.content || '',
-        category:    detail.category || DEFAULT_BLOG_CATEGORY,
-        tags:        detail.tags || '',
-        status:      detail.status || 'draft',
+        title: detail.title || '',
+        excerpt: detail.excerpt || '',
+        content: detail.content || '',
+        category: detail.category || DEFAULT_BLOG_CATEGORY,
+        tags: detail.tags || '',
+        status: detail.status || 'draft',
         is_featured: !!detail.is_featured,
       })
       setThumbnail(null)
@@ -213,11 +214,13 @@ export default function AdminBlogs() {
 
               <div className={styles.field}>
                 <label>Nội dung</label>
-                <RichTextEditor
-                  value={form.content}
-                  onChange={(html) => setForm(f => ({ ...f, content: html }))}
-                  placeholder="Soạn nội dung bài viết..."
-                />
+                <Suspense fallback={<div className={styles.editorLoading}>Đang tải trình soạn thảo...</div>}>
+                  <RichTextEditor
+                    value={form.content}
+                    onChange={(html) => setForm(f => ({ ...f, content: html }))}
+                    placeholder="Soạn nội dung bài viết..."
+                  />
+                </Suspense>
               </div>
             </div>
 
@@ -232,10 +235,10 @@ export default function AdminBlogs() {
                   {preview
                     ? <img src={preview} alt="preview" className={styles.previewImg} />
                     : <div className={styles.uploadPlaceholder}>
-                        <ImageIcon size={26} />
-                        <p>Click để chọn ảnh</p>
-                        <small>JPG, PNG, WEBP · tối đa 10MB</small>
-                      </div>
+                      <ImageIcon size={26} />
+                      <p>Click để chọn ảnh</p>
+                      <small>JPG, PNG, WEBP · tối đa 10MB</small>
+                    </div>
                   }
                 </div>
                 <input ref={fileRef} type="file" accept="image/*" hidden onChange={handleFile} />

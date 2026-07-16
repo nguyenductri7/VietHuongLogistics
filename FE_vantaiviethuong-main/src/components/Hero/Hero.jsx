@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import styles from './Hero.module.scss'
-import heroSlide1 from '../../assets/hero-slide-1.png'
+import heroSlide1 from '../../assets/hero-slide-1.webp'
 import { homePageApi } from '../../services/api'
 gsap.registerPlugin(ScrollTrigger)
 

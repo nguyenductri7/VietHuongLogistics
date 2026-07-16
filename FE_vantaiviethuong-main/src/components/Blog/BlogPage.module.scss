@@ -10,7 +10,7 @@
 .hero {
   background: 
     linear-gradient(160deg, rgba(5,30,46,0.82) 0%, rgba(2,13,24,0.90) 100%),
-    url('../../assets/hero-slide-2.png')
+    url('../../assets/hero-slide-2.webp')
     center/cover no-repeat;
   padding-top: calc(80px + clamp(32px, 5vh, 56px)); // ← giảm lại cho nội dung lên cao
   padding-bottom: 0;

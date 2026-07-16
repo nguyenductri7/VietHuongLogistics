@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { MapPin } from 'lucide-react'
 import { homePageApi } from '../../services/api'
 import styles from './Footer.module.scss'
-import logoFooter from '../../assets/logofooter.png'
+import logoFooter from '../../assets/logofooter.webp'
 
 const DEFAULT_FOOTER = {
   company_name: 'CÔNG TY TNHH GIAO NHẬN VẬN TẢI VIỆT HƯƠNG',
