@@ -1,5 +1,6 @@
 const { pool } = require('../config/database');
 const { sendContactNotification } = require('../services/emailService');
+const { recordAdminAudit } = require('../services/adminAuditService');
 
 // POST /api/contact - Frontend gửi form liên hệ
 const submitContact = async (req, res) => {
@@ -112,7 +113,17 @@ const updateContactStatus = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Trạng thái không hợp lệ.' });
     }
 
+    const [beforeRows] = await pool.query('SELECT * FROM contact_messages WHERE id = ?', [id]);
+    if (!beforeRows.length) {
+      return res.status(404).json({ success: false, message: 'Không tìm thấy liên hệ.' });
+    }
     await pool.query('UPDATE contact_messages SET status = ? WHERE id = ?', [status, id]);
+    const [afterRows] = await pool.query('SELECT * FROM contact_messages WHERE id = ?', [id]);
+    await recordAdminAudit({
+      module: 'contacts', action: 'status', entityType: 'contact', entityId: id,
+      summary: `Cập nhật trạng thái liên hệ của ${beforeRows[0].full_name}`,
+      before: beforeRows[0], after: afterRows[0], userId: req.user?.id,
+    });
     res.json({ success: true, message: 'Cập nhật trạng thái thành công!' });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Lỗi server.' });
@@ -122,7 +133,15 @@ const updateContactStatus = async (req, res) => {
 // DELETE /api/admin/contacts/:id
 const deleteContact = async (req, res) => {
   try {
+    const [beforeRows] = await pool.query('SELECT * FROM contact_messages WHERE id = ?', [req.params.id]);
+    if (!beforeRows.length) {
+      return res.status(404).json({ success: false, message: 'Không tìm thấy liên hệ.' });
+    }
     await pool.query('DELETE FROM contact_messages WHERE id = ?', [req.params.id]);
+    await recordAdminAudit({
+      module: 'contacts', action: 'delete', entityType: 'contact', entityId: req.params.id,
+      summary: `Xóa liên hệ của ${beforeRows[0].full_name}`, before: beforeRows[0], userId: req.user?.id,
+    });
     res.json({ success: true, message: 'Xóa tin nhắn thành công!' });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Lỗi server.' });

@@ -1,15 +1,23 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
   ChevronDown, ChevronUp, Clock3, FileClock, Filter, Loader2, RefreshCw, UserRound,
+  Trash2,
 } from 'lucide-react'
 import { cmsHistoryApi } from '../../services/api'
+import { useAuth } from '../../context/AuthContext'
 import { useAdminToast } from './AdminToast'
+import AdminConfirmDialog from './AdminConfirmDialog'
 import styles from './AdminCmsHistory.module.scss'
 
 const MODULES = {
   home: { label: 'Trang chủ', tone: 'red' },
   about: { label: 'Trang giới thiệu', tone: 'blue' },
   services: { label: 'Trang dịch vụ', tone: 'green' },
+  faq: { label: 'Quản lý giải đáp', tone: 'orange' },
+  faq_content: { label: 'Nội dung FAQ', tone: 'purple' },
+  blogs: { label: 'Tin tức', tone: 'cyan' },
+  branches: { label: 'Chi nhánh', tone: 'pink' },
+  contacts: { label: 'Liên hệ', tone: 'gray' },
 }
 
 const FIELD_LABELS = {
@@ -50,6 +58,23 @@ const FIELD_LABELS = {
   email: 'Email',
   address: 'Địa chỉ',
   hotline: 'Hotline',
+  question: 'Câu hỏi',
+  answer: 'Câu trả lời',
+  label: 'Tên danh mục',
+  key: 'Mã danh mục',
+  category_id: 'Danh mục',
+  status: 'Trạng thái',
+  content: 'Nội dung',
+  excerpt: 'Mô tả ngắn',
+  category: 'Chuyên mục',
+  author: 'Tác giả',
+  is_featured: 'Bài viết nổi bật',
+  published_at: 'Ngày đăng',
+  full_name: 'Họ và tên',
+  message: 'Nội dung liên hệ',
+  lat: 'Vĩ độ',
+  lng: 'Kinh độ',
+  is_headquarter: 'Trụ sở chính',
 }
 
 function formatDate(value) {
@@ -88,10 +113,14 @@ function actionLabel(action) {
 
 export default function AdminCmsHistory() {
   const { showToast } = useAdminToast()
+  const { user } = useAuth()
   const [entries, setEntries] = useState([])
   const [moduleFilter, setModuleFilter] = useState('')
   const [loading, setLoading] = useState(true)
   const [expandedId, setExpandedId] = useState(null)
+  const [deleteTarget, setDeleteTarget] = useState(null)
+  const [deleting, setDeleting] = useState(false)
+  const canDelete = ['superadmin', 'admin'].includes(user?.role)
 
   const loadHistory = async () => {
     setLoading(true)
@@ -106,6 +135,22 @@ export default function AdminCmsHistory() {
   }
 
   useEffect(() => { loadHistory() }, [moduleFilter])
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return
+    setDeleting(true)
+    try {
+      const response = await cmsHistoryApi.delete(deleteTarget.source, deleteTarget.source_id)
+      setEntries(current => current.filter(entry => entry.id !== deleteTarget.id))
+      if (expandedId === deleteTarget.id) setExpandedId(null)
+      setDeleteTarget(null)
+      showToast(response.message || 'Đã xóa bản ghi lịch sử.', 'success')
+    } catch (error) {
+      showToast(error.message || 'Không thể xóa bản ghi lịch sử.', 'error')
+    } finally {
+      setDeleting(false)
+    }
+  }
 
   const counts = useMemo(() => entries.reduce((result, entry) => {
     result[entry.module] = (result[entry.module] || 0) + 1
@@ -165,22 +210,35 @@ export default function AdminCmsHistory() {
             const expanded = expandedId === entry.id
             return (
               <article className={styles.entry} key={entry.id}>
-                <button
-                  type="button"
-                  className={styles.entryMain}
-                  onClick={() => setExpandedId(expanded ? null : entry.id)}
-                >
-                  <span className={`${styles.moduleBadge} ${styles[module.tone]}`}>{module.label}</span>
-                  <div className={styles.entryContent}>
-                    <strong>{entry.change_summary || 'Cập nhật nội dung'}</strong>
-                    <div className={styles.meta}>
-                      <span><UserRound size={13} /> {entry.author?.full_name || entry.author?.username || 'Tài khoản đã xóa'}</span>
-                      <span><Clock3 size={13} /> {formatDate(entry.created_at)}</span>
-                      <span>{entry.is_initial ? 'Bản ghi ban đầu' : `${entry.changes.length} thay đổi`}</span>
+                <div className={styles.entryHeader}>
+                  <button
+                    type="button"
+                    className={styles.entryMain}
+                    onClick={() => setExpandedId(expanded ? null : entry.id)}
+                  >
+                    <span className={`${styles.moduleBadge} ${styles[module.tone]}`}>{module.label}</span>
+                    <div className={styles.entryContent}>
+                      <strong>{entry.change_summary || 'Cập nhật nội dung'}</strong>
+                      <div className={styles.meta}>
+                        <span><UserRound size={13} /> {entry.author?.full_name || entry.author?.username || 'Tài khoản đã xóa'}</span>
+                        <span><Clock3 size={13} /> {formatDate(entry.created_at)}</span>
+                        <span>{entry.is_initial ? 'Bản ghi ban đầu' : `${entry.changes.length} thay đổi`}</span>
+                      </div>
                     </div>
-                  </div>
-                  <span className={styles.expandIcon}>{expanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}</span>
-                </button>
+                    <span className={styles.expandIcon}>{expanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}</span>
+                  </button>
+                  {canDelete && (
+                    <button
+                      type="button"
+                      className={styles.deleteBtn}
+                      onClick={() => setDeleteTarget(entry)}
+                      title="Xóa bản ghi lịch sử"
+                      aria-label="Xóa bản ghi lịch sử"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  )}
+                </div>
 
                 {expanded && (
                   <div className={styles.details}>
@@ -218,6 +276,17 @@ export default function AdminCmsHistory() {
           })}
         </div>
       )}
+
+      <AdminConfirmDialog
+        open={!!deleteTarget}
+        title="Xóa bản ghi lịch sử?"
+        message="Thao tác này chỉ xóa nhật ký, không thay đổi nội dung đang hiển thị trên website."
+        target={deleteTarget ? `${MODULES[deleteTarget.module]?.label || deleteTarget.module} · ${deleteTarget.change_summary || `Bản ghi #${deleteTarget.source_id}`}` : ''}
+        confirmText="Xóa bản ghi"
+        busy={deleting}
+        onCancel={() => setDeleteTarget(null)}
+        onConfirm={handleDelete}
+      />
     </div>
   )
 }

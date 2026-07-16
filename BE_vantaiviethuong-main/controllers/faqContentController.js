@@ -1,6 +1,7 @@
 // controllers/faqContentController.js
 const { pool } = require('../config/database')
 const { sanitizeLegacyLocalized } = require('../utils/cmsSanitizer')
+const { recordAdminAudit } = require('../services/adminAuditService')
 
 // ═══════════════════════════════════════════════════════════════
 //  PUBLIC
@@ -61,6 +62,11 @@ const createCategory = async (req, res) => {
       `INSERT INTO faq_categories (\`key\`, label, sort_order) VALUES (?, ?, ?)`,
       [key.trim(), label.trim(), sort_order]
     )
+    const [createdRows] = await pool.query('SELECT * FROM faq_categories WHERE id = ?', [result.insertId])
+    await recordAdminAudit({
+      module: 'faq_content', action: 'create', entityType: 'faq_category', entityId: result.insertId,
+      summary: `Thêm danh mục FAQ: ${label.trim()}`, after: createdRows[0], userId: req.user?.id,
+    })
     return res.status(201).json({ message: 'Tạo danh mục thành công.', id: result.insertId })
   } catch (err) {
     if (err.code === 'ER_DUP_ENTRY') {
@@ -74,6 +80,8 @@ const createCategory = async (req, res) => {
 // PUT /api/faq-content/admin/categories/:id
 const updateCategory = async (req, res) => {
   try {
+    const [beforeRows] = await pool.query('SELECT * FROM faq_categories WHERE id = ?', [req.params.id])
+    if (!beforeRows.length) return res.status(404).json({ message: 'Không tìm thấy danh mục.' })
     const { label, sort_order, is_active } = req.body
     const fields = [], vals = []
     if (label !== undefined)      { fields.push('label = ?');      vals.push(label) }
@@ -86,6 +94,12 @@ const updateCategory = async (req, res) => {
       `UPDATE faq_categories SET ${fields.join(', ')} WHERE id = ?`, vals
     )
     if (result.affectedRows === 0) return res.status(404).json({ message: 'Không tìm thấy danh mục.' })
+    const [afterRows] = await pool.query('SELECT * FROM faq_categories WHERE id = ?', [req.params.id])
+    await recordAdminAudit({
+      module: 'faq_content', action: 'update', entityType: 'faq_category', entityId: req.params.id,
+      summary: `Cập nhật danh mục FAQ: ${afterRows[0].label}`,
+      before: beforeRows[0], after: afterRows[0], userId: req.user?.id,
+    })
     return res.json({ message: 'Cập nhật danh mục thành công.' })
   } catch (err) {
     console.error('[FAQ-CONTENT] updateCategory error:', err)
@@ -96,10 +110,18 @@ const updateCategory = async (req, res) => {
 // DELETE /api/faq-content/admin/categories/:id  (cascade xóa items luôn)
 const deleteCategory = async (req, res) => {
   try {
+    const [beforeRows] = await pool.query('SELECT * FROM faq_categories WHERE id = ?', [req.params.id])
+    if (!beforeRows.length) return res.status(404).json({ message: 'Không tìm thấy danh mục.' })
+    const [items] = await pool.query('SELECT * FROM faq_items WHERE category_id = ? ORDER BY sort_order ASC', [req.params.id])
     const [result] = await pool.query(
       `DELETE FROM faq_categories WHERE id = ?`, [req.params.id]
     )
     if (result.affectedRows === 0) return res.status(404).json({ message: 'Không tìm thấy danh mục.' })
+    await recordAdminAudit({
+      module: 'faq_content', action: 'delete', entityType: 'faq_category', entityId: req.params.id,
+      summary: `Xóa danh mục FAQ: ${beforeRows[0].label}`,
+      before: { ...beforeRows[0], items }, userId: req.user?.id,
+    })
     return res.json({ message: 'Đã xóa danh mục.' })
   } catch (err) {
     console.error('[FAQ-CONTENT] deleteCategory error:', err)
@@ -136,6 +158,11 @@ const createItem = async (req, res) => {
       `INSERT INTO faq_items (category_id, question, answer, sort_order) VALUES (?, ?, ?, ?)`,
       [req.params.catId, question.trim(), answer.trim(), sort_order]
     )
+    const [createdRows] = await pool.query('SELECT * FROM faq_items WHERE id = ?', [result.insertId])
+    await recordAdminAudit({
+      module: 'faq_content', action: 'create', entityType: 'faq_item', entityId: result.insertId,
+      summary: `Thêm câu hỏi FAQ: ${question.trim()}`, after: createdRows[0], userId: req.user?.id,
+    })
     return res.status(201).json({ message: 'Tạo câu hỏi thành công.', id: result.insertId })
   } catch (err) {
     console.error('[FAQ-CONTENT] createItem error:', err)
@@ -146,6 +173,8 @@ const createItem = async (req, res) => {
 // PUT /api/faq-content/admin/items/:id
 const updateItem = async (req, res) => {
   try {
+    const [beforeRows] = await pool.query('SELECT * FROM faq_items WHERE id = ?', [req.params.id])
+    if (!beforeRows.length) return res.status(404).json({ message: 'Không tìm thấy câu hỏi.' })
     const { question, answer, sort_order, is_active } = req.body
     const fields = [], vals = []
     if (question !== undefined)   { fields.push('question = ?');   vals.push(question) }
@@ -159,6 +188,12 @@ const updateItem = async (req, res) => {
       `UPDATE faq_items SET ${fields.join(', ')} WHERE id = ?`, vals
     )
     if (result.affectedRows === 0) return res.status(404).json({ message: 'Không tìm thấy câu hỏi.' })
+    const [afterRows] = await pool.query('SELECT * FROM faq_items WHERE id = ?', [req.params.id])
+    await recordAdminAudit({
+      module: 'faq_content', action: 'update', entityType: 'faq_item', entityId: req.params.id,
+      summary: `Cập nhật câu hỏi FAQ: ${afterRows[0].question}`,
+      before: beforeRows[0], after: afterRows[0], userId: req.user?.id,
+    })
     return res.json({ message: 'Cập nhật câu hỏi thành công.' })
   } catch (err) {
     console.error('[FAQ-CONTENT] updateItem error:', err)
@@ -169,10 +204,16 @@ const updateItem = async (req, res) => {
 // DELETE /api/faq-content/admin/items/:id
 const deleteItem = async (req, res) => {
   try {
+    const [beforeRows] = await pool.query('SELECT * FROM faq_items WHERE id = ?', [req.params.id])
+    if (!beforeRows.length) return res.status(404).json({ message: 'Không tìm thấy câu hỏi.' })
     const [result] = await pool.query(
       `DELETE FROM faq_items WHERE id = ?`, [req.params.id]
     )
     if (result.affectedRows === 0) return res.status(404).json({ message: 'Không tìm thấy câu hỏi.' })
+    await recordAdminAudit({
+      module: 'faq_content', action: 'delete', entityType: 'faq_item', entityId: req.params.id,
+      summary: `Xóa câu hỏi FAQ: ${beforeRows[0].question}`, before: beforeRows[0], userId: req.user?.id,
+    })
     return res.json({ message: 'Đã xóa câu hỏi.' })
   } catch (err) {
     console.error('[FAQ-CONTENT] deleteItem error:', err)

@@ -144,6 +144,7 @@ export const cmsHistoryApi = {
     if (module) params.set('module', module)
     return request(`/cms-revisions?${params.toString()}`)
   },
+  delete: (source, id) => request(`/cms-revisions/${source}/${id}`, { method: 'DELETE' }),
 }
 
 export const aboutPageApi = {

@@ -1,6 +1,7 @@
 // controllers/faqController.js
 const { pool } = require('../config/database')
 const { sendFaqNotification } = require('../services/emailService')
+const { recordAdminAudit } = require('../services/adminAuditService')
 
 const ALLOWED_STATUSES = ['pending', 'inprogress', 'done']
 
@@ -72,13 +73,20 @@ const updateStatus = async (req, res) => {
     if (!ALLOWED_STATUSES.includes(status)) {
       return res.status(400).json({ message: 'Trạng thái không hợp lệ.' })
     }
+    const [beforeRows] = await pool.query('SELECT * FROM faq_inquiries WHERE id = ?', [req.params.id])
+    if (!beforeRows.length) {
+      return res.status(404).json({ message: 'Không tìm thấy câu hỏi.' })
+    }
     const [result] = await pool.query(
       `UPDATE faq_inquiries SET status = ? WHERE id = ?`,
       [status, req.params.id]
     )
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ message: 'Không tìm thấy câu hỏi.' })
-    }
+    const [afterRows] = await pool.query('SELECT * FROM faq_inquiries WHERE id = ?', [req.params.id])
+    await recordAdminAudit({
+      module: 'faq', action: 'status', entityType: 'faq_inquiry', entityId: req.params.id,
+      summary: `Cập nhật trạng thái thắc mắc của ${beforeRows[0].name}`,
+      before: beforeRows[0], after: afterRows[0], userId: req.user?.id,
+    })
     return res.json({ message: 'Cập nhật trạng thái thành công.' })
   } catch (err) {
     console.error('[FAQ] updateStatus error:', err)
@@ -89,13 +97,18 @@ const updateStatus = async (req, res) => {
 // [ADMIN] DELETE /api/faq-inquiries/admin/:id
 const deleteInquiry = async (req, res) => {
   try {
+    const [beforeRows] = await pool.query('SELECT * FROM faq_inquiries WHERE id = ?', [req.params.id])
+    if (!beforeRows.length) {
+      return res.status(404).json({ message: 'Không tìm thấy câu hỏi.' })
+    }
     const [result] = await pool.query(
       `DELETE FROM faq_inquiries WHERE id = ?`,
       [req.params.id]
     )
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ message: 'Không tìm thấy câu hỏi.' })
-    }
+    await recordAdminAudit({
+      module: 'faq', action: 'delete', entityType: 'faq_inquiry', entityId: req.params.id,
+      summary: `Xóa thắc mắc của ${beforeRows[0].name}`, before: beforeRows[0], userId: req.user?.id,
+    })
     return res.json({ message: 'Đã xóa câu hỏi.' })
   } catch (err) {
     console.error('[FAQ] deleteInquiry error:', err)

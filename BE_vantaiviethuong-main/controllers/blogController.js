@@ -2,6 +2,7 @@ const { pool } = require('../config/database');
 const { deleteFromCloudinary, getPublicIdFromUrl } = require('../config/cloudinary');
 const { BLOG_CATEGORIES, DEFAULT_BLOG_CATEGORY } = require('../config/blogCategories');
 const { sanitizeLegacyLocalized } = require('../utils/cmsSanitizer');
+const { recordAdminAudit } = require('../services/adminAuditService');
 
 const getBlogCategories = (req, res) => {
   res.json({ success: true, data: BLOG_CATEGORIES });
@@ -203,6 +204,10 @@ const createBlog = async (req, res) => {
     );
 
     const [newBlog] = await pool.query('SELECT * FROM blogs WHERE id = ?', [result.insertId]);
+    await recordAdminAudit({
+      module: 'blogs', action: 'create', entityType: 'blog', entityId: result.insertId,
+      summary: `Tạo bài viết: ${title}`, after: newBlog[0], userId: req.user?.id,
+    });
 
     res.status(201).json({ success: true, message: 'Tạo bài viết thành công!', data: withSafeBlogDate(sanitizeLegacyLocalized(newBlog[0])) });
   } catch (err) {
@@ -264,6 +269,10 @@ const updateBlog = async (req, res) => {
     );
 
     const [updated] = await pool.query('SELECT * FROM blogs WHERE id = ?', [id]);
+    await recordAdminAudit({
+      module: 'blogs', action: 'update', entityType: 'blog', entityId: id,
+      summary: `Cập nhật bài viết: ${updated[0].title}`, before: blog, after: updated[0], userId: req.user?.id,
+    });
     res.json({ success: true, message: 'Cập nhật bài viết thành công!', data: withSafeBlogDate(sanitizeLegacyLocalized(updated[0])) });
   } catch (err) {
     console.error('updateBlog error:', err);
@@ -287,6 +296,10 @@ const deleteBlog = async (req, res) => {
     }
 
     await pool.query('DELETE FROM blogs WHERE id = ?', [id]);
+    await recordAdminAudit({
+      module: 'blogs', action: 'delete', entityType: 'blog', entityId: id,
+      summary: `Xóa bài viết: ${rows[0].title}`, before: rows[0], userId: req.user?.id,
+    });
     res.json({ success: true, message: 'Xóa bài viết thành công!' });
   } catch (err) {
     console.error('deleteBlog error:', err);

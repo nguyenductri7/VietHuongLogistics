@@ -1,5 +1,6 @@
 const { pool } = require('../config/database');
 const { sanitizeLegacyLocalized } = require('../utils/cmsSanitizer');
+const { recordAdminAudit } = require('../services/adminAuditService');
 
 const toBoolInt = (value, fallback = 0) => {
   if (value === undefined || value === null || value === '') return fallback;
@@ -75,6 +76,10 @@ const createBranch = async (req, res) => {
     );
 
     const [rows] = await pool.query('SELECT * FROM branches WHERE id = ?', [result.insertId]);
+    await recordAdminAudit({
+      module: 'branches', action: 'create', entityType: 'branch', entityId: result.insertId,
+      summary: `Thêm chi nhánh: ${rows[0].name}`, after: rows[0], userId: req.user?.id,
+    });
     res.status(201).json({ success: true, message: 'Đã thêm chi nhánh.', data: normalizeBranch(rows[0]) });
   } catch (err) {
     console.error('createBranch error:', err);
@@ -122,6 +127,10 @@ const updateBranch = async (req, res) => {
     );
 
     const [rows] = await pool.query('SELECT * FROM branches WHERE id = ?', [id]);
+    await recordAdminAudit({
+      module: 'branches', action: 'update', entityType: 'branch', entityId: id,
+      summary: `Cập nhật chi nhánh: ${rows[0].name}`, before: current, after: rows[0], userId: req.user?.id,
+    });
     res.json({ success: true, message: 'Đã cập nhật chi nhánh.', data: normalizeBranch(rows[0]) });
   } catch (err) {
     console.error('updateBranch error:', err);
@@ -132,12 +141,16 @@ const updateBranch = async (req, res) => {
 const deleteBranch = async (req, res) => {
   try {
     const { id } = req.params;
-    const [rows] = await pool.query('SELECT id FROM branches WHERE id = ?', [id]);
+    const [rows] = await pool.query('SELECT * FROM branches WHERE id = ?', [id]);
     if (!rows.length) {
       return res.status(404).json({ success: false, message: 'Không tìm thấy chi nhánh.' });
     }
 
     await pool.query('DELETE FROM branches WHERE id = ?', [id]);
+    await recordAdminAudit({
+      module: 'branches', action: 'delete', entityType: 'branch', entityId: id,
+      summary: `Xóa chi nhánh: ${rows[0].name}`, before: rows[0], userId: req.user?.id,
+    });
     res.json({ success: true, message: 'Đã xóa chi nhánh.' });
   } catch (err) {
     console.error('deleteBranch error:', err);
