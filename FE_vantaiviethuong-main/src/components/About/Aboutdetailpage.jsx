@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import axios from 'axios'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import {
@@ -8,13 +7,12 @@ import {
   Phone, ArrowRight, Eye, Target, Shield,
 } from 'lucide-react'
 import styles from './Aboutdetailpage.module.scss'
+import { aboutPageApi } from '../../services/api'
 
 gsap.registerPlugin(ScrollTrigger)
 
 // VITE_API_URL = http://localhost:5000/api  ← đã có /api
 // Nên chỉ thêm /about, KHÔNG thêm /api/about
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
-
 // ─── Map tên icon ─────────────────────────────────────────────
 const ICON_MAP = {
   Truck:       <Truck size={18} />,
@@ -144,13 +142,11 @@ export default function AboutDetailPage() {
 
   // ── Fetch — FIX: /about (không phải /api/about) ──────────
   useEffect(() => {
-    const controller = new AbortController()
-    axios.get(`${API_BASE}/about`, { signal: controller.signal })
-      .then(res => setAbout(normalizeAbout(res.data?.data ?? res.data)))
-      .catch(err => {
-        if (err.code !== 'ERR_CANCELED') setAbout(FALLBACK_ABOUT)
-      })
-    return () => controller.abort()
+    let active = true
+    aboutPageApi.get()
+      .then(res => { if (active) setAbout(normalizeAbout(res.data)) })
+      .catch(() => { if (active) setAbout(FALLBACK_ABOUT) })
+    return () => { active = false }
   }, [])
 
   // ── GSAP animations ───────────────────────────────────────

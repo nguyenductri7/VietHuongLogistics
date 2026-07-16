@@ -1,5 +1,6 @@
 const { pool } = require('../config/database');
 const { sanitizeLegacyLocalized } = require('../utils/cmsSanitizer');
+const { ensurePublishedBaseline, recordCurrentPublished } = require('../services/cmsRevisionService');
 
 const JSON_FIELDS = [
   'hero',
@@ -185,6 +186,7 @@ const updateHomePage = async (req, res) => {
     }
 
     const row = await ensureHomePageRow();
+    await ensurePublishedBaseline('home', req.user?.id);
     const updates = [];
     const values = [];
 
@@ -197,6 +199,7 @@ const updateHomePage = async (req, res) => {
     values.push(req.user?.id || null, row.id);
 
     await pool.query(`UPDATE home_page SET ${updates.join(', ')} WHERE id = ?`, values);
+    await recordCurrentPublished('home', req.user?.id, 'Xuất bản thay đổi trang chủ');
 
     const [rows] = await pool.query('SELECT * FROM home_page WHERE id = ?', [row.id]);
     res.json({

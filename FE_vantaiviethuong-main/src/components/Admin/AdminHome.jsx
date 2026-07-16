@@ -8,6 +8,7 @@ import { homePageApi, partnerApi, resolveApiMediaUrl } from '../../services/api'
 import styles from './AdminSettings.module.scss'
 import { useAdminToast } from './AdminToast'
 import AdminConfirmDialog from './AdminConfirmDialog'
+import CmsRevisionToolbar from './CmsRevisionToolbar'
 
 const DEFAULT_HOME = {
   hero: {
@@ -277,9 +278,7 @@ export default function AdminHome() {
     }
   }
 
-  useEffect(() => {
-    if (activeTab === 'partners_section') loadPartners()
-  }, [activeTab])
+  useEffect(() => { loadPartners() }, [])
 
 
   const handleChange = (sectionKey, fieldKey, value) => {
@@ -385,7 +384,7 @@ export default function AdminHome() {
     try {
       const res = await homePageApi.uploadImage(file)
       handleChange('hero', fieldKey, res.url)
-      showToast('Upload thành công! Bấm “Lưu section” để lưu thay đổi.')
+      showToast('Upload thành công! Bấm “Xuất bản section” để cập nhật website.')
     } catch (err) {
       showToast(err.message || 'Upload thất bại.', 'error')
     } finally {
@@ -400,7 +399,7 @@ export default function AdminHome() {
     try {
       const res = await homePageApi.uploadImage(file)
       handleReviewChange(index, 'avatar_url', res.url)
-      showToast('Upload ảnh khách hàng thành công! Bấm “Lưu section” để lưu thay đổi.')
+      showToast('Upload ảnh khách hàng thành công! Bấm “Xuất bản section” để cập nhật website.')
     } catch (err) {
       showToast(err.message || 'Upload ảnh khách hàng thất bại.', 'error')
     } finally {
@@ -466,6 +465,17 @@ export default function AdminHome() {
 
   const currentSection = SECTIONS.find(section => section.key === activeTab)
   const activeDataKey = currentSection?.dataKey || activeTab
+  const cmsSnapshot = {
+    ...home,
+    footer: getSectionPayload('footer'),
+    ...(partners.length ? { partners } : {}),
+  }
+
+  const applyCmsSnapshot = (snapshot) => {
+    if (!snapshot) return
+    setHome(normalizeHome(snapshot))
+    if (Array.isArray(snapshot.partners)) setPartners(snapshot.partners)
+  }
 
   const isSectionEnabled = (section) => {
     const dataKey = section.dataKey || section.key
@@ -482,6 +492,15 @@ export default function AdminHome() {
           <h1 className={styles.title}>Quản lý trang chủ</h1>
         </div>
       </div>
+
+      {!loading && (
+        <CmsRevisionToolbar
+          module="home"
+          snapshot={cmsSnapshot}
+          previewPath="/"
+          onApplied={applyCmsSnapshot}
+        />
+      )}
 
       {loading ? (
         <div className={styles.loadingBox}>
@@ -863,8 +882,8 @@ export default function AdminHome() {
             <div className={styles.saveRow}>
               <button className={styles.saveBtn} onClick={handleSave} disabled={saving}>
                 {saving
-                  ? <><Loader2 size={15} className={styles.spinner} /> Đang lưu...</>
-                  : <><Save size={15} /> Lưu section</>
+                  ? <><Loader2 size={15} className={styles.spinner} /> Đang xuất bản...</>
+                  : <><Save size={15} /> Xuất bản section</>
                 }
               </button>
             </div>

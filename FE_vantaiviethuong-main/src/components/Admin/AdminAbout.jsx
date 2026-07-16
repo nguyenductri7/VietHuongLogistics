@@ -7,6 +7,7 @@ import { normalizeAbout } from '../About/Aboutdetailpage'
 import styles from './AdminAbout.module.scss'
 import { useAdminToast } from './AdminToast'
 import AdminConfirmDialog from './AdminConfirmDialog'
+import CmsRevisionToolbar from './CmsRevisionToolbar'
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
 
@@ -109,6 +110,13 @@ export default function AdminAbout() {
           <h1 className={styles.pageTitle}>Quản Lý Trang Giới Thiệu</h1>
         </div>
       </div>
+
+      <CmsRevisionToolbar
+        module="about"
+        snapshot={data}
+        previewPath="/ve-chung-toi"
+        onApplied={snapshot => snapshot && setData(normalizeAbout(snapshot))}
+      />
 
 
       {/* ══════════ HERO ══════════ */}
@@ -282,7 +290,7 @@ function Section({ title, children, onSave, saving }) {
       <div className={styles.sectionHeader}>
         <h2>{title}</h2>
         <button className={styles.saveBtn} onClick={onSave} disabled={saving}>
-          {saving ? 'Đang lưu...' : 'Lưu thay đổi'}
+          {saving ? 'Đang xuất bản...' : 'Xuất bản section'}
         </button>
       </div>
       <div className={styles.sectionBody}>{children}</div>

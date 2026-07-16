@@ -1,6 +1,6 @@
 const { pool } = require('../config/database');
-const { deleteFromCloudinary } = require('../config/cloudinary');
 const { sanitizeLegacyLocalized } = require('../utils/cmsSanitizer');
+const { ensurePublishedBaseline, recordCurrentPublished } = require('../services/cmsRevisionService');
 
 const parseBooleanFlag = (value) => {
   if (value === undefined) return undefined;
@@ -43,12 +43,14 @@ const createPartner = async (req, res) => {
     const logo_url = req.file?.path || '';
     const logo_public_id = req.file?.filename || '';
 
+    await ensurePublishedBaseline('home', req.user?.id);
     const [result] = await pool.query(
       'INSERT INTO partners (name, logo_url, logo_public_id, website_url, sort_order) VALUES (?, ?, ?, ?, ?)',
       [name, logo_url, logo_public_id, website_url || '', parseInt(sort_order) || 0]
     );
 
     const [newPartner] = await pool.query('SELECT * FROM partners WHERE id = ?', [result.insertId]);
+    await recordCurrentPublished('home', req.user?.id, `Thêm đối tác: ${name}`);
     res.status(201).json({ success: true, message: 'Thêm đối tác thành công!', data: sanitizeLegacyLocalized(newPartner[0]) });
   } catch (err) {
     console.error('createPartner error:', err);
@@ -70,8 +72,9 @@ const updatePartner = async (req, res) => {
     let logo_public_id = partner.logo_public_id;
     const nextIsActive = parseBooleanFlag(is_active);
 
+    await ensurePublishedBaseline('home', req.user?.id);
     if (req.file) {
-      if (partner.logo_public_id) await deleteFromCloudinary(partner.logo_public_id).catch(console.error);
+      // Giữ ảnh cũ để phiên bản trước vẫn có thể được khôi phục.
       logo_url = req.file.path;
       logo_public_id = req.file.filename;
     }
@@ -90,6 +93,7 @@ const updatePartner = async (req, res) => {
     );
 
     const [updated] = await pool.query('SELECT * FROM partners WHERE id = ?', [id]);
+    await recordCurrentPublished('home', req.user?.id, `Cập nhật đối tác: ${updated[0].name}`);
     res.json({ success: true, message: 'Cập nhật đối tác thành công!', data: sanitizeLegacyLocalized(updated[0]) });
   } catch (err) {
     console.error('updatePartner error:', err);
@@ -104,8 +108,10 @@ const deletePartner = async (req, res) => {
     const [rows] = await pool.query('SELECT * FROM partners WHERE id = ?', [id]);
     if (!rows.length) return res.status(404).json({ success: false, message: 'Không tìm thấy đối tác.' });
 
-    if (rows[0].logo_public_id) await deleteFromCloudinary(rows[0].logo_public_id).catch(console.error);
+    await ensurePublishedBaseline('home', req.user?.id);
+    // Không xóa file Cloudinary ngay vì lịch sử CMS có thể cần logo này.
     await pool.query('DELETE FROM partners WHERE id = ?', [id]);
+    await recordCurrentPublished('home', req.user?.id, `Xóa đối tác: ${rows[0].name}`);
     res.json({ success: true, message: 'Xóa đối tác thành công!' });
   } catch (err) {
     console.error('deletePartner error:', err);

@@ -1,6 +1,7 @@
 // src/controllers/servicesPageController.js
 const { pool } = require('../config/database');
 const { sanitizeLegacyLocalized } = require('../utils/cmsSanitizer');
+const { ensurePublishedBaseline, recordCurrentPublished } = require('../services/cmsRevisionService');
 
 const JSON_FIELDS = ['banner', 'process_steps', 'contact_info'];
 
@@ -149,6 +150,7 @@ const updateServicesPage = async (req, res) => {
     }
     const pageId = rows[0].id;
 
+    await ensurePublishedBaseline('services', req.user?.id);
     const updates = [];
     const values = [];
     for (const field of JSON_FIELDS) {
@@ -165,6 +167,7 @@ const updateServicesPage = async (req, res) => {
     values.push(pageId);
 
     await pool.query(`UPDATE services_page SET ${updates.join(', ')} WHERE id = ?`, values);
+    await recordCurrentPublished('services', req.user?.id, 'Xuất bản thay đổi trang dịch vụ');
     res.json({ success: true, message: 'Cập nhật thành công!' });
   } catch (err) {
     console.error('Update services_page error:', err);
@@ -215,6 +218,7 @@ const createServiceItem = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Vui lòng nhập đầy đủ thông tin bắt buộc.' });
     }
 
+    await ensurePublishedBaseline('services', req.user?.id);
     let slug = slugify(title);
     if (!slug) slug = `dich-vu-${Date.now()}`;
 
@@ -231,6 +235,8 @@ const createServiceItem = async (req, res) => {
       [slug, title.trim(), subtitle.trim(), description.trim(), icon_key || 'Truck', image.trim(), JSON.stringify(tags || []), nextOrder]
     );
 
+    await recordCurrentPublished('services', req.user?.id, `Thêm dịch vụ: ${title.trim()}`);
+
     res.status(201).json({ success: true, message: 'Tạo dịch vụ thành công!', id: result.insertId, slug });
   } catch (err) {
     console.error('Create service_item error:', err);
@@ -242,6 +248,7 @@ const createServiceItem = async (req, res) => {
 const seedDefaultServiceItems = async (req, res) => {
   const connection = await pool.getConnection();
   try {
+    await ensurePublishedBaseline('services', req.user?.id);
     await connection.beginTransaction();
     let created = 0;
 
@@ -265,6 +272,7 @@ const seedDefaultServiceItems = async (req, res) => {
     }
 
     await connection.commit();
+    if (created) await recordCurrentPublished('services', req.user?.id, 'Khởi tạo danh sách dịch vụ mặc định');
     return res.status(created ? 201 : 200).json({
       success: true,
       created,
@@ -292,12 +300,15 @@ const updateServiceItem = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Không tìm thấy dịch vụ.' });
     }
 
+    await ensurePublishedBaseline('services', req.user?.id);
     await pool.query(
       `UPDATE service_items
        SET title = ?, subtitle = ?, description = ?, icon_key = ?, image = ?, tags = ?, is_active = ?
        WHERE id = ?`,
       [title, subtitle, description, icon_key, image, JSON.stringify(tags || []), is_active ?? 1, id]
     );
+
+    await recordCurrentPublished('services', req.user?.id, `Cập nhật dịch vụ: ${title || id}`);
 
     res.json({ success: true, message: 'Cập nhật dịch vụ thành công!' });
   } catch (err) {
@@ -310,10 +321,13 @@ const updateServiceItem = async (req, res) => {
 const deleteServiceItem = async (req, res) => {
   try {
     const { id } = req.params;
+    const [rows] = await pool.query('SELECT title FROM service_items WHERE id = ?', [id]);
+    await ensurePublishedBaseline('services', req.user?.id);
     const [result] = await pool.query('DELETE FROM service_items WHERE id = ?', [id]);
     if (!result.affectedRows) {
       return res.status(404).json({ success: false, message: 'Không tìm thấy dịch vụ.' });
     }
+    await recordCurrentPublished('services', req.user?.id, `Xóa dịch vụ: ${rows[0]?.title || id}`);
     res.json({ success: true, message: 'Đã xóa dịch vụ.' });
   } catch (err) {
     console.error('Delete service_item error:', err);
@@ -329,12 +343,15 @@ const reorderServiceItems = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Dữ liệu thứ tự không hợp lệ.' });
     }
 
+    await ensurePublishedBaseline('services', req.user?.id);
     // Cập nhật sort_order tuần tự theo vị trí trong mảng order gửi lên
     await Promise.all(
       order.map((itemId, index) =>
         pool.query('UPDATE service_items SET sort_order = ? WHERE id = ?', [index + 1, itemId])
       )
     );
+
+    await recordCurrentPublished('services', req.user?.id, 'Sắp xếp lại danh sách dịch vụ');
 
     res.json({ success: true, message: 'Đã lưu thứ tự mới.' });
   } catch (err) {

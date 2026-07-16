@@ -13,6 +13,7 @@ import { GripVertical, Plus, Trash2, Eye, EyeOff, X, ArrowLeft } from 'lucide-re
 import styles from './Adminservices.module.scss'
 import { useAdminToast } from './AdminToast'
 import AdminConfirmDialog from './AdminConfirmDialog'
+import CmsRevisionToolbar from './CmsRevisionToolbar'
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
 
@@ -289,6 +290,17 @@ const loadAll = useCallback(() => {
         </div>
       </div>
 
+      <CmsRevisionToolbar
+        module="services"
+        snapshot={{ ...page, service_items: items }}
+        previewPath="/dich-vu"
+        onApplied={snapshot => {
+          if (!snapshot) return
+          setPage(normalizePage(snapshot))
+          if (Array.isArray(snapshot.service_items)) setItems(normalizeServiceItems(snapshot.service_items))
+        }}
+      />
+
 
       {/* ══════════ BANNER ══════════ */}
       <Section title="Banner Hero" onSave={() => saveSection('banner')} saving={saving.banner}>
@@ -507,7 +519,7 @@ function Section({ title, children, onSave, saving }) {
       <div className={styles.sectionHeader}>
         <h2>{title}</h2>
         <button className={styles.saveBtn} onClick={onSave} disabled={saving}>
-          {saving ? 'Đang lưu...' : 'Lưu thay đổi'}
+          {saving ? 'Đang xuất bản...' : 'Xuất bản section'}
         </button>
       </div>
       <div className={styles.sectionBody}>{children}</div>

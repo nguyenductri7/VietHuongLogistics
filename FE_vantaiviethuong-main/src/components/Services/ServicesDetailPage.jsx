@@ -1,9 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import axios from 'axios';
 import { Link, useLocation } from 'react-router-dom';
-import { contactApi } from '../../services/api';
-
-const API_BASE = import.meta.env.VITE_API_URL || ''
+import { contactApi, servicePageApi } from '../../services/api';
 
 const ICON_MAP = {
   Truck: <Truck size={22} />,
@@ -449,9 +446,9 @@ export const ContactSection = ({ contactData }) => {
     if (contactData) return;
     let cancelled = false;
 
-    axios.get(`${API_BASE}/services-page`)
+    servicePageApi.getPage()
       .then(res => {
-        if (!cancelled) setManagedContactData(res.data?.data?.contact_info || null);
+        if (!cancelled) setManagedContactData(res.data?.contact_info || null);
       })
       .catch(() => {});
 
@@ -766,11 +763,11 @@ export default function ServicesSections() {
 
   useEffect(() => {
     Promise.all([
-      axios.get(`${API_BASE}/services-page`),
-      axios.get(`${API_BASE}/services-page/items`),
+      servicePageApi.getPage(),
+      servicePageApi.getItems(),
     ]).then(([pageRes, itemsRes]) => {
-      setPageData(pageRes.data.data)
-      const activeItems = (itemsRes.data.data || []).filter(i => i.is_active)
+      setPageData(pageRes.data)
+      const activeItems = (itemsRes.data || []).filter(i => i.is_active)
       setServices(activeItems.length ? activeItems : TIMELINE_SERVICES)
     }).catch(() => {
       // Lỗi → giữ null → các component dùng hardcode mặc định

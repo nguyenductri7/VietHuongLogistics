@@ -7,7 +7,10 @@ export default function AdminConfirmDialog({
   message = 'Hành động này không thể hoàn tác.',
   target,
   confirmText = 'Xóa vĩnh viễn',
+  busyText = 'Đang xóa...',
   cancelText = 'Hủy',
+  icon: DialogIcon = Trash2,
+  confirmIcon: ConfirmIcon = Trash2,
   busy = false,
   onCancel,
   onConfirm,
@@ -22,7 +25,7 @@ export default function AdminConfirmDialog({
         </button>
 
         <div className={styles.iconWrap}>
-          <Trash2 size={28} />
+          <DialogIcon size={28} />
         </div>
 
         <h3>{title}</h3>
@@ -36,8 +39,8 @@ export default function AdminConfirmDialog({
             {cancelText}
           </button>
           <button className={styles.confirmBtn} disabled={busy} onClick={onConfirm}>
-            {busy ? <Loader2 size={15} className={styles.spin} /> : <Trash2 size={15} />}
-            {busy ? 'Đang xóa...' : confirmText}
+            {busy ? <Loader2 size={15} className={styles.spin} /> : <ConfirmIcon size={15} />}
+            {busy ? busyText : confirmText}
           </button>
         </div>
       </div>

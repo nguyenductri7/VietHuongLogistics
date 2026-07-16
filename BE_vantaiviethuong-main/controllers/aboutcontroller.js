@@ -1,6 +1,7 @@
 // src/controllers/aboutController.js
 const { pool } = require('../config/database');
 const { sanitizeLegacyLocalized } = require('../utils/cmsSanitizer');
+const { ensurePublishedBaseline, recordCurrentPublished } = require('../services/cmsRevisionService');
 
 // ── Các field JSON hợp lệ trong bảng, dùng để validate khi update ──
 const JSON_FIELDS = ['hero', 'stats', 'identity', 'services', 'timeline', 'values_section'];
@@ -72,6 +73,7 @@ const updateAbout = async (req, res) => {
     }
     const aboutId = rows[0].id;
 
+    await ensurePublishedBaseline('about', req.user?.id);
     const updates = [];
     const values = [];
 
@@ -94,6 +96,7 @@ const updateAbout = async (req, res) => {
       `UPDATE about_page SET ${updates.join(', ')} WHERE id = ?`,
       values
     );
+    await recordCurrentPublished('about', req.user?.id, 'Xuất bản thay đổi trang giới thiệu');
 
     res.json({ success: true, message: 'Cập nhật trang About thành công!' });
   } catch (err) {
