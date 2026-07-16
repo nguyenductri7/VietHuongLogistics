@@ -10,6 +10,7 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { contactApi } from '../../services/api';
 import { TIMELINE_SERVICES } from './ServicesDetailPage';
+import { normalizeServiceDetail } from './serviceDetailDefaults';
 import s from './ServiceDetailPage.module.scss';
 
 const API_BASE = import.meta.env.VITE_API_URL || ''
@@ -63,6 +64,7 @@ export default function ServiceDetailPage() {
 
 
 const ServiceDetailHero = ({ service }) => {
+  const detail = normalizeServiceDetail(service.detail_content, service.slug || service.id);
   const heroRef  = useRef(null);
   const titleRef = useRef(null);
   const subRef   = useRef(null);
@@ -117,7 +119,7 @@ const ServiceDetailHero = ({ service }) => {
         </nav>
 
         {/* Service number badge */}
-        <div className={s.heroLabel}>{service.label}</div>
+        <div className={s.heroLabel}>{service.label || String(service.sort_order || '').padStart(2, '0')}</div>
 
         {/* Title */}
         <h1 ref={titleRef} className={s.heroTitle}>
@@ -128,11 +130,11 @@ const ServiceDetailHero = ({ service }) => {
         </h1>
 
         <p ref={subRef} className={s.heroSubtitle}>{service.subtitle}</p>
-        <p className={s.heroDesc}>{service.desc}</p>
+        <p className={s.heroDesc}>{service.description || service.desc}</p>
 
         {/* Tags */}
         <ul className={s.heroTags}>
-          {service.tags.map(t => (
+          {(service.tags || []).map(t => (
             <li key={t} className={s.heroTag}>
               <CheckCircle2 size={13} /> {t}
             </li>
@@ -142,7 +144,7 @@ const ServiceDetailHero = ({ service }) => {
         {/* CTAs */}
         <div ref={ctaRef} className={s.heroCtas}>
           <a href="#lien-he" className={s.heroBtnPrimary}>
-            Đặt Dịch Vụ Ngay <ArrowRight size={16} />
+            {detail.hero_cta_label} <ArrowRight size={16} />
           </a>
           <Link to="/dich-vu" className={s.heroBtnGhost}>
             <ArrowLeft size={16} /> Xem Dịch Vụ Khác
@@ -230,9 +232,7 @@ const SERVICE_DETAIL_DATA = {
 
 const ServiceDetailContent = ({ service, allServices = TIMELINE_SERVICES }) => {
   const sectionRef = useRef(null);
-  const detail = SERVICE_DETAIL_DATA[service.id] || {
-    highlights: [], features: [],
-  };
+  const detail = normalizeServiceDetail(service.detail_content, service.slug || service.id);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -264,19 +264,15 @@ const ServiceDetailContent = ({ service, allServices = TIMELINE_SERVICES }) => {
         {/* Features */}
         <div className={s.contentGrid}>
           <div className={s.contentLeft}>
-            <span className={s.miniEyebrow}>Chi Tiết Dịch Vụ</span>
+            <span className={s.miniEyebrow}>{detail.eyebrow}</span>
             <h2 className={s.contentTitle}>
-              Tại Sao Chọn <br />
+              {detail.title_prefix} <br />
               <span className={s.shineText}>{service.title}?</span>
             </h2>
-            <p className={s.contentDesc}>
-              Chúng tôi không chỉ vận chuyển hàng hóa — chúng tôi cam kết
-              mang lại sự yên tâm tuyệt đối cho doanh nghiệp của bạn,
-              từ khâu tiếp nhận đến tận tay người nhận.
-            </p>
-            <Link to="/chi-nhanh" className={s.btnPrimary}>
-              Nhận Báo Giá Ngay <ArrowRight size={16} />
-            </Link>
+            <p className={s.contentDesc}>{detail.description}</p>
+            <a href={detail.cta_link || '#lien-he'} className={s.btnPrimary}>
+              {detail.cta_label || 'Nhận Báo Giá Ngay'} <ArrowRight size={16} />
+            </a>
           </div>
 
           <ul className={s.featureList}>
@@ -314,6 +310,7 @@ const ServiceDetailContent = ({ service, allServices = TIMELINE_SERVICES }) => {
    CTA SECTION — form đỏ ánh nắng (inline)
    ════════════════════════════════════════════════════════════ */
 const ServiceDetailCTA = ({ service }) => {
+  const detail = normalizeServiceDetail(service.detail_content, service.slug || service.id);
   const sectionRef = useRef(null);
   const [form, setForm] = React.useState({
     name: '', phone: '', email: '', cargo: '', note: '',
@@ -389,17 +386,15 @@ const ServiceDetailCTA = ({ service }) => {
             <div className={s.ctaLeft}>
               <div className={s.ctaIconWrap}>{service.icon || ICON_MAP[service.icon_key] || <Truck size={32} />}</div>
               <h2 className={s.ctaTitle}>
-                Đặt Lịch<br /><span className={s.ctaTitleShine}>{service.title}</span>
+                {detail.form_title_prefix}<br /><span className={s.ctaTitleShine}>{service.title}</span>
               </h2>
-              <p className={s.ctaDesc}>
-                Tư vấn miễn phí · Báo giá trong 30 phút · Không ràng buộc
-              </p>
+              <p className={s.ctaDesc}>{detail.form_description}</p>
               <div className={s.ctaContacts}>
-                <a href="tel:1800xxxxxx" className={s.ctaContactItem}>
-                  <Phone size={15} /> 1800 xxx xxx
+                <a href={`tel:${String(detail.hotline || '').replace(/\s/g, '')}`} className={s.ctaContactItem}>
+                  <Phone size={15} /> {detail.hotline}
                 </a>
-                <a href="mailto:info@congty.vn" className={s.ctaContactItem}>
-                  <Mail size={15} /> info@congty.vn
+                <a href={`mailto:${detail.email || ''}`} className={s.ctaContactItem}>
+                  <Mail size={15} /> {detail.email}
                 </a>
               </div>
             </div>

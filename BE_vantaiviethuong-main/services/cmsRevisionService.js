@@ -59,6 +59,7 @@ async function readSnapshot(module, connection = pool) {
     snapshot.service_items = items.map((item) => ({
       ...cleanRow(item),
       tags: parseJson(item.tags, []),
+      detail_content: parseJson(item.detail_content, null),
     }));
   }
 
@@ -117,8 +118,8 @@ async function replaceServiceItems(connection, items) {
   for (const [index, item] of items.entries()) {
     await connection.query(
       `INSERT INTO service_items
-        (id, slug, title, subtitle, description, icon_key, image, tags, sort_order, is_active)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        (id, slug, title, subtitle, description, icon_key, image, tags, detail_content, sort_order, is_active)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         item.id || null,
         item.slug || `dich-vu-${Date.now()}-${index}`,
@@ -128,6 +129,7 @@ async function replaceServiceItems(connection, items) {
         item.icon_key || 'Truck',
         item.image || '',
         JSON.stringify(Array.isArray(item.tags) ? item.tags : []),
+        JSON.stringify(item.detail_content || {}),
         Number(item.sort_order) || index + 1,
         item.is_active === 0 ? 0 : 1,
       ],

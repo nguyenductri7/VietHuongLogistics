@@ -105,6 +105,14 @@ function normalizeServicesPage(row = {}) {
   });
 }
 
+function normalizeServiceItem(row = {}) {
+  return sanitizeLegacyLocalized({
+    ...row,
+    tags: parseJson(row.tags, []),
+    detail_content: parseJson(row.detail_content, null),
+  });
+}
+
 // ── Tạo slug không dấu từ tiếng Việt, dùng cho service_items.slug ──
 function slugify(str) {
   return str
@@ -183,10 +191,7 @@ const listServiceItems = async (req, res) => {
     const [rows] = await pool.query(
       'SELECT * FROM service_items WHERE is_active = 1 ORDER BY sort_order ASC, id ASC'
     );
-    const items = rows.map(r => sanitizeLegacyLocalized({
-      ...r,
-      tags: typeof r.tags === 'string' ? JSON.parse(r.tags) : r.tags,
-    }));
+    const items = rows.map(normalizeServiceItem);
     res.json({ success: true, data: items });
   } catch (err) {
     console.error('List service_items error:', err);
@@ -198,10 +203,7 @@ const listServiceItems = async (req, res) => {
 const listServiceItemsAdmin = async (req, res) => {
   try {
     const [rows] = await pool.query('SELECT * FROM service_items ORDER BY sort_order ASC, id ASC');
-    const items = rows.map(r => sanitizeLegacyLocalized({
-      ...r,
-      tags: typeof r.tags === 'string' ? JSON.parse(r.tags) : r.tags,
-    }));
+    const items = rows.map(normalizeServiceItem);
     res.json({ success: true, data: items });
   } catch (err) {
     console.error('List service_items (admin) error:', err);
@@ -212,7 +214,7 @@ const listServiceItemsAdmin = async (req, res) => {
 // POST /api/services-page/items  (admin) — tạo dịch vụ mới, slug tự sinh từ title
 const createServiceItem = async (req, res) => {
   try {
-    const { title, subtitle, description, icon_key, image, tags } = req.body;
+    const { title, subtitle, description, icon_key, image, tags, detail_content } = req.body;
 
     if (!title?.trim() || !subtitle?.trim() || !description?.trim() || !image?.trim()) {
       return res.status(400).json({ success: false, message: 'Vui lòng nhập đầy đủ thông tin bắt buộc.' });
@@ -230,9 +232,12 @@ const createServiceItem = async (req, res) => {
     const nextOrder = maxOrderRows[0].maxOrder + 1;
 
     const [result] = await pool.query(
-      `INSERT INTO service_items (slug, title, subtitle, description, icon_key, image, tags, sort_order)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      [slug, title.trim(), subtitle.trim(), description.trim(), icon_key || 'Truck', image.trim(), JSON.stringify(tags || []), nextOrder]
+      `INSERT INTO service_items (slug, title, subtitle, description, icon_key, image, tags, detail_content, sort_order)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        slug, title.trim(), subtitle.trim(), description.trim(), icon_key || 'Truck', image.trim(),
+        JSON.stringify(tags || []), JSON.stringify(detail_content || {}), nextOrder,
+      ]
     );
 
     await recordCurrentPublished('services', req.user?.id, `Thêm dịch vụ: ${title.trim()}`);
@@ -293,7 +298,7 @@ const seedDefaultServiceItems = async (req, res) => {
 const updateServiceItem = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, subtitle, description, icon_key, image, tags, is_active } = req.body;
+    const { title, subtitle, description, icon_key, image, tags, detail_content, is_active } = req.body;
 
     const [rows] = await pool.query('SELECT id FROM service_items WHERE id = ?', [id]);
     if (!rows.length) {
@@ -303,9 +308,12 @@ const updateServiceItem = async (req, res) => {
     await ensurePublishedBaseline('services', req.user?.id);
     await pool.query(
       `UPDATE service_items
-       SET title = ?, subtitle = ?, description = ?, icon_key = ?, image = ?, tags = ?, is_active = ?
+       SET title = ?, subtitle = ?, description = ?, icon_key = ?, image = ?, tags = ?, detail_content = ?, is_active = ?
        WHERE id = ?`,
-      [title, subtitle, description, icon_key, image, JSON.stringify(tags || []), is_active ?? 1, id]
+      [
+        title, subtitle, description, icon_key, image, JSON.stringify(tags || []),
+        JSON.stringify(detail_content || {}), is_active ?? 1, id,
+      ]
     );
 
     await recordCurrentPublished('services', req.user?.id, `Cập nhật dịch vụ: ${title || id}`);

@@ -13,6 +13,7 @@ import { GripVertical, Plus, Trash2, Eye, EyeOff, X, ArrowLeft } from 'lucide-re
 import styles from './Adminservices.module.scss'
 import { useAdminToast } from './AdminToast'
 import AdminConfirmDialog from './AdminConfirmDialog'
+import { GENERIC_SERVICE_DETAIL, normalizeServiceDetail } from '../Services/serviceDetailDefaults'
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
 
@@ -21,7 +22,10 @@ const ICON_OPTIONS = [
   'Phone', 'Mail', 'MapPin', 'Clock',
 ]
 
-const EMPTY_ITEM = { title: '', subtitle: '', description: '', icon_key: 'Truck', image: '', tags: [] }
+const EMPTY_ITEM = {
+  title: '', subtitle: '', description: '', icon_key: 'Truck', image: '', tags: [],
+  detail_content: structuredClone(GENERIC_SERVICE_DETAIL),
+}
 
 const DEFAULT_PAGE = {
   banner: {
@@ -93,6 +97,7 @@ function normalizeServiceItems(items) {
   return items.map(item => ({
     ...item,
     tags: Array.isArray(item.tags) ? item.tags : [],
+    detail_content: normalizeServiceDetail(item.detail_content, item.slug),
   }))
 }
 
@@ -178,7 +183,7 @@ const loadAll = useCallback(() => {
 
   const openCreateForm = () => {
     setEditingItem(null)
-    setFormData(EMPTY_ITEM)
+    setFormData(structuredClone(EMPTY_ITEM))
     setTagInput('')
     setShowForm(true)
   }
@@ -198,7 +203,11 @@ const loadAll = useCallback(() => {
 
   const openEditForm = (item) => {
     setEditingItem(item)
-    setFormData({ ...item, tags: Array.isArray(item.tags) ? item.tags : [] })
+    setFormData({
+      ...item,
+      tags: Array.isArray(item.tags) ? [...item.tags] : [],
+      detail_content: normalizeServiceDetail(item.detail_content, item.slug),
+    })
     setTagInput('')
     setShowForm(true)
   }
@@ -220,12 +229,20 @@ const loadAll = useCallback(() => {
       showToast('Vui lòng nhập đầy đủ thông tin bắt buộc.', 'error')
       return
     }
+    const payload = {
+      ...formData,
+      detail_content: {
+        ...formData.detail_content,
+        highlights: formData.detail_content.highlights.filter(item => String(item.num || '').trim() || String(item.label || '').trim()),
+        features: formData.detail_content.features.map(item => String(item || '').trim()).filter(Boolean),
+      },
+    }
     try {
       if (editingItem) {
-        await axios.put(`${API_BASE}/services-page/items/${editingItem.id}`, formData, authHeaders)
+        await axios.put(`${API_BASE}/services-page/items/${editingItem.id}`, payload, authHeaders)
         showToast('Đã cập nhật dịch vụ!', 'success')
       } else {
-        await axios.post(`${API_BASE}/services-page/items`, formData, authHeaders)
+        await axios.post(`${API_BASE}/services-page/items`, payload, authHeaders)
         showToast('Đã thêm dịch vụ mới!', 'success')
       }
       setShowForm(false)
@@ -436,6 +453,108 @@ const loadAll = useCallback(() => {
                     </span>
                   ))}
                 </div>
+              </div>
+
+              <div className={styles.detailEditor}>
+                <div className={styles.detailEditorHeader}>
+                  <div>
+                    <h4>Nội dung trang chi tiết</h4>
+                    <p>Hiển thị sau khi khách bấm vào dịch vụ này.</p>
+                  </div>
+                </div>
+
+                <div className={styles.row}>
+                  <TextField label="Nhãn nhỏ" value={formData.detail_content.eyebrow}
+                    onChange={v => setFormData(p => ({ ...p, detail_content: { ...p.detail_content, eyebrow: v } }))} />
+                  <TextField label="Tiêu đề mở đầu" value={formData.detail_content.title_prefix}
+                    onChange={v => setFormData(p => ({ ...p, detail_content: { ...p.detail_content, title_prefix: v } }))} />
+                </div>
+                <TextAreaField label="Đoạn giới thiệu" value={formData.detail_content.description}
+                  onChange={v => setFormData(p => ({ ...p, detail_content: { ...p.detail_content, description: v } }))} />
+                <div className={styles.row}>
+                  <TextField label="Chữ trên nút" value={formData.detail_content.cta_label}
+                    onChange={v => setFormData(p => ({ ...p, detail_content: { ...p.detail_content, cta_label: v } }))} />
+                  <TextField label="Liên kết nút" value={formData.detail_content.cta_link}
+                    onChange={v => setFormData(p => ({ ...p, detail_content: { ...p.detail_content, cta_link: v } }))} />
+                </div>
+                <TextField label="Chữ nút đặt dịch vụ trên Hero" value={formData.detail_content.hero_cta_label}
+                  onChange={v => setFormData(p => ({ ...p, detail_content: { ...p.detail_content, hero_cta_label: v } }))} />
+
+                <div className={styles.detailGroupHeader}>
+                  <h5>Số liệu nổi bật</h5>
+                  <button type="button" className={styles.inlineAddBtn} onClick={() => setFormData(p => ({
+                    ...p,
+                    detail_content: {
+                      ...p.detail_content,
+                      highlights: [...p.detail_content.highlights, { num: '', label: '' }],
+                    },
+                  }))}><Plus size={14} /> Thêm số liệu</button>
+                </div>
+                {formData.detail_content.highlights.map((highlight, index) => (
+                  <div className={styles.detailRow} key={`highlight-${index}`}>
+                    <TextField label={`Giá trị #${index + 1}`} value={highlight.num} onChange={v => setFormData(p => ({
+                      ...p,
+                      detail_content: {
+                        ...p.detail_content,
+                        highlights: p.detail_content.highlights.map((item, i) => i === index ? { ...item, num: v } : item),
+                      },
+                    }))} />
+                    <TextField label="Mô tả" value={highlight.label} onChange={v => setFormData(p => ({
+                      ...p,
+                      detail_content: {
+                        ...p.detail_content,
+                        highlights: p.detail_content.highlights.map((item, i) => i === index ? { ...item, label: v } : item),
+                      },
+                    }))} />
+                    <button type="button" className={styles.inlineDeleteBtn} title="Xóa số liệu" onClick={() => setFormData(p => ({
+                      ...p,
+                      detail_content: {
+                        ...p.detail_content,
+                        highlights: p.detail_content.highlights.filter((_, i) => i !== index),
+                      },
+                    }))}><Trash2 size={16} /></button>
+                  </div>
+                ))}
+
+                <div className={styles.detailGroupHeader}>
+                  <h5>Các lợi ích và đặc điểm</h5>
+                  <button type="button" className={styles.inlineAddBtn} onClick={() => setFormData(p => ({
+                    ...p,
+                    detail_content: { ...p.detail_content, features: [...p.detail_content.features, ''] },
+                  }))}><Plus size={14} /> Thêm nội dung</button>
+                </div>
+                {formData.detail_content.features.map((feature, index) => (
+                  <div className={styles.detailRow} key={`feature-${index}`}>
+                    <TextAreaField label={`Nội dung #${index + 1}`} value={feature} onChange={v => setFormData(p => ({
+                      ...p,
+                      detail_content: {
+                        ...p.detail_content,
+                        features: p.detail_content.features.map((item, i) => i === index ? v : item),
+                      },
+                    }))} />
+                    <button type="button" className={styles.inlineDeleteBtn} title="Xóa nội dung" onClick={() => setFormData(p => ({
+                      ...p,
+                      detail_content: {
+                        ...p.detail_content,
+                        features: p.detail_content.features.filter((_, i) => i !== index),
+                      },
+                    }))}><Trash2 size={16} /></button>
+                  </div>
+                ))}
+
+                <div className={styles.detailGroupHeader}>
+                  <h5>Khối biểu mẫu tư vấn</h5>
+                </div>
+                <div className={styles.row}>
+                  <TextField label="Tiêu đề biểu mẫu" value={formData.detail_content.form_title_prefix}
+                    onChange={v => setFormData(p => ({ ...p, detail_content: { ...p.detail_content, form_title_prefix: v } }))} />
+                  <TextField label="Hotline" value={formData.detail_content.hotline}
+                    onChange={v => setFormData(p => ({ ...p, detail_content: { ...p.detail_content, hotline: v } }))} />
+                </div>
+                <TextAreaField label="Mô tả biểu mẫu" value={formData.detail_content.form_description}
+                  onChange={v => setFormData(p => ({ ...p, detail_content: { ...p.detail_content, form_description: v } }))} />
+                <TextField label="Email liên hệ" value={formData.detail_content.email}
+                  onChange={v => setFormData(p => ({ ...p, detail_content: { ...p.detail_content, email: v } }))} />
               </div>
 
               <div className={styles.modalActions}>
