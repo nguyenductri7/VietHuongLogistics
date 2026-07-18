@@ -87,6 +87,7 @@ const fetchData = async ({ silent = false } = {}) => {
       setContacts(current => current.map(item => item.id === id ? { ...item, status } : item))
       const statsRes = await contactApi.getStats()
       setStats({ ...EMPTY_STATS, ...(statsRes.data || {}) })
+      window.dispatchEvent(new Event('vh-admin-notifications-refresh'))
       showToast('Đã cập nhật trạng thái.')
     } catch (error) {
       showToast(error.message || 'Không thể cập nhật trạng thái.', 'error')
@@ -101,6 +102,7 @@ const fetchData = async ({ silent = false } = {}) => {
     try {
       await contactApi.delete(deleting.id)
       setDeleting(null)
+      window.dispatchEvent(new Event('vh-admin-notifications-refresh'))
       showToast('Đã xóa yêu cầu liên hệ.')
       if (contacts.length === 1 && page > 1) setPage(current => current - 1)
       else await fetchData()

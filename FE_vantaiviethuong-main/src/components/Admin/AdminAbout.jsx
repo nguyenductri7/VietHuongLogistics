@@ -282,7 +282,7 @@ function Section({ title, children, onSave, saving }) {
       <div className={styles.sectionHeader}>
         <h2>{title}</h2>
         <button className={styles.saveBtn} onClick={onSave} disabled={saving}>
-          {saving ? 'Đang xuất bản...' : 'Xuất bản section'}
+          {saving ? 'Đang lưu...' :  'Lưu section'}
         </button>
       </div>
       <div className={styles.sectionBody}>{children}</div>

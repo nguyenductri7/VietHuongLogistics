@@ -3,10 +3,10 @@ import { useEffect, useState } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import { useNavigate } from 'react-router-dom'
 import {
-  Building2, ChevronRight, FileText, HelpCircle, Home,
+  Building2, ChevronRight, FileText, HelpCircle, History, Home,
   Info, Newspaper, Phone, Truck,
 } from 'lucide-react'
-import { contactApi } from '../../services/api'
+import { contactApi, faqApi } from '../../services/api'
 import styles from './AdminDashboard.module.scss'
 
 const cards = [
@@ -18,27 +18,33 @@ const cards = [
   { icon: Newspaper, label: 'Tin tức / Blog', desc: 'Đăng và chỉnh sửa bài viết', color: '#d97706', to: '/admin/blogs' },
   { icon: Building2, label: 'Văn phòng & Chi nhánh', desc: 'Thêm, sửa, xóa địa điểm trên trang khách hàng', color: '#0f766e', to: '/admin/branches' },
   { icon: Phone, label: 'Liên hệ', desc: 'Xem yêu cầu từ khách hàng', color: '#059669', to: '/admin/contacts' },
+  { icon: History, label: 'Lịch sử chỉnh sửa', desc: 'Theo dõi các nội dung đã được admin thêm, sửa hoặc xóa', color: '#475569', to: '/admin/history' },
 ]
 
 export default function AdminDashboard() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const [newContacts, setNewContacts] = useState(0)
+  const [pendingFaq, setPendingFaq] = useState(0)
 
   useEffect(() => {
     let alive = true
 
-    const loadContactStats = async () => {
-      try {
-        const res = await contactApi.getStats()
-        if (alive) setNewContacts(Number(res?.data?.new_count) || 0)
-      } catch {
-        if (alive) setNewContacts(0)
+    const loadNotificationStats = async () => {
+      const [contactResult, faqResult] = await Promise.allSettled([
+        contactApi.getStats(), faqApi.getStats(),
+      ])
+      if (!alive) return
+      if (contactResult.status === 'fulfilled') {
+        setNewContacts(Number(contactResult.value?.data?.new_count) || 0)
+      }
+      if (faqResult.status === 'fulfilled') {
+        setPendingFaq(Number(faqResult.value?.data?.pending_count) || 0)
       }
     }
 
-    loadContactStats()
-    const timer = window.setInterval(loadContactStats, 30000)
+    loadNotificationStats()
+    const timer = window.setInterval(loadNotificationStats, 15000)
 
     return () => {
       alive = false
@@ -78,6 +84,9 @@ export default function AdminDashboard() {
                   {c.label}
                   {c.to === '/admin/contacts' && newContacts > 0 && (
                     <span className={styles.cardBadge}>{newContacts > 99 ? '99+' : `${newContacts} mới`}</span>
+                  )}
+                  {c.to === '/admin/faq' && pendingFaq > 0 && (
+                    <span className={styles.cardBadge}>{pendingFaq > 99 ? '99+' : `${pendingFaq} mới`}</span>
                   )}
                 </div>
                 <div className={styles.cardDesc}>{c.desc}</div>

@@ -213,6 +213,7 @@ export const faqApi = {
     const qs = new URLSearchParams(params).toString()
     return request(`/faq-inquiries/admin${qs ? '?' + qs : ''}`)
   },
+  getStats: () => request('/faq-inquiries/admin/stats'),
 
   // Admin — đổi trạng thái
   updateStatus: (id, status) =>

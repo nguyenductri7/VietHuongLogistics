@@ -31,8 +31,8 @@ export default function AdminFaq() {
   const [updating, setUpdating]         = useState(null)
 
   // ── Fetch ─────────────────────────────────────────────────────
-  const fetchData = async () => {
-    setLoading(true)
+  const fetchData = async ({ silent = false } = {}) => {
+    if (!silent) setLoading(true)
     try {
       const params = {}
       if (statusFilter) params.status = statusFilter
@@ -40,10 +40,10 @@ export default function AdminFaq() {
       const res = await faqApi.getList(params)          // ← faqApi.getList
       setInquiries(res.data || res)
     } catch (err) {
-      showToast(err.message || 'Lỗi tải dữ liệu', 'error')
+      if (!silent) showToast(err.message || 'Lỗi tải dữ liệu', 'error')
       if (err.message?.includes('Token')) { logout(); navigate('/login') }
     } finally {
-      setLoading(false)
+      if (!silent) setLoading(false)
     }
   }
 
@@ -52,6 +52,10 @@ export default function AdminFaq() {
     const t = setTimeout(() => fetchData(), 400)
     return () => clearTimeout(t)
   }, [search])
+  useEffect(() => {
+    const timer = window.setInterval(() => fetchData({ silent: true }), 15000)
+    return () => window.clearInterval(timer)
+  }, [statusFilter, search])
 
   // ── Toast ──────────────────────────────────────────────────────
 
@@ -63,6 +67,7 @@ export default function AdminFaq() {
       setInquiries(prev =>
         prev.map(i => i.id === id ? { ...i, status } : i)
       )
+      window.dispatchEvent(new Event('vh-admin-notifications-refresh'))
       showToast('Cập nhật trạng thái thành công!')
     } catch (err) {
       showToast(err.message, 'error')
@@ -78,6 +83,7 @@ export default function AdminFaq() {
       await faqApi.delete(deleting.id)                  // ← faqApi.delete
       showToast('Đã xóa câu hỏi!')
       setDeleting(null)
+      window.dispatchEvent(new Event('vh-admin-notifications-refresh'))
       fetchData()
     } catch (err) {
       showToast(err.message, 'error')

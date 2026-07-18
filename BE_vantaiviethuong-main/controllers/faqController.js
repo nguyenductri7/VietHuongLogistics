@@ -66,6 +66,32 @@ const getInquiries = async (req, res) => {
   }
 }
 
+// [ADMIN] GET /api/faq-inquiries/admin/stats
+const getInquiryStats = async (req, res) => {
+  try {
+    const [rows] = await pool.query(
+      `SELECT
+        COUNT(*) AS total,
+        SUM(status = 'pending') AS pending_count,
+        SUM(status = 'inprogress') AS inprogress_count,
+        SUM(status = 'done') AS done_count
+       FROM faq_inquiries`
+    )
+    return res.json({
+      success: true,
+      data: {
+        total: Number(rows[0]?.total) || 0,
+        pending_count: Number(rows[0]?.pending_count) || 0,
+        inprogress_count: Number(rows[0]?.inprogress_count) || 0,
+        done_count: Number(rows[0]?.done_count) || 0,
+      },
+    })
+  } catch (err) {
+    console.error('[FAQ] getInquiryStats error:', err)
+    return res.status(500).json({ success: false, message: 'Lỗi tải thống kê.' })
+  }
+}
+
 // [ADMIN] PUT /api/faq-inquiries/admin/:id/status
 const updateStatus = async (req, res) => {
   try {
@@ -116,4 +142,4 @@ const deleteInquiry = async (req, res) => {
   }
 }
 
-module.exports = { submitInquiry, getInquiries, updateStatus, deleteInquiry }
+module.exports = { submitInquiry, getInquiries, getInquiryStats, updateStatus, deleteInquiry }

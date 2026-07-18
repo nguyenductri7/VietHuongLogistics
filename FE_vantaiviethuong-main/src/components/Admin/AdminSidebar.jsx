@@ -5,7 +5,7 @@ import {
   History, LogOut, Newspaper, PanelLeftClose, PanelLeftOpen, Phone, Truck,
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
-import { contactApi } from '../../services/api'
+import { contactApi, faqApi } from '../../services/api'
 import logo from '../../assets/VIET HUONG LOGISTICS.png'
 import styles from './AdminSidebar.module.scss'
 
@@ -26,26 +26,43 @@ export default function AdminSidebar({ collapsed = false, onToggleCollapse }) {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
-  const [newContacts, setNewContacts] = useState(0)
+  const [notifications, setNotifications] = useState({ contacts: 0, faq: 0 })
 
   useEffect(() => {
     let alive = true
 
-    const loadContactStats = async () => {
-      try {
-        const res = await contactApi.getStats()
-        if (alive) setNewContacts(Number(res?.data?.new_count) || 0)
-      } catch {
-        if (alive) setNewContacts(0)
-      }
+    const loadNotificationStats = async () => {
+      const [contactResult, faqResult] = await Promise.allSettled([
+        contactApi.getStats(),
+        faqApi.getStats(),
+      ])
+      if (!alive) return
+      setNotifications(current => ({
+        contacts: contactResult.status === 'fulfilled'
+          ? Number(contactResult.value?.data?.new_count) || 0
+          : current.contacts,
+        faq: faqResult.status === 'fulfilled'
+          ? Number(faqResult.value?.data?.pending_count) || 0
+          : current.faq,
+      }))
     }
 
-    loadContactStats()
-    const timer = window.setInterval(loadContactStats, 30000)
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') loadNotificationStats()
+    }
+
+    loadNotificationStats()
+    const timer = window.setInterval(loadNotificationStats, 15000)
+    window.addEventListener('focus', loadNotificationStats)
+    window.addEventListener('vh-admin-notifications-refresh', loadNotificationStats)
+    document.addEventListener('visibilitychange', handleVisibility)
 
     return () => {
       alive = false
       window.clearInterval(timer)
+      window.removeEventListener('focus', loadNotificationStats)
+      window.removeEventListener('vh-admin-notifications-refresh', loadNotificationStats)
+      document.removeEventListener('visibilitychange', handleVisibility)
     }
   }, [])
 
@@ -79,17 +96,22 @@ export default function AdminSidebar({ collapsed = false, onToggleCollapse }) {
       <nav className={styles.sideNav}>
         {navItems.map((item) => {
           const Icon = item.icon
+          const notificationCount = item.to === '/admin/contacts'
+            ? notifications.contacts
+            : item.to === '/admin/faq'
+              ? notifications.faq
+              : 0
           return (
             <button
               key={item.to}
               className={`${styles.navItem} ${isActive(item.to) ? styles.active : ''}`}
               onClick={() => navigate(item.to)}
-              title={collapsed ? item.label : undefined}
+              title={collapsed ? `${item.label}${notificationCount ? ` (${notificationCount} mới)` : ''}` : undefined}
             >
               <Icon size={16} strokeWidth={1.8} />
               <span className={styles.navLabel}>{item.label}</span>
-              {item.to === '/admin/contacts' && newContacts > 0 && (
-                <span className={styles.navBadge}>{newContacts > 99 ? '99+' : newContacts}</span>
+              {notificationCount > 0 && (
+                <span className={styles.navBadge}>{notificationCount > 99 ? '99+' : notificationCount}</span>
               )}
             </button>
           )
