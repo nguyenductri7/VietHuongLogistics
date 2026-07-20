@@ -203,15 +203,18 @@ async function sendFaqNotification(inquiry) {
     id: escapeHtml(inquiry.id),
     name: escapeHtml(inquiry.name),
     phone: escapeHtml(inquiry.phone),
+    email: escapeHtml(inquiry.email || 'Không cung cấp'),
     question: escapeHtml(inquiry.question).replace(/\n/g, '<br>'),
   };
 
   return sendMail({
     subject: `[Việt Hương] Câu hỏi mới - ${inquiry.name}`,
+    replyTo: inquiry.email,
     text: [
       `Mã câu hỏi: #${inquiry.id}`,
       `Họ tên: ${inquiry.name}`,
       `Điện thoại: ${inquiry.phone}`,
+      `Email: ${inquiry.email || 'Không cung cấp'}`,
       '',
       inquiry.question,
     ].join('\n'),
@@ -223,13 +226,14 @@ async function sendFaqNotification(inquiry) {
       rows: [
         { label: 'Họ và tên', value: safe.name },
         { label: 'Điện thoại', value: safe.phone },
+        { label: 'Email', value: safe.email },
       ],
       messageLabel: 'Câu hỏi của khách hàng',
       message: safe.question,
-      action: {
-        label: 'Gọi cho khách hàng',
-        href: `tel:${encodeURIComponent(inquiry.phone)}`,
-      },
+      action: inquiry.email ? {
+        label: 'Trả lời khách hàng',
+        href: `mailto:${encodeURIComponent(inquiry.email)}?subject=${encodeURIComponent(`Phản hồi từ Việt Hương Logistics - câu hỏi #${inquiry.id}`)}`,
+      } : null,
     }),
   });
 }

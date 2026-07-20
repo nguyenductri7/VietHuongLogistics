@@ -5,6 +5,7 @@ import {
   HelpCircle, Search, ArrowLeft, Trash2, Trash,
   ChevronDown, ChevronUp, Phone, X, Loader2,
   Clock, CheckCircle2, RefreshCw, MessageSquare,
+  Mail,
 } from 'lucide-react'
 import { faqApi } from '../../services/api'
 import { useAuth } from '../../context/AuthContext'
@@ -113,6 +114,7 @@ export default function AdminFaq() {
     return (
       item.name?.toLowerCase().includes(q) ||
       item.phone?.toLowerCase().includes(q) ||
+      item.email?.toLowerCase().includes(q) ||
       item.question?.toLowerCase().includes(q)
     )
   })
@@ -232,6 +234,15 @@ export default function AdminFaq() {
                             >
                               <Phone size={11} /> {item.phone}
                             </a>
+                            {item.email ? (
+                              <a
+                                href={`mailto:${item.email}`}
+                                className={styles.customerEmail}
+                                onClick={e => e.stopPropagation()}
+                              >
+                                <Mail size={11} /> {item.email}
+                              </a>
+                            ) : null}
                           </div>
                         </div>
                       </td>
@@ -287,6 +298,15 @@ export default function AdminFaq() {
                         <td colSpan={5}>
                           <div className={styles.expandedBox}>
                             <p className={styles.expandedLabel}>Nội dung đầy đủ</p>
+                            {item.email ? (
+                              <a
+                                href={`mailto:${item.email}?subject=${encodeURIComponent(`Phản hồi từ Việt Hương Logistics - câu hỏi #${item.id}`)}`}
+                                className={styles.replyLink}
+                                onClick={e => e.stopPropagation()}
+                              >
+                                <Mail size={14} /> Trả lời khách hàng qua email
+                              </a>
+                            ) : null}
                             <p className={styles.expandedText}>{item.question}</p>
                           </div>
                         </td>

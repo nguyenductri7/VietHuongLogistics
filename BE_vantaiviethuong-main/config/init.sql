@@ -192,6 +192,7 @@ CREATE TABLE IF NOT EXISTS faq_inquiries (
   id INT AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR(100) NOT NULL,
   phone VARCHAR(30) NOT NULL,
+  email VARCHAR(100) NOT NULL,
   question TEXT NOT NULL,
   status ENUM('pending', 'inprogress', 'done') DEFAULT 'pending',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

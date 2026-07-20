@@ -35,7 +35,7 @@ export default function FaqPage() {
   const [faqLoading, setFaqLoading]       = useState(true)
   const [activeTab, setActiveTab]         = useState('')
 
-  const [form, setForm]             = useState({ name: '', phone: '', question: '' })
+  const [form, setForm]             = useState({ name: '', phone: '', email: '', question: '' })
   const [submitted, setSubmitted]   = useState(false)
   const [submitting, setSubmitting] = useState(false)
 
@@ -75,12 +75,18 @@ export default function FaqPage() {
   // ── Submit gửi lên API thật ────────────────────────────────────
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!form.name.trim() || !form.phone.trim() || !form.question.trim()) return
+    const email = form.email.trim()
+    if (!form.name.trim() || !form.phone.trim() || !email || !form.question.trim()) return
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      alert('Địa chỉ email chưa đúng định dạng.')
+      return
+    }
     setSubmitting(true)
     try {
       await faqApi.submit({                             // ← gọi API thật
         name:     form.name.trim(),
         phone:    form.phone.trim(),
+        email,
         question: form.question.trim(),
       })
       setSubmitted(true)
@@ -229,7 +235,7 @@ export default function FaqPage() {
                           className={styles.resetBtn}
                           onClick={() => {
                             setSubmitted(false)
-                            setForm({ name: '', phone: '', question: '' })
+                            setForm({ name: '', phone: '', email: '', question: '' })
                           }}
                         >
                           Gửi câu hỏi khác
@@ -254,6 +260,17 @@ export default function FaqPage() {
                             placeholder="Mời bạn nhập số điện thoại"
                             value={form.phone}
                             onChange={e => setForm(p => ({ ...p, phone: e.target.value }))}
+                            required
+                          />
+                        </div>
+                        <div className={styles.formField}>
+                          <label>Email <span>*</span></label>
+                          <input
+                            type="email"
+                            placeholder="email@congty.com"
+                            value={form.email}
+                            onChange={e => setForm(p => ({ ...p, email: e.target.value }))}
+                            autoComplete="email"
                             required
                           />
                         </div>

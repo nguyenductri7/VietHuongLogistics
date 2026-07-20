@@ -4,26 +4,38 @@ const { sendFaqNotification } = require('../services/emailService')
 const { recordAdminAudit } = require('../services/adminAuditService')
 
 const ALLOWED_STATUSES = ['pending', 'inprogress', 'done']
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 // [PUBLIC] POST /api/faq-inquiries
 const submitInquiry = async (req, res) => {
   try {
-    const { name, phone, question } = req.body
-    if (!name?.trim() || !phone?.trim() || !question?.trim()) {
+    const { name, phone, email, question } = req.body
+
+    const inquiry = {
+      name: String(name || '').trim(),
+      phone: String(phone || '').trim(),
+      email: String(email || '').trim(),
+      question: String(question || '').trim(),
+    }
+
+    if (!inquiry.name || !inquiry.phone || !inquiry.email || !inquiry.question) {
       return res.status(400).json({ message: 'Vui lòng điền đầy đủ thông tin.' })
     }
+
+    if (!EMAIL_REGEX.test(inquiry.email)) {
+      return res.status(400).json({ message: 'Email không hợp lệ.' })
+    }
+
     const [result] = await pool.query(
-      `INSERT INTO faq_inquiries (name, phone, question) VALUES (?, ?, ?)`,
-      [name.trim(), phone.trim(), question.trim()]
+      `INSERT INTO faq_inquiries (name, phone, email, question) VALUES (?, ?, ?, ?)`,
+      [inquiry.name, inquiry.phone, inquiry.email, inquiry.question]
     )
 
     let emailNotificationSent = false
     try {
       emailNotificationSent = await sendFaqNotification({
         id: result.insertId,
-        name: name.trim(),
-        phone: phone.trim(),
-        question: question.trim(),
+        ...inquiry,
       })
     } catch (mailError) {
       console.error('[MAIL] Không thể gửi thông báo FAQ:', mailError.message)
@@ -44,18 +56,20 @@ const submitInquiry = async (req, res) => {
 const getInquiries = async (req, res) => {
   try {
     const { status, search } = req.query
-    let sql    = `SELECT * FROM faq_inquiries WHERE 1=1`
+    let sql = `SELECT * FROM faq_inquiries WHERE 1=1`
     const vals = []
 
     if (status && ALLOWED_STATUSES.includes(status)) {
       sql += ` AND status = ?`
       vals.push(status)
     }
+
     if (search?.trim()) {
       const like = `%${search.trim()}%`
-      sql += ` AND (name LIKE ? OR phone LIKE ? OR question LIKE ?)`
-      vals.push(like, like, like)
+      sql += ` AND (name LIKE ? OR phone LIKE ? OR email LIKE ? OR question LIKE ?)`
+      vals.push(like, like, like, like)
     }
+
     sql += ` ORDER BY created_at DESC`
 
     const [rows] = await pool.query(sql, vals)
@@ -99,20 +113,29 @@ const updateStatus = async (req, res) => {
     if (!ALLOWED_STATUSES.includes(status)) {
       return res.status(400).json({ message: 'Trạng thái không hợp lệ.' })
     }
+
     const [beforeRows] = await pool.query('SELECT * FROM faq_inquiries WHERE id = ?', [req.params.id])
     if (!beforeRows.length) {
       return res.status(404).json({ message: 'Không tìm thấy câu hỏi.' })
     }
-    const [result] = await pool.query(
+
+    await pool.query(
       `UPDATE faq_inquiries SET status = ? WHERE id = ?`,
       [status, req.params.id]
     )
+
     const [afterRows] = await pool.query('SELECT * FROM faq_inquiries WHERE id = ?', [req.params.id])
     await recordAdminAudit({
-      module: 'faq', action: 'status', entityType: 'faq_inquiry', entityId: req.params.id,
+      module: 'faq',
+      action: 'status',
+      entityType: 'faq_inquiry',
+      entityId: req.params.id,
       summary: `Cập nhật trạng thái thắc mắc của ${beforeRows[0].name}`,
-      before: beforeRows[0], after: afterRows[0], userId: req.user?.id,
+      before: beforeRows[0],
+      after: afterRows[0],
+      userId: req.user?.id,
     })
+
     return res.json({ message: 'Cập nhật trạng thái thành công.' })
   } catch (err) {
     console.error('[FAQ] updateStatus error:', err)
@@ -127,14 +150,22 @@ const deleteInquiry = async (req, res) => {
     if (!beforeRows.length) {
       return res.status(404).json({ message: 'Không tìm thấy câu hỏi.' })
     }
-    const [result] = await pool.query(
+
+    await pool.query(
       `DELETE FROM faq_inquiries WHERE id = ?`,
       [req.params.id]
     )
+
     await recordAdminAudit({
-      module: 'faq', action: 'delete', entityType: 'faq_inquiry', entityId: req.params.id,
-      summary: `Xóa thắc mắc của ${beforeRows[0].name}`, before: beforeRows[0], userId: req.user?.id,
+      module: 'faq',
+      action: 'delete',
+      entityType: 'faq_inquiry',
+      entityId: req.params.id,
+      summary: `Xóa thắc mắc của ${beforeRows[0].name}`,
+      before: beforeRows[0],
+      userId: req.user?.id,
     })
+
     return res.json({ message: 'Đã xóa câu hỏi.' })
   } catch (err) {
     console.error('[FAQ] deleteInquiry error:', err)
