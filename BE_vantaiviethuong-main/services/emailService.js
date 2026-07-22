@@ -1,7 +1,7 @@
 const RESEND_API_URL = 'https://api.resend.com/emails';
 const DEFAULT_RECIPIENT = 'ductri09876@gmail.com';
 const DEFAULT_FROM = 'Viet Huong Logistics <onboarding@resend.dev>';
-const DEFAULT_EMAIL_LOGO_PATH = '/static/email/logofooter.png';
+const DEFAULT_EMAIL_LOGO_PATH = '/static/email/logo-email.png';
 
 let warnedMissingConfig = false;
 
@@ -15,7 +15,9 @@ function escapeHtml(value = '') {
 }
 
 function renderInfoRows(rows) {
-  return rows.map(({ label, value }) => `
+  return rows
+    .filter(({ value }) => value !== null && value !== undefined && String(value).trim() !== '')
+    .map(({ label, value }) => `
     <tr>
       <td style="padding:10px 0;border-bottom:1px solid #e8edf3;color:#64748b;font-size:13px;width:120px;vertical-align:top;">${label}</td>
       <td style="padding:10px 0;border-bottom:1px solid #e8edf3;color:#172033;font-size:14px;font-weight:600;vertical-align:top;">${value}</td>
@@ -156,12 +158,13 @@ async function sendMail({ subject, text, html, replyTo }) {
 }
 
 async function sendContactNotification(contact) {
+  const hasCompany = Boolean(String(contact.company || '').trim());
   const safe = {
     id: escapeHtml(contact.id),
     name: escapeHtml(contact.full_name),
     phone: escapeHtml(contact.phone),
     email: escapeHtml(contact.email || 'Không cung cấp'),
-    company: escapeHtml(contact.company || 'Không cung cấp'),
+    company: hasCompany ? escapeHtml(contact.company) : '',
     message: escapeHtml(contact.message).replace(/\n/g, '<br>'),
   };
 
@@ -173,7 +176,7 @@ async function sendContactNotification(contact) {
       `Họ tên: ${contact.full_name}`,
       `Điện thoại: ${contact.phone}`,
       `Email: ${contact.email || 'Không cung cấp'}`,
-      `Công ty: ${contact.company || 'Không cung cấp'}`,
+      ...(hasCompany ? [`Công ty: ${contact.company}`] : []),
       '',
       contact.message,
     ].join('\n'),
@@ -186,7 +189,7 @@ async function sendContactNotification(contact) {
         { label: 'Họ và tên', value: safe.name },
         { label: 'Điện thoại', value: safe.phone },
         { label: 'Email', value: safe.email },
-        { label: 'Công ty', value: safe.company },
+        ...(hasCompany ? [{ label: 'Công ty', value: safe.company }] : []),
       ],
       messageLabel: 'Nội dung yêu cầu',
       message: safe.message,
