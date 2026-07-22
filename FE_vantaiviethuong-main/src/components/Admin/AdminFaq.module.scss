@@ -437,6 +437,71 @@
   }
 }
 
+.crmPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.crmActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.crmActionBtn {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #fff;
+  color: #475569;
+  padding: 7px 10px;
+  font-size: 12.5px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s;
+
+  &:hover:not(:disabled) {
+    border-color: #fca5a5;
+    color: $red;
+    background: #fff7f7;
+  }
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+}
+
+.crmActionActive {
+  border-color: #fca5a5;
+  background: #fef2f2;
+  color: $red;
+}
+
+.crmNote {
+  width: 100%;
+  min-height: 84px;
+  resize: vertical;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  background: #f8fafc;
+  color: #0f172a;
+  padding: 10px 12px;
+  font-family: inherit;
+  font-size: 13.5px;
+  line-height: 1.6;
+  box-sizing: border-box;
+
+  &:focus {
+    outline: none;
+    border-color: $red;
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba($red, 0.08);
+  }
+}
+
 .expandedText {
   font-size: 14px;
   color: #334155;

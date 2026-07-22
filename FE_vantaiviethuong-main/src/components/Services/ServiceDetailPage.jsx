@@ -266,8 +266,8 @@ const ServiceDetailContent = ({ service, allServices = TIMELINE_SERVICES }) => {
           <div className={s.contentLeft}>
             <span className={s.miniEyebrow}>{detail.eyebrow}</span>
             <h2 className={s.contentTitle}>
-              {detail.title_prefix} <br />
-              <span className={s.shineText}>{service.title}?</span>
+              Giới thiệu <br />
+              <span className={s.shineText}>{service.title}</span>
             </h2>
             <p className={s.contentDesc}>{detail.description}</p>
             <a href={detail.cta_link || '#lien-he'} className={s.btnPrimary}>
@@ -276,13 +276,78 @@ const ServiceDetailContent = ({ service, allServices = TIMELINE_SERVICES }) => {
           </div>
 
           <ul className={s.featureList}>
-            {detail.features.map((feat, i) => (
+            {detail.benefits.map((feat, i) => (
               <li key={i} className={s.featureItem}>
                 <CheckCircle2 size={18} className={s.featureIcon} />
                 <span>{feat}</span>
               </li>
             ))}
           </ul>
+        </div>
+
+        <div className={s.standardSections}>
+          <section className={s.standardBlock}>
+            <div className={s.blockHeading}>
+              <span>01</span>
+              <h3>Phù hợp với loại khách nào?</h3>
+            </div>
+            <div className={s.audienceGrid}>
+              {detail.audiences.map((item, index) => (
+                <div key={index} className={s.audienceCard}>
+                  <CheckCircle2 size={18} />
+                  <p>{item}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section className={s.standardBlock}>
+            <div className={s.blockHeading}>
+              <span>02</span>
+              <h3>Quy trình thực hiện</h3>
+            </div>
+            <div className={s.processList}>
+              {detail.process.map((step, index) => (
+                <div key={index} className={s.processItem}>
+                  <div className={s.processIndex}>{String(index + 1).padStart(2, '0')}</div>
+                  <div>
+                    <h4>{step.title}</h4>
+                    <p>{step.description}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section className={s.standardBlock}>
+            <div className={s.blockHeading}>
+              <span>03</span>
+              <h3>Hồ sơ / thông tin cần chuẩn bị</h3>
+            </div>
+            <ul className={s.documentList}>
+              {detail.documents.map((item, index) => (
+                <li key={index}>
+                  <CheckCircle2 size={16} />
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+
+          <section className={s.standardBlock}>
+            <div className={s.blockHeading}>
+              <span>04</span>
+              <h3>Câu hỏi thường gặp riêng của dịch vụ</h3>
+            </div>
+            <div className={s.serviceFaqList}>
+              {detail.faqs.map((faq, index) => (
+                <details key={index} className={s.serviceFaqItem}>
+                  <summary>{faq.question}</summary>
+                  <p>{faq.answer}</p>
+                </details>
+              ))}
+            </div>
+          </section>
         </div>
 
         {/* Other services */}

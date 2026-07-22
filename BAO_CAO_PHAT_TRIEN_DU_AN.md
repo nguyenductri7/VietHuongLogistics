@@ -257,16 +257,15 @@ Trong quá trình phát triển, hệ thống đã được hoàn thiện theo h
 
 ## 6. Các điểm còn có thể phát triển tiếp
 
-1. Tối ưu hiệu năng frontend bằng code splitting/lazy loading để giảm bundle lớn.
-2. Thay các hàm Sass `darken()` cũ bằng `color.adjust()` để loại bỏ cảnh báo build.
-3. Bổ sung hệ thống phân quyền Admin chi tiết hơn theo vai trò.
-4. Bổ sung xác nhận email nếu Admin thay đổi email tài khoản.
-5. Bổ sung audit log để biết ai đã sửa/xoá nội dung nào.
-6. Bổ sung backup database định kỳ.
-7. Cân nhắc nâng cấp Render/Aiven nếu cần tốc độ phản hồi ổn định hơn và tránh cold start.
-8. Nếu cần real-time thật, có thể triển khai WebSocket/SSE; hiện tại polling 30 giây là lựa chọn phù hợp với Render Free.
-9. Tối ưu SEO nâng cao cho bài viết: schema, sitemap, Open Graph, canonical URL.
-10. Tối ưu hình ảnh và video để giảm thời gian tải trang đầu.
+1. Thay các hàm Sass `darken()` cũ bằng `color.adjust()` để loại bỏ cảnh báo build.
+2. Bổ sung hệ thống phân quyền Admin chi tiết hơn theo vai trò.
+3. Bổ sung xác nhận email nếu Admin thay đổi email tài khoản.
+4. Bổ sung audit log để biết ai đã sửa/xoá nội dung nào.
+5. Bổ sung backup database định kỳ.
+6. Cân nhắc nâng cấp Render/Aiven nếu cần tốc độ phản hồi ổn định hơn và tránh cold start.
+7. Nếu cần real-time thật, có thể triển khai WebSocket/SSE; hiện tại polling 30 giây là lựa chọn phù hợp với Render Free.
+8. Tối ưu SEO nâng cao cho bài viết: schema, sitemap, Open Graph, canonical URL.
+9. Tối ưu hình ảnh và video để giảm thời gian tải trang đầu.
 
 ---
 

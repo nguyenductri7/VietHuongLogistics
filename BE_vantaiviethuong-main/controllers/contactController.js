@@ -166,4 +166,42 @@ const getContactStats = async (req, res) => {
   }
 };
 
-module.exports = { submitContact, getContacts, updateContactStatus, deleteContact, getContactStats };
+// PUT /api/admin/contacts/:id/crm
+const updateContactCrm = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const note = String(req.body.admin_note ?? '').trim();
+    const action = String(req.body.last_action ?? '').trim();
+
+    const [beforeRows] = await pool.query('SELECT * FROM contact_messages WHERE id = ?', [id]);
+    if (!beforeRows.length) {
+      return res.status(404).json({ success: false, message: 'Không tìm thấy liên hệ.' });
+    }
+
+    await pool.query(
+      `UPDATE contact_messages
+       SET admin_note = ?, last_action = ?, last_action_at = CASE WHEN ? <> '' THEN CURRENT_TIMESTAMP ELSE last_action_at END
+       WHERE id = ?`,
+      [note, action || null, action, id]
+    );
+
+    const [afterRows] = await pool.query('SELECT * FROM contact_messages WHERE id = ?', [id]);
+    await recordAdminAudit({
+      module: 'contacts',
+      action: 'update',
+      entityType: 'contact',
+      entityId: id,
+      summary: `Cập nhật CRM liên hệ của ${beforeRows[0].full_name}`,
+      before: beforeRows[0],
+      after: afterRows[0],
+      userId: req.user?.id,
+    });
+
+    res.json({ success: true, message: 'Đã cập nhật ghi chú xử lý.', data: afterRows[0] });
+  } catch (err) {
+    console.error('updateContactCrm error:', err);
+    res.status(500).json({ success: false, message: 'Lỗi server.' });
+  }
+};
+
+module.exports = { submitContact, getContacts, updateContactStatus, updateContactCrm, deleteContact, getContactStats };

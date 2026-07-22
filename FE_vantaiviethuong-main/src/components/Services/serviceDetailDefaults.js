@@ -11,6 +11,39 @@ export const GENERIC_SERVICE_DETAIL = {
   email: 'info@vantaiviethuong.com',
   highlights: [],
   features: [],
+  audiences: [
+    'Doanh nghiệp cần vận chuyển hàng hóa thường xuyên.',
+    'Chủ shop, nhà phân phối hoặc đơn vị thương mại điện tử.',
+    'Khách hàng cần giải pháp giao nhận trọn gói, đúng tiến độ.',
+  ],
+  process: [
+    { title: 'Tiếp nhận thông tin', description: 'Ghi nhận loại hàng, số lượng, điểm đi, điểm đến và yêu cầu thời gian.' },
+    { title: 'Tư vấn phương án', description: 'Đề xuất hình thức vận chuyển phù hợp về chi phí, tiến độ và độ an toàn.' },
+    { title: 'Báo giá và xác nhận', description: 'Gửi báo giá rõ ràng, thống nhất lịch lấy hàng và phương án xử lý.' },
+    { title: 'Triển khai vận chuyển', description: 'Theo dõi quá trình vận chuyển, cập nhật trạng thái khi cần thiết.' },
+    { title: 'Bàn giao và đối soát', description: 'Bàn giao hàng hóa, xác nhận chứng từ và hỗ trợ sau vận chuyển.' },
+  ],
+  benefits: [
+    'Tiết kiệm thời gian xử lý vận chuyển cho doanh nghiệp.',
+    'Giảm rủi ro thất lạc, chậm tiến độ hoặc phát sinh chi phí.',
+    'Có đội ngũ theo dõi và hỗ trợ trong suốt quá trình giao nhận.',
+  ],
+  documents: [
+    'Thông tin người gửi và người nhận.',
+    'Loại hàng hóa, số lượng, kích thước hoặc trọng lượng.',
+    'Địa chỉ lấy hàng, giao hàng và thời gian mong muốn.',
+    'Hóa đơn, phiếu xuất kho hoặc chứng từ liên quan nếu có.',
+  ],
+  faqs: [
+    {
+      question: 'Bao lâu tôi nhận được báo giá?',
+      answer: 'Thông thường Việt Hương phản hồi báo giá trong khoảng 30 phút đến 2 giờ làm việc sau khi nhận đủ thông tin.',
+    },
+    {
+      question: 'Dịch vụ có hỗ trợ lấy hàng tận nơi không?',
+      answer: 'Có. Đội ngũ tư vấn sẽ xác nhận điểm lấy hàng, thời gian phù hợp và phương án vận chuyển trước khi triển khai.',
+    },
+  ],
 }
 
 export const SERVICE_DETAIL_DATA = {
@@ -92,5 +125,12 @@ export function normalizeServiceDetail(detail, slug = '') {
     ...source,
     highlights: Array.isArray(source.highlights) ? source.highlights : [...fallback.highlights],
     features: Array.isArray(source.features) ? source.features : [...fallback.features],
+    audiences: Array.isArray(source.audiences) ? source.audiences : [...fallback.audiences],
+    process: Array.isArray(source.process) ? source.process : [...fallback.process],
+    benefits: Array.isArray(source.benefits)
+      ? source.benefits
+      : (Array.isArray(source.features) && source.features.length ? [...source.features] : [...fallback.benefits]),
+    documents: Array.isArray(source.documents) ? source.documents : [...fallback.documents],
+    faqs: Array.isArray(source.faqs) ? source.faqs : [...fallback.faqs],
   }
 }

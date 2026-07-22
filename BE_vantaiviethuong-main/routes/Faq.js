@@ -7,6 +7,7 @@ const {
   getInquiries,
   getInquiryStats,
   updateStatus,
+  updateInquiryCrm,
   deleteInquiry,
 } = require('../controllers/faqController')
 
@@ -17,6 +18,7 @@ router.post('/', submitInquiry)
 router.get('/admin', authMiddleware, getInquiries)
 router.get('/admin/stats', authMiddleware, getInquiryStats)
 router.put('/admin/:id/status', authMiddleware, updateStatus)
+router.put('/admin/:id/crm', authMiddleware, updateInquiryCrm)
 router.delete('/admin/:id', authMiddleware, deleteInquiry)
 
 module.exports = router

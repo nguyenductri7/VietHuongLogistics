@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const {
-  submitContact, getContacts, updateContactStatus, deleteContact, getContactStats,
+  submitContact, getContacts, updateContactStatus, updateContactCrm, deleteContact, getContactStats,
 } = require('../controllers/contactController');
 const { authMiddleware } = require('../middleware/auth');
 
@@ -16,6 +16,9 @@ router.get('/admin/stats', authMiddleware, getContactStats);
 
 // PUT /api/admin/contacts/:id/status
 router.put('/admin/:id/status', authMiddleware, updateContactStatus);
+
+// PUT /api/admin/contacts/:id/crm
+router.put('/admin/:id/crm', authMiddleware, updateContactCrm);
 
 // DELETE /api/admin/contacts/:id
 router.delete('/admin/:id', authMiddleware, deleteContact);

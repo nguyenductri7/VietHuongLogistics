@@ -223,6 +223,43 @@ const loadAll = useCallback(() => {
     setFormData(prev => ({ ...prev, tags: prev.tags.filter((_, i) => i !== idx) }))
   }
 
+  const updateDetailField = (field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      detail_content: { ...prev.detail_content, [field]: value },
+    }))
+  }
+
+  const updateDetailArrayItem = (field, index, value) => {
+    setFormData(prev => ({
+      ...prev,
+      detail_content: {
+        ...prev.detail_content,
+        [field]: prev.detail_content[field].map((item, i) => i === index ? value : item),
+      },
+    }))
+  }
+
+  const addDetailArrayItem = (field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      detail_content: {
+        ...prev.detail_content,
+        [field]: [...prev.detail_content[field], value],
+      },
+    }))
+  }
+
+  const removeDetailArrayItem = (field, index) => {
+    setFormData(prev => ({
+      ...prev,
+      detail_content: {
+        ...prev.detail_content,
+        [field]: prev.detail_content[field].filter((_, i) => i !== index),
+      },
+    }))
+  }
+
   const submitForm = async (e) => {
     e.preventDefault()
     if (!formData.title.trim() || !formData.subtitle.trim() || !formData.description.trim() || !formData.image.trim()) {
@@ -235,6 +272,21 @@ const loadAll = useCallback(() => {
         ...formData.detail_content,
         highlights: formData.detail_content.highlights.filter(item => String(item.num || '').trim() || String(item.label || '').trim()),
         features: formData.detail_content.features.map(item => String(item || '').trim()).filter(Boolean),
+        audiences: formData.detail_content.audiences.map(item => String(item || '').trim()).filter(Boolean),
+        benefits: formData.detail_content.benefits.map(item => String(item || '').trim()).filter(Boolean),
+        documents: formData.detail_content.documents.map(item => String(item || '').trim()).filter(Boolean),
+        process: formData.detail_content.process
+          .map(item => ({
+            title: String(item.title || '').trim(),
+            description: String(item.description || '').trim(),
+          }))
+          .filter(item => item.title || item.description),
+        faqs: formData.detail_content.faqs
+          .map(item => ({
+            question: String(item.question || '').trim(),
+            answer: String(item.answer || '').trim(),
+          }))
+          .filter(item => item.question || item.answer),
       },
     }
     try {
@@ -470,15 +522,105 @@ const loadAll = useCallback(() => {
                     onChange={v => setFormData(p => ({ ...p, detail_content: { ...p.detail_content, title_prefix: v } }))} />
                 </div>
                 <TextAreaField label="Đoạn giới thiệu" value={formData.detail_content.description}
-                  onChange={v => setFormData(p => ({ ...p, detail_content: { ...p.detail_content, description: v } }))} />
+                  onChange={v => updateDetailField('description', v)} />
+
+                <div className={styles.detailGroupHeader}>
+                  <h5>Phù hợp với loại khách nào</h5>
+                  <button type="button" className={styles.inlineAddBtn} onClick={() => addDetailArrayItem('audiences', '')}>
+                    <Plus size={14} /> Thêm đối tượng
+                  </button>
+                </div>
+                {formData.detail_content.audiences.map((audience, index) => (
+                  <div className={styles.detailRow} key={`audience-${index}`}>
+                    <TextAreaField label={`Đối tượng #${index + 1}`} value={audience}
+                      onChange={v => updateDetailArrayItem('audiences', index, v)} />
+                    <button type="button" className={styles.inlineDeleteBtn} title="Xóa đối tượng"
+                      onClick={() => removeDetailArrayItem('audiences', index)}>
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                ))}
+
+                <div className={styles.detailGroupHeader}>
+                  <h5>Quy trình thực hiện</h5>
+                  <button type="button" className={styles.inlineAddBtn} onClick={() => addDetailArrayItem('process', { title: '', description: '' })}>
+                    <Plus size={14} /> Thêm bước
+                  </button>
+                </div>
+                {formData.detail_content.process.map((step, index) => (
+                  <div className={styles.detailRow} key={`process-${index}`}>
+                    <TextField label={`Bước #${index + 1}`} value={step.title}
+                      onChange={v => updateDetailArrayItem('process', index, { ...step, title: v })} />
+                    <TextAreaField label="Mô tả" value={step.description}
+                      onChange={v => updateDetailArrayItem('process', index, { ...step, description: v })} />
+                    <button type="button" className={styles.inlineDeleteBtn} title="Xóa bước"
+                      onClick={() => removeDetailArrayItem('process', index)}>
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                ))}
+
+                <div className={styles.detailGroupHeader}>
+                  <h5>Lợi ích</h5>
+                  <button type="button" className={styles.inlineAddBtn} onClick={() => addDetailArrayItem('benefits', '')}>
+                    <Plus size={14} /> Thêm lợi ích
+                  </button>
+                </div>
+                {formData.detail_content.benefits.map((benefit, index) => (
+                  <div className={styles.detailRow} key={`benefit-${index}`}>
+                    <TextAreaField label={`Lợi ích #${index + 1}`} value={benefit}
+                      onChange={v => updateDetailArrayItem('benefits', index, v)} />
+                    <button type="button" className={styles.inlineDeleteBtn} title="Xóa lợi ích"
+                      onClick={() => removeDetailArrayItem('benefits', index)}>
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                ))}
+
+                <div className={styles.detailGroupHeader}>
+                  <h5>Hồ sơ / thông tin cần chuẩn bị</h5>
+                  <button type="button" className={styles.inlineAddBtn} onClick={() => addDetailArrayItem('documents', '')}>
+                    <Plus size={14} /> Thêm mục
+                  </button>
+                </div>
+                {formData.detail_content.documents.map((documentItem, index) => (
+                  <div className={styles.detailRow} key={`document-${index}`}>
+                    <TextAreaField label={`Mục #${index + 1}`} value={documentItem}
+                      onChange={v => updateDetailArrayItem('documents', index, v)} />
+                    <button type="button" className={styles.inlineDeleteBtn} title="Xóa mục"
+                      onClick={() => removeDetailArrayItem('documents', index)}>
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                ))}
+
+                <div className={styles.detailGroupHeader}>
+                  <h5>Câu hỏi thường gặp riêng của dịch vụ</h5>
+                  <button type="button" className={styles.inlineAddBtn} onClick={() => addDetailArrayItem('faqs', { question: '', answer: '' })}>
+                    <Plus size={14} /> Thêm FAQ
+                  </button>
+                </div>
+                {formData.detail_content.faqs.map((faq, index) => (
+                  <div className={styles.detailRow} key={`faq-${index}`}>
+                    <TextField label={`Câu hỏi #${index + 1}`} value={faq.question}
+                      onChange={v => updateDetailArrayItem('faqs', index, { ...faq, question: v })} />
+                    <TextAreaField label="Câu trả lời" value={faq.answer}
+                      onChange={v => updateDetailArrayItem('faqs', index, { ...faq, answer: v })} />
+                    <button type="button" className={styles.inlineDeleteBtn} title="Xóa FAQ"
+                      onClick={() => removeDetailArrayItem('faqs', index)}>
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                ))}
+
                 <div className={styles.row}>
                   <TextField label="Chữ trên nút" value={formData.detail_content.cta_label}
-                    onChange={v => setFormData(p => ({ ...p, detail_content: { ...p.detail_content, cta_label: v } }))} />
+                    onChange={v => updateDetailField('cta_label', v)} />
                   <TextField label="Liên kết nút" value={formData.detail_content.cta_link}
-                    onChange={v => setFormData(p => ({ ...p, detail_content: { ...p.detail_content, cta_link: v } }))} />
+                    onChange={v => updateDetailField('cta_link', v)} />
                 </div>
                 <TextField label="Chữ nút đặt dịch vụ trên Hero" value={formData.detail_content.hero_cta_label}
-                  onChange={v => setFormData(p => ({ ...p, detail_content: { ...p.detail_content, hero_cta_label: v } }))} />
+                  onChange={v => updateDetailField('hero_cta_label', v)} />
 
                 <div className={styles.detailGroupHeader}>
                   <h5>Số liệu nổi bật</h5>

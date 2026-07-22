@@ -197,6 +197,11 @@ export const contactApi = {
       method: 'PUT',
       body: JSON.stringify({ status }),
     }),
+  updateCrm: (id, data) =>
+    request(`/contact/admin/${id}/crm`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
   delete: (id) => request(`/contact/admin/${id}`, { method: 'DELETE' }),
 }
 
@@ -223,6 +228,11 @@ export const faqApi = {
     }),
 
   // Admin — xóa
+  updateCrm: (id, data) =>
+    request(`/faq-inquiries/admin/${id}/crm`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
   delete: (id) => request(`/faq-inquiries/admin/${id}`, { method: 'DELETE' }),
 }
 // ════════════════════════════════════════════════════════════

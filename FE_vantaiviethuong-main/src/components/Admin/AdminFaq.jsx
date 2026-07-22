@@ -18,6 +18,15 @@ const STATUS = {
   done:       { label: 'Đã xử lý',    color: '#10b981' },
 }
 
+const CRM_ACTIONS = [
+  { value: 'called', label: 'Đã gọi' },
+  { value: 'emailed', label: 'Đã gửi mail' },
+  { value: 'missed_call', label: 'Khách không nghe máy' },
+  { value: 'closed', label: 'Đã chốt' },
+]
+
+const CRM_ACTION_LABEL = CRM_ACTIONS.reduce((acc, item) => ({ ...acc, [item.value]: item.label }), {})
+
 export default function AdminFaq() {
   const { showToast } = useAdminToast()
   const { logout } = useAuth()
@@ -78,6 +87,28 @@ export default function AdminFaq() {
   }
 
   // ── Delete ─────────────────────────────────────────────────────
+  const updateLocalInquiry = (id, patch) => {
+    setInquiries(prev =>
+      prev.map(item => item.id === id ? { ...item, ...patch } : item)
+    )
+  }
+
+  const saveCrm = async (item, action = item.last_action || '') => {
+    setUpdating(item.id)
+    try {
+      const res = await faqApi.updateCrm(item.id, {
+        admin_note: item.admin_note || '',
+        last_action: action,
+      })
+      updateLocalInquiry(item.id, res.data || { ...item, last_action: action })
+      showToast('Đã lưu thông tin xử lý.')
+    } catch (err) {
+      showToast(err.message || 'Không thể lưu thông tin xử lý.', 'error')
+    } finally {
+      setUpdating(null)
+    }
+  }
+
   const handleDelete = async () => {
     if (!deleting) return
     try {
@@ -308,6 +339,43 @@ export default function AdminFaq() {
                               </a>
                             ) : null}
                             <p className={styles.expandedText}>{item.question}</p>
+                            {item.last_action ? (
+                              <p className={styles.expandedText}>
+                                Xử lý gần nhất: {CRM_ACTION_LABEL[item.last_action] || item.last_action}
+                                {item.last_action_at ? ` - ${formatDate(item.last_action_at)}` : ''}
+                              </p>
+                            ) : null}
+                            <p className={styles.expandedLabel} style={{ marginTop: 14 }}>CRM nội bộ</p>
+                            <div className={styles.crmPanel} onClick={event => event.stopPropagation()}>
+                              <div className={styles.crmActions}>
+                                {CRM_ACTIONS.map(action => (
+                                  <button
+                                    key={action.value}
+                                    type="button"
+                                    className={`${styles.crmActionBtn} ${item.last_action === action.value ? styles.crmActionActive : ''}`}
+                                    disabled={updating === item.id}
+                                    onClick={() => saveCrm(item, action.value)}
+                                  >
+                                    {action.label}
+                                  </button>
+                                ))}
+                              </div>
+                              <textarea
+                                className={styles.crmNote}
+                                rows={3}
+                                placeholder="Ghi chú nội bộ: đã trả lời chưa, khách hỏi gì thêm, bước tiếp theo..."
+                                value={item.admin_note || ''}
+                                onChange={event => updateLocalInquiry(item.id, { admin_note: event.target.value })}
+                              />
+                              <button
+                                type="button"
+                                className={styles.replyLink}
+                                disabled={updating === item.id}
+                                onClick={() => saveCrm(item)}
+                              >
+                                Lưu ghi chú
+                              </button>
+                            </div>
                           </div>
                         </td>
                       </tr>

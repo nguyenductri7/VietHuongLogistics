@@ -173,4 +173,42 @@ const deleteInquiry = async (req, res) => {
   }
 }
 
-module.exports = { submitInquiry, getInquiries, getInquiryStats, updateStatus, deleteInquiry }
+// [ADMIN] PUT /api/faq-inquiries/admin/:id/crm
+const updateInquiryCrm = async (req, res) => {
+  try {
+    const { id } = req.params
+    const note = String(req.body.admin_note ?? '').trim()
+    const action = String(req.body.last_action ?? '').trim()
+
+    const [beforeRows] = await pool.query('SELECT * FROM faq_inquiries WHERE id = ?', [id])
+    if (!beforeRows.length) {
+      return res.status(404).json({ message: 'Không tìm thấy câu hỏi.' })
+    }
+
+    await pool.query(
+      `UPDATE faq_inquiries
+       SET admin_note = ?, last_action = ?, last_action_at = CASE WHEN ? <> '' THEN CURRENT_TIMESTAMP ELSE last_action_at END
+       WHERE id = ?`,
+      [note, action || null, action, id]
+    )
+
+    const [afterRows] = await pool.query('SELECT * FROM faq_inquiries WHERE id = ?', [id])
+    await recordAdminAudit({
+      module: 'faq',
+      action: 'update',
+      entityType: 'faq_inquiry',
+      entityId: id,
+      summary: `Cập nhật CRM thắc mắc của ${beforeRows[0].name}`,
+      before: beforeRows[0],
+      after: afterRows[0],
+      userId: req.user?.id,
+    })
+
+    return res.json({ success: true, message: 'Đã cập nhật ghi chú xử lý.', data: afterRows[0] })
+  } catch (err) {
+    console.error('[FAQ] updateInquiryCrm error:', err)
+    return res.status(500).json({ message: 'Lỗi server.' })
+  }
+}
+
+module.exports = { submitInquiry, getInquiries, getInquiryStats, updateStatus, updateInquiryCrm, deleteInquiry }
