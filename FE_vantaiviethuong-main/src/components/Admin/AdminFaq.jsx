@@ -27,6 +27,17 @@ const CRM_ACTIONS = [
 
 const CRM_ACTION_LABEL = CRM_ACTIONS.reduce((acc, item) => ({ ...acc, [item.value]: item.label }), {})
 
+const getGmailComposeUrl = ({ to, subject = '', body = '' }) => {
+  const params = new URLSearchParams({
+    view: 'cm',
+    fs: '1',
+    to: to || '',
+    su: subject,
+    body,
+  })
+  return `https://mail.google.com/mail/?${params.toString()}`
+}
+
 export default function AdminFaq() {
   const { showToast } = useAdminToast()
   const { logout } = useAuth()
@@ -267,8 +278,14 @@ export default function AdminFaq() {
                             </a>
                             {item.email ? (
                               <a
-                                href={`mailto:${item.email}`}
+                                href={getGmailComposeUrl({
+                                  to: item.email,
+                                  subject: `Phản hồi từ Việt Hương Logistics - câu hỏi #${item.id}`,
+                                  body: `Chào ${item.name || 'quý khách'},\n\nViệt Hương Logistics đã nhận được thắc mắc của bạn và xin phản hồi như sau:\n\n`,
+                                })}
                                 className={styles.customerEmail}
+                                target="_blank"
+                                rel="noreferrer"
                                 onClick={e => e.stopPropagation()}
                               >
                                 <Mail size={11} /> {item.email}
@@ -331,8 +348,14 @@ export default function AdminFaq() {
                             <p className={styles.expandedLabel}>Nội dung đầy đủ</p>
                             {item.email ? (
                               <a
-                                href={`mailto:${item.email}?subject=${encodeURIComponent(`Phản hồi từ Việt Hương Logistics - câu hỏi #${item.id}`)}`}
+                                href={getGmailComposeUrl({
+                                  to: item.email,
+                                  subject: `Phản hồi từ Việt Hương Logistics - câu hỏi #${item.id}`,
+                                  body: `Chào ${item.name || 'quý khách'},\n\nViệt Hương Logistics đã nhận được thắc mắc của bạn:\n"${item.question || ''}"\n\nNội dung phản hồi:\n\n`,
+                                })}
                                 className={styles.replyLink}
+                                target="_blank"
+                                rel="noreferrer"
                                 onClick={e => e.stopPropagation()}
                               >
                                 <Mail size={14} /> Trả lời khách hàng qua email

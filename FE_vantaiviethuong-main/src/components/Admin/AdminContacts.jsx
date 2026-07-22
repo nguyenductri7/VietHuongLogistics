@@ -33,6 +33,17 @@ const CRM_ACTIONS = [
 
 const CRM_ACTION_LABEL = CRM_ACTIONS.reduce((acc, item) => ({ ...acc, [item.value]: item.label }), {})
 
+const getGmailComposeUrl = ({ to, subject = '', body = '' }) => {
+  const params = new URLSearchParams({
+    view: 'cm',
+    fs: '1',
+    to: to || '',
+    su: subject,
+    body,
+  })
+  return `https://mail.google.com/mail/?${params.toString()}`
+}
+
 export default function AdminContacts() {
   const navigate = useNavigate()
   const [contacts, setContacts] = useState([])
@@ -290,7 +301,23 @@ const fetchData = async ({ silent = false } = {}) => {
                           <div className={styles.expandedBox}>
                             <p className={styles.expandedLabel}>Thông tin khách hàng</p>
                             <p className={styles.expandedText}>
-                              {item.email ? <><Mail size={13} /> <a href={`mailto:${item.email}`}>{item.email}</a><br /></> : null}
+                              {item.email ? (
+                                <>
+                                  <Mail size={13} />{' '}
+                                  <a
+                                    href={getGmailComposeUrl({
+                                      to: item.email,
+                                      subject: `Phản hồi từ Việt Hương Logistics - liên hệ #${item.id}`,
+                                      body: `Chào ${item.full_name || 'quý khách'},\n\nViệt Hương Logistics đã nhận được yêu cầu tư vấn của bạn và xin phản hồi như sau:\n\n`,
+                                    })}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                  >
+                                    {item.email}
+                                  </a>
+                                  <br />
+                                </>
+                              ) : null}
                               {item.company ? <>Công ty: {item.company}<br /></> : null}
                               Gửi lúc: {formatDate(item.created_at)}
                             </p>
