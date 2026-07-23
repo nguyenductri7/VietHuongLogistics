@@ -415,6 +415,37 @@
   }
 }
 
+.detailRowSplit {
+  grid-template-columns: minmax(220px, .85fr) minmax(360px, 1.35fr) 38px;
+  align-items: stretch;
+
+  &:has(textarea) {
+    grid-template-columns: minmax(220px, .85fr) minmax(360px, 1.35fr) 38px;
+  }
+
+  textarea {
+    min-height: 92px;
+  }
+
+  > button {
+    align-self: end;
+  }
+
+  @media (max-width: 760px) {
+    grid-template-columns: 1fr 38px;
+
+    > :first-child,
+    > :nth-child(2):not(button) {
+      grid-column: 1;
+    }
+
+    > button {
+      grid-column: 2;
+      grid-row: 1 / span 2;
+    }
+  }
+}
+
 .inlineDeleteBtn {
   width: 38px;
   height: 38px;

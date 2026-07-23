@@ -548,7 +548,7 @@ const loadAll = useCallback(() => {
                   </button>
                 </div>
                 {formData.detail_content.process.map((step, index) => (
-                  <div className={styles.detailRow} key={`process-${index}`}>
+                  <div className={`${styles.detailRow} ${styles.detailRowSplit}`} key={`process-${index}`}>
                     <TextField label={`Bước #${index + 1}`} value={step.title}
                       onChange={v => updateDetailArrayItem('process', index, { ...step, title: v })} />
                     <TextAreaField label="Mô tả" value={step.description}
@@ -601,7 +601,7 @@ const loadAll = useCallback(() => {
                   </button>
                 </div>
                 {formData.detail_content.faqs.map((faq, index) => (
-                  <div className={styles.detailRow} key={`faq-${index}`}>
+                  <div className={`${styles.detailRow} ${styles.detailRowSplit}`} key={`faq-${index}`}>
                     <TextField label={`Câu hỏi #${index + 1}`} value={faq.question}
                       onChange={v => updateDetailArrayItem('faqs', index, { ...faq, question: v })} />
                     <TextAreaField label="Câu trả lời" value={faq.answer}
