@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   ChevronDown, ChevronUp, Clock3, FileClock, Filter, Loader2, RefreshCw, UserRound,
   RotateCcw, Trash2,
@@ -10,89 +10,96 @@ import AdminConfirmDialog from './AdminConfirmDialog'
 import styles from './AdminCmsHistory.module.scss'
 
 const MODULES = {
-  home: { label: 'Trang chá»§', tone: 'red' },
-  about: { label: 'Trang giá»›i thiá»‡u', tone: 'blue' },
-  services: { label: 'Trang dá»‹ch vá»¥', tone: 'green' },
-  faq: { label: 'Quáº£n lĂ½ giáº£i Ä‘Ă¡p', tone: 'orange' },
-  faq_content: { label: 'Ná»™i dung FAQ', tone: 'purple' },
-  blogs: { label: 'Tin tá»©c', tone: 'cyan' },
-  branches: { label: 'Chi nhĂ¡nh', tone: 'pink' },
-  contacts: { label: 'LiĂªn há»‡', tone: 'gray' },
+  home: { label: 'Trang chủ', tone: 'red' },
+  about: { label: 'Trang giới thiệu', tone: 'blue' },
+  services: { label: 'Trang dịch vụ', tone: 'green' },
+  faq: { label: 'Quản lý giải đáp', tone: 'orange' },
+  faq_content: { label: 'Nội dung FAQ', tone: 'purple' },
+  blogs: { label: 'Tin tức', tone: 'cyan' },
+  branches: { label: 'Chi nhánh', tone: 'pink' },
+  contacts: { label: 'Liên hệ', tone: 'gray' },
 }
 
 const FIELD_LABELS = {
-  hero: 'Hero Ä‘áº§u trang',
-  about_intro: 'Giá»›i thiá»‡u trĂªn trang chá»§',
-  services_section: 'Giáº£i phĂ¡p váº­n táº£i',
-  partners_section: 'Äá»‘i tĂ¡c vĂ  Ä‘Ă¡nh giĂ¡',
-  contact_section: 'ThĂ´ng tin liĂªn há»‡',
-  footer: 'ChĂ¢n trang',
-  partners: 'Äá»‘i tĂ¡c',
-  stats: 'Sá»‘ liá»‡u thá»‘ng kĂª',
-  identity: 'Giá»›i thiá»‡u cĂ´ng ty',
-  services: 'Dá»‹ch vá»¥',
-  timeline: 'Lá»‹ch sá»­ hĂ¬nh thĂ nh',
-  values_section: 'GiĂ¡ trá»‹ cá»‘t lĂµi',
+  hero: 'Hero đầu trang',
+  about_intro: 'Giới thiệu trên trang chủ',
+  services_section: 'Giải pháp vận tải',
+  partners_section: 'Đối tác và đánh giá',
+  contact_section: 'Thông tin liên hệ',
+  footer: 'Chân trang',
+  partners: 'Đối tác',
+  stats: 'Số liệu thống kê',
+  identity: 'Giới thiệu công ty',
+  services: 'Dịch vụ',
+  timeline: 'Lịch sử hình thành',
+  values_section: 'Giá trị cốt lõi',
   banner: 'Banner',
-  process_steps: 'CĂ¡c bÆ°á»›c quy trĂ¬nh',
-  contact_info: 'ThĂ´ng tin liĂªn há»‡',
-  service_items: 'Danh sĂ¡ch dá»‹ch vá»¥',
-  detail_content: 'Ná»™i dung trang chi tiáº¿t',
-  highlights: 'Sá»‘ liá»‡u ná»•i báº­t',
-  features: 'Lá»£i Ă­ch vĂ  Ä‘áº·c Ä‘iá»ƒm',
-  eyebrow: 'NhĂ£n nhá»',
-  title_prefix: 'TiĂªu Ä‘á» má»Ÿ Ä‘áº§u',
-  cta_label: 'Chá»¯ trĂªn nĂºt',
-  cta_link: 'LiĂªn káº¿t nĂºt',
-  hero_cta_label: 'NĂºt Ä‘áº·t dá»‹ch vá»¥ trĂªn Hero',
-  form_title_prefix: 'TiĂªu Ä‘á» biá»ƒu máº«u',
-  form_description: 'MĂ´ táº£ biá»ƒu máº«u',
-  num: 'GiĂ¡ trá»‹',
-  title: 'TiĂªu Ä‘á»',
-  subtitle: 'Phá»¥ Ä‘á»',
-  description: 'MĂ´ táº£',
-  name: 'TĂªn',
-  company: 'CĂ´ng ty',
-  quote: 'Ná»™i dung Ä‘Ă¡nh giĂ¡',
-  image: 'HĂ¬nh áº£nh',
-  image_url: 'HĂ¬nh áº£nh',
-  avatar_url: 'áº¢nh khĂ¡ch hĂ ng',
+  process_steps: 'Các bước quy trình',
+  contact_info: 'Thông tin liên hệ',
+  service_items: 'Danh sách dịch vụ',
+  detail_content: 'Nội dung trang chi tiết',
+  highlights: 'Số liệu nổi bật',
+  features: 'Lợi ích và đặc điểm',
+  eyebrow: 'Nhãn nhỏ',
+  title_prefix: 'Tiêu đề mở đầu',
+  cta_label: 'Chữ trên nút',
+  cta_link: 'Liên kết nút',
+  hero_cta_label: 'Nút đặt dịch vụ trên Hero',
+  form_title_prefix: 'Tiêu đề biểu mẫu',
+  form_description: 'Mô tả biểu mẫu',
+  num: 'Giá trị',
+  title: 'Tiêu đề',
+  subtitle: 'Phụ đề',
+  description: 'Mô tả',
+  name: 'Tên',
+  company: 'Công ty',
+  quote: 'Nội dung đánh giá',
+  image: 'Hình ảnh',
+  image_url: 'Hình ảnh',
+  avatar_url: 'Ảnh khách hàng',
   logo_url: 'Logo',
   website_url: 'Website',
-  is_active: 'Tráº¡ng thĂ¡i hiá»ƒn thá»‹',
-  enabled: 'Báº­t/táº¯t section',
-  sort_order: 'Thá»© tá»±',
+  is_active: 'Trạng thái hiển thị',
+  enabled: 'Bật/tắt section',
+  sort_order: 'Thứ tự',
   icon_key: 'Icon',
   icon_url: 'Icon upload',
-  tags: 'Tháº» ná»™i dung',
-  phone: 'Äiá»‡n thoáº¡i',
+  tags: 'Thẻ nội dung',
+  phone: 'Điện thoại',
   email: 'Email',
-  address: 'Äá»‹a chá»‰',
+  address: 'Địa chỉ',
   hotline: 'Hotline',
-  question: 'CĂ¢u há»i',
-  answer: 'CĂ¢u tráº£ lá»i',
-  label: 'TĂªn danh má»¥c',
-  key: 'MĂ£ danh má»¥c',
-  category_id: 'Danh má»¥c',
-  status: 'Tráº¡ng thĂ¡i',
-  content: 'Ná»™i dung',
-  excerpt: 'MĂ´ táº£ ngáº¯n',
-  category: 'ChuyĂªn má»¥c',
-  author: 'TĂ¡c giáº£',
-  is_featured: 'BĂ i viáº¿t ná»•i báº­t',
-  published_at: 'NgĂ y Ä‘Äƒng',
-  full_name: 'Há» vĂ  tĂªn',
-  message: 'Ná»™i dung liĂªn há»‡',
-  lat: 'VÄ© Ä‘á»™',
-  lng: 'Kinh Ä‘á»™',
-  is_headquarter: 'Trá»¥ sá»Ÿ chĂ­nh',
+  question: 'Câu hỏi',
+  answer: 'Câu trả lời',
+  label: 'Tên danh mục',
+  key: 'Mã danh mục',
+  category_id: 'Danh mục',
+  status: 'Trạng thái',
+  content: 'Nội dung',
+  excerpt: 'Mô tả ngắn',
+  category: 'Chuyên mục',
+  author: 'Tác giả',
+  is_featured: 'Bài viết nổi bật',
+  published_at: 'Ngày đăng',
+  full_name: 'Họ và tên',
+  message: 'Nội dung liên hệ',
+  lat: 'Vĩ độ',
+  lng: 'Kinh độ',
+  is_headquarter: 'Trụ sở chính',
+  admin_note: 'Ghi chú nội bộ',
+  last_action: 'Hành động CRM',
+  last_action_at: 'Thời gian xử lý CRM',
 }
 
 function formatDate(value) {
   const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return 'KhĂ´ng xĂ¡c Ä‘á»‹nh'
+  if (Number.isNaN(date.getTime())) return 'Không xác định'
   return new Intl.DateTimeFormat('vi-VN', {
-    hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
   }).format(date)
 }
 
@@ -104,22 +111,22 @@ function formatPath(path = '') {
       if (!match) return segment
       return `${FIELD_LABELS[match[1]] || match[1].replaceAll('_', ' ')}${match[2]}`
     })
-    .join(' â€º ')
+    .join(' › ')
 }
 
 function formatValue(value, path = '') {
-  if (value === null || value === undefined || value === '') return 'Trá»‘ng'
+  if (value === null || value === undefined || value === '') return 'Trống'
   const isFlag = /(?:^|\.)(?:is_active|enabled|show_[^.]+)$/.test(path)
-  if (value === true || (isFlag && value === 1)) return 'Báº­t / Hiá»ƒn thá»‹'
-  if (value === false || (isFlag && value === 0)) return 'Táº¯t / áº¨n'
+  if (value === true || (isFlag && value === 1)) return 'Bật / Hiển thị'
+  if (value === false || (isFlag && value === 0)) return 'Tắt / Ẩn'
   if (typeof value === 'object') return JSON.stringify(value, null, 2)
   return String(value)
 }
 
 function actionLabel(action) {
-  if (action === 'added') return 'ÄĂ£ thĂªm'
-  if (action === 'removed') return 'ÄĂ£ xĂ³a'
-  return 'ÄĂ£ cáº­p nháº­t'
+  if (action === 'added') return 'Đã thêm'
+  if (action === 'removed') return 'Đã xoá'
+  return 'Đã cập nhật'
 }
 
 function getEntryKey(entry) {
@@ -148,7 +155,7 @@ export default function AdminCmsHistory() {
       setEntries(Array.isArray(response.data) ? response.data : [])
       setSelectedKeys(new Set())
     } catch (error) {
-      showToast(error.message || 'KhĂ´ng thá»ƒ táº£i lá»‹ch sá»­ chá»‰nh sá»­a.', 'error')
+      showToast(error.message || 'Không thể tải lịch sử chỉnh sửa.', 'error')
     } finally {
       setLoading(false)
     }
@@ -160,6 +167,11 @@ export default function AdminCmsHistory() {
     () => entries.filter(entry => selectedKeys.has(getEntryKey(entry))),
     [entries, selectedKeys],
   )
+
+  const counts = useMemo(() => entries.reduce((result, entry) => {
+    result[entry.module] = (result[entry.module] || 0) + 1
+    return result
+  }, {}), [entries])
 
   const toggleSelected = (entry) => {
     const key = getEntryKey(entry)
@@ -181,9 +193,9 @@ export default function AdminCmsHistory() {
       setEntries(current => current.filter(entry => entry.id !== deleteTarget.id))
       if (expandedId === deleteTarget.id) setExpandedId(null)
       setDeleteTarget(null)
-      showToast(response.message || 'ÄĂ£ xĂ³a báº£n ghi lá»‹ch sá»­.', 'success')
+      showToast(response.message || 'Đã xoá bản ghi lịch sử.', 'success')
     } catch (error) {
-      showToast(error.message || 'KhĂ´ng thá»ƒ xĂ³a báº£n ghi lá»‹ch sá»­.', 'error')
+      showToast(error.message || 'Không thể xoá bản ghi lịch sử.', 'error')
     } finally {
       setDeleting(false)
     }
@@ -201,9 +213,9 @@ export default function AdminCmsHistory() {
       if (selectedEntries.some(entry => entry.id === expandedId)) setExpandedId(null)
       clearSelected()
       setBulkDeleteOpen(false)
-      showToast(response.message || 'ÄĂ£ xoĂ¡ cĂ¡c báº£n ghi Ä‘Ă£ chá»n.', 'success')
+      showToast(response.message || 'Đã xoá các bản ghi đã chọn.', 'success')
     } catch (error) {
-      showToast(error.message || 'KhĂ´ng thá»ƒ xoĂ¡ cĂ¡c báº£n ghi Ä‘Ă£ chá»n.', 'error')
+      showToast(error.message || 'Không thể xoá các bản ghi đã chọn.', 'error')
     } finally {
       setDeleting(false)
     }
@@ -216,39 +228,34 @@ export default function AdminCmsHistory() {
       const response = await cmsHistoryApi.restoreRevision(restoreTarget.source_id)
       setRestoreTarget(null)
       clearSelected()
-      showToast(response.message || 'ÄĂ£ hoĂ n tĂ¡c ná»™i dung CMS.', 'success')
+      showToast(response.message || 'Đã hoàn tác nội dung CMS.', 'success')
       await loadHistory()
     } catch (error) {
-      showToast(error.message || 'KhĂ´ng thá»ƒ hoĂ n tĂ¡c báº£n ghi nĂ y.', 'error')
+      showToast(error.message || 'Không thể hoàn tác bản ghi này.', 'error')
     } finally {
       setRestoring(false)
     }
   }
 
-  const counts = useMemo(() => entries.reduce((result, entry) => {
-    result[entry.module] = (result[entry.module] || 0) + 1
-    return result
-  }, {}), [entries])
-
   return (
     <div className={styles.page}>
       <div className={styles.intro}>
         <div>
-          <div className={styles.eyebrow}><FileClock size={16} /> Nháº­t kĂ½ ná»™i dung</div>
-          <h2>Lá»‹ch sá»­ chá»‰nh sá»­a CMS</h2>
-          <p>Theo dĂµi ai Ä‘Ă£ cáº­p nháº­t ná»™i dung, thá»i gian cáº­p nháº­t vĂ  nhá»¯ng thĂ´ng tin Ä‘Ă£ thay Ä‘á»•i.</p>
+          <div className={styles.eyebrow}><FileClock size={16} /> Nhật ký nội dung</div>
+          <h2>Lịch sử chỉnh sửa CMS</h2>
+          <p>Theo dõi ai đã cập nhật nội dung, thời gian cập nhật và những thông tin đã thay đổi.</p>
         </div>
         <button type="button" className={styles.refreshBtn} onClick={loadHistory} disabled={loading}>
-          <RefreshCw size={16} className={loading ? styles.spin : ''} /> LĂ m má»›i
+          <RefreshCw size={16} className={loading ? styles.spin : ''} /> Làm mới
         </button>
       </div>
 
       <div className={styles.toolbar}>
         <label className={styles.filter}>
           <Filter size={16} />
-          <span>Trang quáº£n lĂ½</span>
+          <span>Trang quản lý</span>
           <select value={moduleFilter} onChange={event => setModuleFilter(event.target.value)}>
-            <option value="">Táº¥t cáº£ cĂ¡c trang</option>
+            <option value="">Tất cả các trang</option>
             {Object.entries(MODULES).map(([key, module]) => (
               <option key={key} value={key}>{module.label}</option>
             ))}
@@ -285,12 +292,14 @@ export default function AdminCmsHistory() {
       )}
 
       {loading ? (
-        <div className={styles.state}><Loader2 size={24} className={styles.spin} /> Äang táº£i lá»‹ch sá»­...</div>
+        <div className={styles.state}>
+          <Loader2 size={24} className={styles.spin} /> Đang tải lịch sử...
+        </div>
       ) : entries.length === 0 ? (
         <div className={styles.state}>
           <FileClock size={34} />
-          <strong>ChÆ°a cĂ³ lá»‹ch sá»­ chá»‰nh sá»­a</strong>
-          <span>Lá»‹ch sá»­ sáº½ xuáº¥t hiá»‡n sau láº§n lÆ°u ná»™i dung tiáº¿p theo.</span>
+          <strong>Chưa có lịch sử chỉnh sửa</strong>
+          <span>Lịch sử sẽ xuất hiện sau lần lưu nội dung tiếp theo.</span>
         </div>
       ) : (
         <div className={styles.list}>
@@ -318,11 +327,11 @@ export default function AdminCmsHistory() {
                   >
                     <span className={`${styles.moduleBadge} ${styles[module.tone]}`}>{module.label}</span>
                     <div className={styles.entryContent}>
-                      <strong>{entry.change_summary || 'Cáº­p nháº­t ná»™i dung'}</strong>
+                      <strong>{entry.change_summary || 'Cập nhật nội dung'}</strong>
                       <div className={styles.meta}>
-                        <span><UserRound size={13} /> {entry.author?.full_name || entry.author?.username || 'TĂ i khoáº£n Ä‘Ă£ xĂ³a'}</span>
+                        <span><UserRound size={13} /> {entry.author?.full_name || entry.author?.username || 'Tài khoản đã xoá'}</span>
                         <span><Clock3 size={13} /> {formatDate(entry.created_at)}</span>
-                        <span>{entry.is_initial ? 'Báº£n ghi ban Ä‘áº§u' : `${entry.changes.length} thay Ä‘á»•i`}</span>
+                        <span>{entry.is_initial ? 'Bản ghi ban đầu' : `${entry.changes.length} thay đổi`}</span>
                       </div>
                     </div>
                     <span className={styles.expandIcon}>{expanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}</span>
@@ -343,8 +352,8 @@ export default function AdminCmsHistory() {
                       type="button"
                       className={styles.deleteBtn}
                       onClick={() => setDeleteTarget(entry)}
-                      title="XĂ³a báº£n ghi lá»‹ch sá»­"
-                      aria-label="XĂ³a báº£n ghi lá»‹ch sá»­"
+                      title="Xoá bản ghi lịch sử"
+                      aria-label="Xoá bản ghi lịch sử"
                     >
                       <Trash2 size={16} />
                     </button>
@@ -354,9 +363,9 @@ export default function AdminCmsHistory() {
                 {expanded && (
                   <div className={styles.details}>
                     {entry.is_initial ? (
-                      <p className={styles.initialNote}>ÄĂ¢y lĂ  báº£n ghi ná»™i dung ban Ä‘áº§u khi há»‡ thá»‘ng lá»‹ch sá»­ Ä‘Æ°á»£c kĂ­ch hoáº¡t.</p>
+                      <p className={styles.initialNote}>Đây là bản ghi nội dung ban đầu khi hệ thống lịch sử được kích hoạt.</p>
                     ) : entry.changes.length === 0 ? (
-                      <p className={styles.initialNote}>KhĂ´ng phĂ¡t hiá»‡n thay Ä‘á»•i dá»¯ liá»‡u trong láº§n lÆ°u nĂ y.</p>
+                      <p className={styles.initialNote}>Không phát hiện thay đổi dữ liệu trong lần lưu này.</p>
                     ) : (
                       <div className={styles.changeList}>
                         {entry.changes.map((change, index) => (
@@ -367,7 +376,7 @@ export default function AdminCmsHistory() {
                             </div>
                             <div className={styles.values}>
                               {change.action !== 'added' && (
-                                <div><small>TrÆ°á»›c</small><pre>{formatValue(change.before, change.path)}</pre></div>
+                                <div><small>Trước</small><pre>{formatValue(change.before, change.path)}</pre></div>
                               )}
                               {change.action !== 'removed' && (
                                 <div><small>Sau</small><pre>{formatValue(change.after, change.path)}</pre></div>
@@ -376,7 +385,7 @@ export default function AdminCmsHistory() {
                           </div>
                         ))}
                         {entry.changes_truncated && (
-                          <p className={styles.truncated}>Báº£n ghi cĂ³ quĂ¡ nhiá»u thay Ä‘á»•i; chá»‰ hiá»ƒn thá»‹ 100 thay Ä‘á»•i Ä‘áº§u tiĂªn.</p>
+                          <p className={styles.truncated}>Bản ghi có quá nhiều thay đổi; chỉ hiển thị 100 thay đổi đầu tiên.</p>
                         )}
                       </div>
                     )}
@@ -390,10 +399,10 @@ export default function AdminCmsHistory() {
 
       <AdminConfirmDialog
         open={!!deleteTarget}
-        title="XĂ³a báº£n ghi lá»‹ch sá»­?"
-        message="Thao tĂ¡c nĂ y chá»‰ xĂ³a nháº­t kĂ½, khĂ´ng thay Ä‘á»•i ná»™i dung Ä‘ang hiá»ƒn thá»‹ trĂªn website."
-        target={deleteTarget ? `${MODULES[deleteTarget.module]?.label || deleteTarget.module} Â· ${deleteTarget.change_summary || `Báº£n ghi #${deleteTarget.source_id}`}` : ''}
-        confirmText="XĂ³a báº£n ghi"
+        title="Xoá bản ghi lịch sử?"
+        message="Thao tác này chỉ xoá nhật ký, không thay đổi nội dung đang hiển thị trên website."
+        target={deleteTarget ? `${MODULES[deleteTarget.module]?.label || deleteTarget.module} · ${deleteTarget.change_summary || `Bản ghi #${deleteTarget.source_id}`}` : ''}
+        confirmText="Xoá bản ghi"
         busy={deleting}
         onCancel={() => setDeleteTarget(null)}
         onConfirm={handleDelete}
