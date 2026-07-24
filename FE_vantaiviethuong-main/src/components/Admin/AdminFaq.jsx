@@ -377,7 +377,7 @@ export default function AdminFaq() {
                                     type="button"
                                     className={`${styles.crmActionBtn} ${item.last_action === action.value ? styles.crmActionActive : ''}`}
                                     disabled={updating === item.id}
-                                    onClick={() => saveCrm(item, action.value)}
+                                    onClick={() => saveCrm(item, item.last_action === action.value ? '' : action.value)}
                                   >
                                     {action.label}
                                   </button>
