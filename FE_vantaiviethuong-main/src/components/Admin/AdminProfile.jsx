@@ -208,6 +208,14 @@ export default function AdminProfile() {
                     placeholder="Nhập mật khẩu hiện tại"
                     autoComplete="current-password"
                   />
+                  <button
+                    type="button"
+                    className={styles.eyeBtn}
+                    onClick={() => setShowPassword(value => !value)}
+                    aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                  >
+                    {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                  </button>
                 </div>
               </label>
 
@@ -222,6 +230,14 @@ export default function AdminProfile() {
                     placeholder="Tối thiểu 6 ký tự"
                     autoComplete="new-password"
                   />
+                  <button
+                    type="button"
+                    className={styles.eyeBtn}
+                    onClick={() => setShowPassword(value => !value)}
+                    aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                  >
+                    {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                  </button>
                 </div>
               </label>
 
@@ -240,6 +256,7 @@ export default function AdminProfile() {
                     type="button"
                     className={styles.eyeBtn}
                     onClick={() => setShowPassword(value => !value)}
+                    aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
                   >
                     {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
                   </button>
