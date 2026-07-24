@@ -78,6 +78,11 @@
   color: #dc2626;
 }
 
+.restoreIcon {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
 .actions {
   display: flex;
   justify-content: center;
@@ -123,6 +128,15 @@
 
   &:hover:not(:disabled) {
     background: #b91c1c;
+  }
+}
+
+.restoreConfirmBtn {
+  background: #2563eb;
+  box-shadow: 0 12px 26px rgba(37, 99, 235, .18);
+
+  &:hover:not(:disabled) {
+    background: #1d4ed8;
   }
 }
 
