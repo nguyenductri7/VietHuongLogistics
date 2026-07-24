@@ -201,7 +201,33 @@ const restoreRevisionEntry = async (req, res) => {
     await connection.beginTransaction();
 
     const [rows] = await connection.query(
-      'SELECT id, module, version_number, snapshot FROM cms_revisions WHERE id = ?',
+      `SELECT id, module, version_number, snapshot,
+        (
+          SELECT previous.snapshot
+          FROM cms_revisions previous
+          WHERE previous.module = cms_revisions.module
+            AND previous.version_number < cms_revisions.version_number
+          ORDER BY previous.version_number DESC
+          LIMIT 1
+        ) AS previous_snapshot,
+        (
+          SELECT previous.id
+          FROM cms_revisions previous
+          WHERE previous.module = cms_revisions.module
+            AND previous.version_number < cms_revisions.version_number
+          ORDER BY previous.version_number DESC
+          LIMIT 1
+        ) AS previous_id,
+        (
+          SELECT previous.version_number
+          FROM cms_revisions previous
+          WHERE previous.module = cms_revisions.module
+            AND previous.version_number < cms_revisions.version_number
+          ORDER BY previous.version_number DESC
+          LIMIT 1
+        ) AS previous_version_number
+       FROM cms_revisions
+       WHERE id = ?`,
       [id],
     );
 
@@ -211,7 +237,15 @@ const restoreRevisionEntry = async (req, res) => {
     }
 
     const revision = rows[0];
-    const snapshot = parseJson(revision.snapshot, null);
+    if (!revision.previous_snapshot) {
+      await connection.rollback();
+      return res.status(400).json({
+        success: false,
+        message: 'Đây là phiên bản đầu tiên nên không có nội dung trước đó để hoàn tác.',
+      });
+    }
+
+    const snapshot = parseJson(revision.previous_snapshot, null);
     if (!snapshot || typeof snapshot !== 'object') {
       await connection.rollback();
       return res.status(400).json({ success: false, message: 'Dữ liệu phiên bản không hợp lệ, không thể hoàn tác.' });
@@ -224,7 +258,7 @@ const restoreRevisionEntry = async (req, res) => {
       snapshot,
       userId: req.user?.id,
       restoredFromId: revision.id,
-      summary: `Hoàn tác về phiên bản #${revision.version_number}`,
+      summary: `Hoàn tác thay đổi #${revision.version_number}, khôi phục về phiên bản #${revision.previous_version_number}`,
     });
 
     await connection.commit();
@@ -234,6 +268,7 @@ const restoreRevisionEntry = async (req, res) => {
       data: {
         module: revision.module,
         restored_from_id: revision.id,
+        restored_to_id: revision.previous_id,
         new_revision_id: restoredRevision.id,
         version_number: restoredRevision.version_number,
       },

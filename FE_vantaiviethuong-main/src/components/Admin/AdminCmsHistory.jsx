@@ -336,7 +336,7 @@ export default function AdminCmsHistory() {
                     </div>
                     <span className={styles.expandIcon}>{expanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}</span>
                   </button>
-                  {entry.source === 'revision' && canDelete && (
+                  {entry.source === 'revision' && !entry.is_initial && canDelete && (
                     <button
                       type="button"
                       className={styles.restoreBtn}
@@ -344,8 +344,8 @@ export default function AdminCmsHistory() {
                         event.stopPropagation()
                         setRestoreTarget(entry)
                       }}
-                      title="Hoàn tác về phiên bản này"
-                      aria-label="Hoàn tác về phiên bản này"
+                      title="Hoàn tác thay đổi này"
+                      aria-label="Hoàn tác thay đổi này"
                     >
                       <RotateCcw size={16} />
                     </button>
@@ -415,9 +415,9 @@ export default function AdminCmsHistory() {
       />
       <AdminConfirmDialog
         open={!!restoreTarget}
-        title="Hoàn tác nội dung CMS?"
-        message="Hệ thống sẽ khôi phục nội dung của trang này về đúng phiên bản đã chọn và tạo thêm một bản ghi lịch sử mới. Nội dung hiện tại sẽ bị thay thế."
-        target={restoreTarget ? `${MODULES[restoreTarget.module]?.label || restoreTarget.module} · ${restoreTarget.change_summary || `Phiên bản #${restoreTarget.version_number}`}` : ''}
+        title="Hoàn tác thay đổi này?"
+        message="Hệ thống sẽ khôi phục nội dung của trang này về phiên bản ngay trước lần chỉnh sửa đã chọn và tạo thêm một bản ghi lịch sử mới. Nội dung hiện tại sẽ bị thay thế."
+        target={restoreTarget ? `${MODULES[restoreTarget.module]?.label || restoreTarget.module} · ${restoreTarget.change_summary || `Thay đổi #${restoreTarget.version_number}`}` : ''}
         confirmText="Hoàn tác"
         variant="restore"
         busy={restoring}
