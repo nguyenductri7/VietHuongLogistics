@@ -1,5 +1,5 @@
 const { pool } = require('../config/database');
-const { parseJson } = require('../services/cmsRevisionService');
+const { applySnapshot, insertRevision, parseJson } = require('../services/cmsRevisionService');
 
 const REVISION_MODULES = ['home', 'about', 'services'];
 const AUDIT_MODULES = ['faq', 'faq_content', 'blogs', 'branches', 'contacts'];
@@ -190,4 +190,117 @@ const deleteAuditEntry = async (req, res) => {
   }
 };
 
-module.exports = { getAuditHistory, deleteAuditEntry };
+const restoreRevisionEntry = async (req, res) => {
+  const connection = await pool.getConnection();
+  try {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id) || id <= 0) {
+      return res.status(400).json({ success: false, message: 'Mã phiên bản không hợp lệ.' });
+    }
+
+    await connection.beginTransaction();
+
+    const [rows] = await connection.query(
+      'SELECT id, module, version_number, snapshot FROM cms_revisions WHERE id = ?',
+      [id],
+    );
+
+    if (!rows.length) {
+      await connection.rollback();
+      return res.status(404).json({ success: false, message: 'Phiên bản cần hoàn tác không còn tồn tại.' });
+    }
+
+    const revision = rows[0];
+    const snapshot = parseJson(revision.snapshot, null);
+    if (!snapshot || typeof snapshot !== 'object') {
+      await connection.rollback();
+      return res.status(400).json({ success: false, message: 'Dữ liệu phiên bản không hợp lệ, không thể hoàn tác.' });
+    }
+
+    await applySnapshot(revision.module, snapshot, req.user?.id, connection);
+    const restoredRevision = await insertRevision(connection, {
+      module: revision.module,
+      status: 'published',
+      snapshot,
+      userId: req.user?.id,
+      restoredFromId: revision.id,
+      summary: `Hoàn tác về phiên bản #${revision.version_number}`,
+    });
+
+    await connection.commit();
+    return res.json({
+      success: true,
+      message: 'Đã hoàn tác nội dung CMS thành công.',
+      data: {
+        module: revision.module,
+        restored_from_id: revision.id,
+        new_revision_id: restoredRevision.id,
+        version_number: restoredRevision.version_number,
+      },
+    });
+  } catch (error) {
+    await connection.rollback().catch(() => {});
+    console.error('restoreCmsRevisionEntry error:', error);
+    return res.status(error.statusCode || 500).json({
+      success: false,
+      message: error.statusCode ? error.message : 'Không thể hoàn tác phiên bản CMS.',
+    });
+  } finally {
+    connection.release();
+  }
+};
+
+const bulkDeleteAuditEntries = async (req, res) => {
+  const connection = await pool.getConnection();
+  try {
+    const entries = Array.isArray(req.body?.entries) ? req.body.entries : [];
+    if (!entries.length) {
+      return res.status(400).json({ success: false, message: 'Vui lòng chọn ít nhất một bản ghi lịch sử.' });
+    }
+    if (entries.length > 100) {
+      return res.status(400).json({ success: false, message: 'Chỉ có thể xoá tối đa 100 bản ghi mỗi lần.' });
+    }
+
+    const revisionIds = [];
+    const auditIds = [];
+
+    for (const entry of entries) {
+      const source = String(entry.source || '').trim();
+      const id = Number(entry.id);
+      if (!['revision', 'audit'].includes(source) || !Number.isInteger(id) || id <= 0) {
+        return res.status(400).json({ success: false, message: 'Danh sách bản ghi xoá không hợp lệ.' });
+      }
+      if (source === 'revision') revisionIds.push(id);
+      else auditIds.push(id);
+    }
+
+    await connection.beginTransaction();
+    let deleted = 0;
+
+    if (revisionIds.length) {
+      const [result] = await connection.query('DELETE FROM cms_revisions WHERE id IN (?)', [revisionIds]);
+      deleted += Number(result.affectedRows) || 0;
+    }
+
+    if (auditIds.length) {
+      const [result] = await connection.query('DELETE FROM admin_audit_logs WHERE id IN (?)', [auditIds]);
+      deleted += Number(result.affectedRows) || 0;
+    }
+
+    await connection.commit();
+    return res.json({ success: true, message: `Đã xoá ${deleted} bản ghi lịch sử.`, deleted });
+  } catch (error) {
+    await connection.rollback().catch(() => {});
+    console.error('bulkDeleteCmsAuditEntries error:', error);
+    return res.status(500).json({ success: false, message: 'Không thể xoá các bản ghi lịch sử đã chọn.' });
+  } finally {
+    connection.release();
+  }
+};
+
+module.exports = {
+  getAuditHistory,
+  deleteAuditEntry,
+  restoreRevisionEntry,
+  bulkDeleteAuditEntries,
+};

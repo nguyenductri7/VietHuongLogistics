@@ -77,6 +77,41 @@
 
 .total { color: #7a8595; font-size: .82rem; }
 
+.toolbarActions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
+.clearBtn,
+.bulkDeleteBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 11px;
+  border-radius: 8px;
+  font: inherit;
+  font-size: .8rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.clearBtn {
+  border: 1px solid #d8dfe8;
+  background: #fff;
+  color: #4b5769;
+}
+
+.bulkDeleteBtn {
+  border: 1px solid #fecaca;
+  background: #fff1f2;
+  color: #dc2626;
+
+  &:hover { background: #dc2626; color: #fff; }
+}
+
 .stats {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -133,6 +168,20 @@
   align-items: stretch;
 }
 
+.selectEntry {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  padding-left: 14px;
+
+  input {
+    width: 16px;
+    height: 16px;
+    accent-color: #dc2626;
+    cursor: pointer;
+  }
+}
+
 .entryMain {
   display: grid;
   grid-template-columns: 150px minmax(0, 1fr) 36px;
@@ -150,6 +199,7 @@
   min-width: 0;
 }
 
+.restoreBtn,
 .deleteBtn {
   align-self: center;
   flex: 0 0 auto;
@@ -166,6 +216,14 @@
   transition: background .15s ease, color .15s ease;
 
   &:hover { background: #dc2626; color: #fff; }
+}
+
+.restoreBtn {
+  margin-right: 8px;
+  border-color: #bfdbfe;
+  color: #2563eb;
+
+  &:hover { background: #2563eb; color: #fff; }
 }
 
 .moduleBadge {

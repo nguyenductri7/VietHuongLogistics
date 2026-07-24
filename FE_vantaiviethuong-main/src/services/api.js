@@ -144,6 +144,12 @@ export const cmsHistoryApi = {
     if (module) params.set('module', module)
     return request(`/cms-revisions?${params.toString()}`)
   },
+  restoreRevision: (id) => request(`/cms-revisions/revision/${id}/restore`, { method: 'POST' }),
+  deleteMany: (entries) =>
+    request('/cms-revisions/bulk-delete', {
+      method: 'POST',
+      body: JSON.stringify({ entries }),
+    }),
   delete: (source, id) => request(`/cms-revisions/${source}/${id}`, { method: 'DELETE' }),
 }
 
