@@ -588,32 +588,54 @@ export default function AdminBlogs() {
             </div>
 
             <form className={styles.categoryForm} onSubmit={handleCategorySubmit}>
-              <div className={styles.categoryField}>
-                <label>Tên danh mục</label>
-                <input
-                  type="text"
-                  value={categoryForm.name}
-                  onChange={e => setCategoryForm(f => ({ ...f, name: e.target.value }))}
-                  placeholder="VD: Tin thị trường"
-                />
+              <div className={styles.categoryFormHeader}>
+                <div>
+                  <strong>{editingCategory ? 'Chỉnh sửa danh mục' : 'Thêm danh mục mới'}</strong>
+                  <span>
+                    {editingCategory
+                      ? `Đang chỉnh sửa “${editingCategory.name}”`
+                      : 'Tạo danh mục để phân loại bài viết dễ dàng hơn.'}
+                  </span>
+                </div>
               </div>
-              <div className={styles.categoryField}>
-                <label>Thứ tự</label>
-                <input
-                  type="number"
-                  value={categoryForm.sort_order}
-                  onChange={e => setCategoryForm(f => ({ ...f, sort_order: e.target.value }))}
-                  placeholder="0"
-                />
+
+              <div className={styles.categoryFormGrid}>
+                <div className={styles.categoryField}>
+                  <label htmlFor="category-name">Tên danh mục</label>
+                  <input
+                    id="category-name"
+                    type="text"
+                    value={categoryForm.name}
+                    onChange={e => setCategoryForm(f => ({ ...f, name: e.target.value }))}
+                    placeholder="VD: Tin thị trường"
+                    autoFocus
+                  />
+                </div>
+                <div className={styles.categoryField}>
+                  <label htmlFor="category-order">Thứ tự hiển thị</label>
+                  <input
+                    id="category-order"
+                    type="number"
+                    min="0"
+                    value={categoryForm.sort_order}
+                    onChange={e => setCategoryForm(f => ({ ...f, sort_order: e.target.value }))}
+                    placeholder="0"
+                  />
+                </div>
+                <div className={styles.categoryStatusField}>
+                  <span className={styles.categoryStatusLabel}>Trạng thái</span>
+                  <label className={styles.categoryCheck}>
+                    <input
+                      type="checkbox"
+                      checked={categoryForm.is_active}
+                      onChange={e => setCategoryForm(f => ({ ...f, is_active: e.target.checked }))}
+                    />
+                    <span className={styles.categorySwitch} aria-hidden="true" />
+                    <span>{categoryForm.is_active ? 'Đang hiển thị' : 'Đang ẩn'}</span>
+                  </label>
+                </div>
               </div>
-              <label className={styles.categoryCheck}>
-                <input
-                  type="checkbox"
-                  checked={categoryForm.is_active}
-                  onChange={e => setCategoryForm(f => ({ ...f, is_active: e.target.checked }))}
-                />
-                Hiển thị
-              </label>
+
               <div className={styles.categoryModalActions}>
                 {editingCategory && (
                   <button type="button" className={styles.categoryCancelBtn} onClick={resetCategoryForm}>
@@ -629,25 +651,41 @@ export default function AdminBlogs() {
               </div>
             </form>
 
-            <div className={styles.categoryList}>
-              {categoryRecords.map(category => (
-                <div className={styles.categoryItem} key={category.id}>
-                  <div>
-                    <strong>{category.name}</strong>
-                    <span>
-                      Thứ tự: {category.sort_order || 0} · {Number(category.post_count) || 0} bài · {category.is_active === 0 ? 'Đang ẩn' : 'Đang hiện'}
-                    </span>
-                  </div>
-                  <div className={styles.categoryActions}>
-                    <button type="button" onClick={() => startEditCategory(category)}>
-                      <Pencil size={13} /> Sửa
-                    </button>
-                    <button type="button" className={styles.categoryDeleteBtn} onClick={() => setDeletingCategory(category)}>
-                      <Trash2 size={13} /> Xoá
-                    </button>
-                  </div>
+            <div className={styles.categoryListSection}>
+              <div className={styles.categoryListHeader}>
+                <div>
+                  <strong>Danh sách danh mục</strong>
+                  <span>Sắp xếp theo thứ tự hiển thị</span>
                 </div>
-              ))}
+                <span className={styles.categoryCount}>{categoryRecords.length} danh mục</span>
+              </div>
+
+              <div className={styles.categoryList}>
+                {categoryRecords.map(category => (
+                  <div className={styles.categoryItem} key={category.id}>
+                    <div className={styles.categoryItemInfo}>
+                      <span className={styles.categoryOrder}>{category.sort_order || 0}</span>
+                      <div>
+                        <strong>{category.name}</strong>
+                        <span>{Number(category.post_count) || 0} bài viết</span>
+                      </div>
+                    </div>
+                    <div className={styles.categoryItemControls}>
+                      <span className={`${styles.categoryState} ${category.is_active === 0 ? styles.categoryStateHidden : ''}`}>
+                        {category.is_active === 0 ? 'Đang ẩn' : 'Hiển thị'}
+                      </span>
+                      <div className={styles.categoryActions}>
+                        <button type="button" onClick={() => startEditCategory(category)}>
+                          <Pencil size={13} /> Sửa
+                        </button>
+                        <button type="button" className={styles.categoryDeleteBtn} onClick={() => setDeletingCategory(category)}>
+                          <Trash2 size={13} /> Xoá
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
