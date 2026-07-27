@@ -18,9 +18,10 @@ import {
 import { CSS } from '@dnd-kit/utilities'
 import {
   Building2, Clock3, GripVertical, History, Loader2, Mail,
-  MessageSquareText, Phone, Plus, RefreshCw, Search, UserRound, X,
+  MessageSquareText, Phone, Plus, RefreshCw, Search, Trash2, UserRound, X,
 } from 'lucide-react'
-import { crmApi } from '../../services/api'
+import { contactApi, crmApi } from '../../services/api'
+import AdminConfirmDialog from './AdminConfirmDialog'
 import { useAdminToast } from './AdminToast'
 import styles from './AdminCrm.module.scss'
 
@@ -160,6 +161,8 @@ export default function AdminCrm() {
   const [activities, setActivities] = useState([])
   const [activitiesLoading, setActivitiesLoading] = useState(false)
   const [savingActivity, setSavingActivity] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [deletingContact, setDeletingContact] = useState(false)
   const [activityForm, setActivityForm] = useState({
     activity_type: 'note',
     title: '',
@@ -305,6 +308,24 @@ export default function AdminCrm() {
     }
   }
 
+  const handleDeleteContact = async () => {
+    if (!selectedContact) return
+    setDeletingContact(true)
+    try {
+      await contactApi.delete(selectedContact.id)
+      setContacts(current => current.filter(contact => contact.id !== selectedContact.id))
+      setShowDeleteConfirm(false)
+      setSelectedContact(null)
+      setActivities([])
+      window.dispatchEvent(new Event('vh-admin-notifications-refresh'))
+      showToast('Đã xoá khách hàng khỏi hệ thống.')
+    } catch (error) {
+      showToast(error.message || 'Không thể xoá khách hàng.', 'error')
+    } finally {
+      setDeletingContact(false)
+    }
+  }
+
   return (
     <div className={styles.page}>
       <div className={styles.toolbar}>
@@ -447,10 +468,31 @@ export default function AdminCrm() {
                   </div>
                 )}
               </section>
+
+              <section className={styles.dangerZone}>
+                <div>
+                  <strong>Xoá hồ sơ khách hàng</strong>
+                  <span>Khách hàng sẽ bị xoá khỏi CRM, danh sách liên hệ và toàn bộ nhật ký chăm sóc.</span>
+                </div>
+                <button type="button" onClick={() => setShowDeleteConfirm(true)}>
+                  <Trash2 size={14} /> Xoá khách hàng
+                </button>
+              </section>
             </div>
           </aside>
         </div>
       )}
+
+      <AdminConfirmDialog
+        open={showDeleteConfirm && Boolean(selectedContact)}
+        title="Xoá hồ sơ khách hàng?"
+        message="Hành động này sẽ xoá yêu cầu liên hệ và toàn bộ nhật ký CRM liên quan. Không thể hoàn tác."
+        target={selectedContact?.full_name}
+        confirmText="Xoá khách hàng"
+        busy={deletingContact}
+        onCancel={() => setShowDeleteConfirm(false)}
+        onConfirm={handleDeleteContact}
+      />
     </div>
   )
 }
