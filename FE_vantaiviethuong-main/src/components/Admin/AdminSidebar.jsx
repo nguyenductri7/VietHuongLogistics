@@ -5,7 +5,7 @@ import {
   History, LogOut, Newspaper, PanelLeftClose, PanelLeftOpen, Phone, Truck,
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
-import { contactApi, faqApi } from '../../services/api'
+import { contactApi, crmApi, faqApi } from '../../services/api'
 import logo from '../../assets/VIET HUONG LOGISTICS.png'
 import styles from './AdminSidebar.module.scss'
 
@@ -19,7 +19,7 @@ const navItems = [
   { icon: Newspaper, label: 'Tin tức', to: '/admin/blogs' },
   { icon: Building2, label: 'Chi nhánh', to: '/admin/branches' },
   { icon: Phone, label: 'Liên hệ', to: '/admin/contacts' },
-  { icon: Columns3, label: 'CRM khách hàng', to: '/admin/crm' },
+  { icon: Columns3, label: 'CRM Liên Hệ khách hàng', to: '/admin/crm' },
   { icon: History, label: 'Lịch sử chỉnh sửa', to: '/admin/history' },
 ]
 
@@ -27,15 +27,16 @@ export default function AdminSidebar({ collapsed = false, onToggleCollapse }) {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
-  const [notifications, setNotifications] = useState({ contacts: 0, faq: 0 })
+  const [notifications, setNotifications] = useState({ contacts: 0, faq: 0, crm: 0 })
 
   useEffect(() => {
     let alive = true
 
     const loadNotificationStats = async () => {
-      const [contactResult, faqResult] = await Promise.allSettled([
+      const [contactResult, faqResult, crmResult] = await Promise.allSettled([
         contactApi.getStats(),
         faqApi.getStats(),
+        crmApi.getReminderStats(),
       ])
       if (!alive) return
       setNotifications(current => ({
@@ -45,6 +46,9 @@ export default function AdminSidebar({ collapsed = false, onToggleCollapse }) {
         faq: faqResult.status === 'fulfilled'
           ? Number(faqResult.value?.data?.pending_count) || 0
           : current.faq,
+        crm: crmResult.status === 'fulfilled'
+          ? Number(crmResult.value?.data?.attention_count) || 0
+          : current.crm,
       }))
     }
 
@@ -101,7 +105,9 @@ export default function AdminSidebar({ collapsed = false, onToggleCollapse }) {
             ? notifications.contacts
             : item.to === '/admin/faq'
               ? notifications.faq
-              : 0
+              : item.to === '/admin/crm'
+                ? notifications.crm
+                : 0
           return (
             <button
               key={item.to}

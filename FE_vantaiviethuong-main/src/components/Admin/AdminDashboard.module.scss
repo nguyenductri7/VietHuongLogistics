@@ -255,6 +255,149 @@ $transition: 160ms ease;
   border-radius: 999px;
 }
 
+.reminderWidget {
+  margin-bottom: 26px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  border-radius: 15px;
+  background: #fff;
+  box-shadow: $shadow-sm;
+}
+
+.reminderWidgetHeader {
+  min-height: 66px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 12px 16px;
+  border-bottom: 1px solid #f1f5f9;
+
+  > div {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+  }
+
+  h3 {
+    margin: 0 0 3px;
+    color: #111827;
+    font-size: 14px;
+  }
+
+  p {
+    margin: 0;
+    color: #94a3b8;
+    font-size: 11px;
+  }
+
+  > button {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    min-height: 34px;
+    padding: 0 10px;
+    border: 1px solid #dbeafe;
+    border-radius: 8px;
+    background: #eff6ff;
+    color: #2563eb;
+    font: inherit;
+    font-size: 10.5px;
+    font-weight: 800;
+    cursor: pointer;
+  }
+}
+
+.reminderWidgetIcon {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.reminderWidgetList {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  background: #f1f5f9;
+
+  > button {
+    min-width: 0;
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 9px;
+    padding: 11px 14px;
+    border: 0;
+    background: #fff;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+
+    &:hover {
+      background: #f8fafc;
+    }
+
+    strong,
+    small {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    strong {
+      color: #1f2937;
+      font-size: 11.5px;
+    }
+
+    small {
+      margin-top: 3px;
+      color: #94a3b8;
+      font-size: 9.5px;
+    }
+
+    em {
+      padding: 4px 7px;
+      border-radius: 999px;
+      background: #fef2f2;
+      color: #dc2626;
+      font-size: 9px;
+      font-style: normal;
+      font-weight: 800;
+    }
+  }
+}
+
+.reminderTimeIcon {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9px;
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.reminderTimeOverdue {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.reminderWidgetEmpty {
+  margin: 0;
+  padding: 18px 16px;
+  color: #94a3b8;
+  font-size: 11.5px;
+  text-align: center;
+}
+
 // ── Section label ──────────────────────────────────────────────
 .sectionLabel {
   font-size: 11px;
@@ -422,6 +565,10 @@ $transition: 160ms ease;
   .sideFooter { display: none; }
 
   .main { padding: 20px 16px 40px; }
+
+  .reminderWidgetList {
+    grid-template-columns: 1fr;
+  }
 
   .grid { grid-template-columns: 1fr; }
 }

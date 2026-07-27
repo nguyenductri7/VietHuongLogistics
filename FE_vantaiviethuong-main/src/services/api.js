@@ -234,6 +234,22 @@ export const crmApi = {
       method: 'POST',
       body: JSON.stringify(data),
     }),
+  getReminders: (params = {}) => {
+    const qs = new URLSearchParams(params).toString()
+    return request(`/crm/reminders${qs ? '?' + qs : ''}`)
+  },
+  getReminderStats: () => request('/crm/reminders/stats'),
+  createReminder: (contactId, data) =>
+    request(`/crm/contacts/${contactId}/reminders`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+  updateReminder: (id, data) =>
+    request(`/crm/reminders/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+  deleteReminder: (id) => request(`/crm/reminders/${id}`, { method: 'DELETE' }),
 }
 
 // ════════════════════════════════════════════════════════════

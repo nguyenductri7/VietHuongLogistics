@@ -17,8 +17,9 @@ import {
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import {
-  Building2, Clock3, GripVertical, History, Loader2, Mail,
-  MessageSquareText, Phone, Plus, RefreshCw, Search, Trash2, UserRound, X,
+  BellRing, Building2, CalendarClock, Check, Clock3, GripVertical, History,
+  Loader2, Mail, MessageSquareText, Phone, Plus, RefreshCw, Search,
+  Trash2, UserRound, X,
 } from 'lucide-react'
 import { contactApi, crmApi } from '../../services/api'
 import AdminConfirmDialog from './AdminConfirmDialog'
@@ -41,6 +42,20 @@ const ACTIVITY_TYPES = [
   { value: 'quote', label: 'Báo giá' },
   { value: 'meeting', label: 'Cuộc hẹn' },
 ]
+
+const REMINDER_TYPE_LABELS = {
+  call: 'Gọi điện',
+  email: 'Gửi email',
+  quote: 'Gửi báo giá',
+  meeting: 'Gặp khách hàng',
+  other: 'Công việc khác',
+}
+
+const REMINDER_PRIORITY_LABELS = {
+  low: 'Thấp',
+  normal: 'Bình thường',
+  high: 'Cao',
+}
 
 function formatDate(value) {
   if (!value) return '—'
@@ -161,12 +176,25 @@ export default function AdminCrm() {
   const [activities, setActivities] = useState([])
   const [activitiesLoading, setActivitiesLoading] = useState(false)
   const [savingActivity, setSavingActivity] = useState(false)
+  const [reminders, setReminders] = useState([])
+  const [remindersLoading, setRemindersLoading] = useState(false)
+  const [savingReminder, setSavingReminder] = useState(false)
+  const [reminderToDelete, setReminderToDelete] = useState(null)
+  const [deletingReminder, setDeletingReminder] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deletingContact, setDeletingContact] = useState(false)
   const [activityForm, setActivityForm] = useState({
     activity_type: 'note',
     title: '',
     description: '',
+  })
+  const [reminderForm, setReminderForm] = useState({
+    title: '',
+    notes: '',
+    reminder_type: 'call',
+    priority: 'normal',
+    remind_at: '',
+    email_reminder_enabled: false,
   })
 
   const sensors = useSensors(
@@ -201,17 +229,24 @@ export default function AdminCrm() {
     ]),
   ), [contacts, stages])
 
-  const loadActivities = async (contact) => {
+  const loadContactDetails = async (contact) => {
     setSelectedContact(contact)
     setActivities([])
+    setReminders([])
     setActivitiesLoading(true)
+    setRemindersLoading(true)
     try {
-      const response = await crmApi.getActivities(contact.id)
-      setActivities(response.data || [])
+      const [activityResponse, reminderResponse] = await Promise.all([
+        crmApi.getActivities(contact.id),
+        crmApi.getReminders({ contact_id: contact.id }),
+      ])
+      setActivities(activityResponse.data || [])
+      setReminders(reminderResponse.data || [])
     } catch (error) {
-      showToast(error.message || 'Không thể tải nhật ký chăm sóc.', 'error')
+      showToast(error.message || 'Không thể tải hồ sơ chăm sóc khách hàng.', 'error')
     } finally {
       setActivitiesLoading(false)
+      setRemindersLoading(false)
     }
   }
 
@@ -309,6 +344,74 @@ export default function AdminCrm() {
     }
   }
 
+  const handleCreateReminder = async (event) => {
+    event.preventDefault()
+    if (!selectedContact || !reminderForm.title.trim() || !reminderForm.remind_at) {
+      showToast('Vui lòng nhập nội dung và thời gian nhắc.', 'error')
+      return
+    }
+
+    setSavingReminder(true)
+    try {
+      const response = await crmApi.createReminder(selectedContact.id, {
+        ...reminderForm,
+        title: reminderForm.title.trim(),
+        notes: reminderForm.notes.trim(),
+        remind_at: new Date(reminderForm.remind_at).toISOString(),
+      })
+      setReminders(current => [...current, response.data].sort(
+        (left, right) => new Date(left.remind_at) - new Date(right.remind_at),
+      ))
+      setReminderForm({
+        title: '',
+        notes: '',
+        reminder_type: 'call',
+        priority: 'normal',
+        remind_at: '',
+        email_reminder_enabled: false,
+      })
+      const activityResponse = await crmApi.getActivities(selectedContact.id)
+      setActivities(activityResponse.data || [])
+      window.dispatchEvent(new Event('vh-admin-notifications-refresh'))
+      showToast('Đã tạo lịch hẹn.')
+    } catch (error) {
+      showToast(error.message || 'Không thể tạo lịch hẹn.', 'error')
+    } finally {
+      setSavingReminder(false)
+    }
+  }
+
+  const updateReminder = async (reminder, patch, successMessage) => {
+    try {
+      const response = await crmApi.updateReminder(reminder.id, patch)
+      setReminders(current => current.map(item => item.id === reminder.id ? response.data : item))
+      if (patch.status && selectedContact) {
+        const activityResponse = await crmApi.getActivities(selectedContact.id)
+        setActivities(activityResponse.data || [])
+      }
+      window.dispatchEvent(new Event('vh-admin-notifications-refresh'))
+      if (successMessage) showToast(successMessage)
+    } catch (error) {
+      showToast(error.message || 'Không thể cập nhật lịch hẹn.', 'error')
+    }
+  }
+
+  const handleDeleteReminder = async () => {
+    if (!reminderToDelete) return
+    setDeletingReminder(true)
+    try {
+      await crmApi.deleteReminder(reminderToDelete.id)
+      setReminders(current => current.filter(item => item.id !== reminderToDelete.id))
+      setReminderToDelete(null)
+      window.dispatchEvent(new Event('vh-admin-notifications-refresh'))
+      showToast('Đã xoá lịch hẹn.')
+    } catch (error) {
+      showToast(error.message || 'Không thể xoá lịch hẹn.', 'error')
+    } finally {
+      setDeletingReminder(false)
+    }
+  }
+
   const handleDeleteContact = async () => {
     if (!selectedContact) return
     setDeletingContact(true)
@@ -372,7 +475,7 @@ export default function AdminCrm() {
                 key={stage.key}
                 stage={stage}
                 contacts={contactsByStage[stage.key] || []}
-                onOpen={loadActivities}
+                onOpen={loadContactDetails}
               />
             ))}
           </div>
@@ -406,6 +509,130 @@ export default function AdminCrm() {
                 {selectedContact.phone && <div><Phone size={15} /><a href={`tel:${selectedContact.phone}`}>{selectedContact.phone}</a></div>}
                 {selectedContact.email && <div><Mail size={15} /><a href={`mailto:${selectedContact.email}`}>{selectedContact.email}</a></div>}
                 <div><MessageSquareText size={15} /><span>{selectedContact.message || 'Chưa có nội dung yêu cầu.'}</span></div>
+              </section>
+
+              <section className={styles.reminderSection}>
+                <div className={styles.sectionTitle}>
+                  <CalendarClock size={15} />
+                  <strong>Lịch hẹn và nhắc việc</strong>
+                </div>
+
+                <form className={styles.reminderForm} onSubmit={handleCreateReminder}>
+                  <input
+                    value={reminderForm.title}
+                    onChange={event => setReminderForm(form => ({ ...form, title: event.target.value }))}
+                    placeholder="VD: Gọi lại để xác nhận báo giá"
+                  />
+                  <div className={styles.reminderFormRow}>
+                    <select
+                      value={reminderForm.reminder_type}
+                      onChange={event => setReminderForm(form => ({ ...form, reminder_type: event.target.value }))}
+                    >
+                      {Object.entries(REMINDER_TYPE_LABELS).map(([value, label]) => (
+                        <option key={value} value={value}>{label}</option>
+                      ))}
+                    </select>
+                    <select
+                      value={reminderForm.priority}
+                      onChange={event => setReminderForm(form => ({ ...form, priority: event.target.value }))}
+                    >
+                      {Object.entries(REMINDER_PRIORITY_LABELS).map(([value, label]) => (
+                        <option key={value} value={value}>Ưu tiên: {label}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <input
+                    type="datetime-local"
+                    value={reminderForm.remind_at}
+                    onChange={event => setReminderForm(form => ({ ...form, remind_at: event.target.value }))}
+                  />
+                  <textarea
+                    rows={2}
+                    value={reminderForm.notes}
+                    onChange={event => setReminderForm(form => ({ ...form, notes: event.target.value }))}
+                    placeholder="Ghi chú cho lịch hẹn..."
+                  />
+                  <label className={styles.emailReminderToggle}>
+                    <input
+                      type="checkbox"
+                      checked={reminderForm.email_reminder_enabled}
+                      onChange={event => setReminderForm(form => ({
+                        ...form,
+                        email_reminder_enabled: event.target.checked,
+                      }))}
+                    />
+                    <span className={styles.reminderSwitch} aria-hidden="true" />
+                    <span>
+                      <strong>Nhắc lịch qua email</strong>
+                      <small>Lưu lựa chọn trước; hệ thống gửi tự động sẽ được kích hoạt sau.</small>
+                    </span>
+                  </label>
+                  <button type="submit" disabled={savingReminder}>
+                    {savingReminder ? <Loader2 size={14} className={styles.spin} /> : <CalendarClock size={14} />}
+                    {savingReminder ? 'Đang tạo...' : 'Tạo lịch hẹn'}
+                  </button>
+                </form>
+
+                {remindersLoading ? (
+                  <div className={styles.timelineLoading}><Loader2 size={16} className={styles.spin} /> Đang tải lịch...</div>
+                ) : reminders.length === 0 ? (
+                  <p className={styles.emptyTimeline}>Chưa có lịch hẹn nào.</p>
+                ) : (
+                  <div className={styles.reminderList}>
+                    {reminders.map(reminder => {
+                      const overdue = reminder.status === 'pending'
+                        && new Date(reminder.remind_at).getTime() < Date.now()
+                      return (
+                        <article
+                          key={reminder.id}
+                          className={`${styles.reminderItem} ${overdue ? styles.reminderOverdue : ''} ${reminder.status !== 'pending' ? styles.reminderDone : ''}`}
+                        >
+                          <div className={styles.reminderItemTop}>
+                            <div>
+                              <strong>{reminder.title}</strong>
+                              <span>{REMINDER_TYPE_LABELS[reminder.reminder_type] || 'Công việc'} · Ưu tiên {REMINDER_PRIORITY_LABELS[reminder.priority] || 'Bình thường'}</span>
+                            </div>
+                            <time>{formatDate(reminder.remind_at)}</time>
+                          </div>
+                          {reminder.notes && <p>{reminder.notes}</p>}
+                          <label className={styles.reminderEmailOption}>
+                            <input
+                              type="checkbox"
+                              checked={Boolean(Number(reminder.email_reminder_enabled))}
+                              disabled={reminder.status !== 'pending'}
+                              onChange={event => updateReminder(
+                                reminder,
+                                { email_reminder_enabled: event.target.checked },
+                                event.target.checked ? 'Đã bật tùy chọn nhắc email.' : 'Đã tắt tùy chọn nhắc email.',
+                              )}
+                            />
+                            <BellRing size={12} />
+                            Nhắc email
+                          </label>
+                          <div className={styles.reminderActions}>
+                            {reminder.status === 'pending' ? (
+                              <>
+                                <button type="button" onClick={() => updateReminder(reminder, { status: 'completed' }, 'Đã hoàn thành lịch hẹn.')}>
+                                  <Check size={13} /> Hoàn thành
+                                </button>
+                                <button type="button" onClick={() => updateReminder(reminder, { status: 'cancelled' }, 'Đã huỷ lịch hẹn.')}>
+                                  Huỷ lịch
+                                </button>
+                              </>
+                            ) : (
+                              <button type="button" onClick={() => updateReminder(reminder, { status: 'pending' }, 'Đã mở lại lịch hẹn.')}>
+                                Mở lại
+                              </button>
+                            )}
+                            <button type="button" className={styles.reminderDeleteBtn} onClick={() => setReminderToDelete(reminder)}>
+                              <Trash2 size={13} /> Xoá
+                            </button>
+                          </div>
+                        </article>
+                      )
+                    })}
+                  </div>
+                )}
               </section>
 
               <form className={styles.activityForm} onSubmit={handleAddActivity}>
@@ -483,6 +710,17 @@ export default function AdminCrm() {
           </aside>
         </div>
       )}
+
+      <AdminConfirmDialog
+        open={Boolean(reminderToDelete)}
+        title="Xoá lịch hẹn?"
+        message="Lịch hẹn này sẽ bị xoá khỏi hồ sơ khách hàng."
+        target={reminderToDelete?.title}
+        confirmText="Xoá lịch hẹn"
+        busy={deletingReminder}
+        onCancel={() => setReminderToDelete(null)}
+        onConfirm={handleDeleteReminder}
+      />
 
       <AdminConfirmDialog
         open={showDeleteConfirm && Boolean(selectedContact)}

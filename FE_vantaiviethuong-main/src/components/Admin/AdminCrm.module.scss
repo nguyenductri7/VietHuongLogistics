@@ -419,6 +419,7 @@
 }
 
 .customerSummary,
+.reminderSection,
 .activityForm,
 .timelineSection {
   border: 1px solid #e2e8f0;
@@ -464,6 +465,279 @@
 
   strong {
     font-size: 13px;
+  }
+}
+
+.reminderSection {
+  padding: 15px;
+}
+
+.reminderForm {
+  display: grid;
+  gap: 9px;
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 11px;
+  background: #f8fafc;
+
+  input,
+  select,
+  textarea {
+    min-width: 0;
+    border: 1px solid #dce2ea;
+    border-radius: 9px;
+    background: #fff;
+    color: #111827;
+    font: inherit;
+    font-size: 11.5px;
+
+    &:focus {
+      outline: 0;
+      border-color: #dc2626;
+      box-shadow: 0 0 0 3px rgba(220, 38, 38, .06);
+    }
+  }
+
+  > input,
+  select {
+    min-height: 39px;
+    padding: 0 10px;
+  }
+
+  textarea {
+    resize: vertical;
+    padding: 9px 10px;
+    line-height: 1.5;
+  }
+
+  > button {
+    justify-self: end;
+    min-height: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 0 13px;
+    border: 0;
+    border-radius: 9px;
+    background: #dc2626;
+    color: #fff;
+    font: inherit;
+    font-size: 11.5px;
+    font-weight: 800;
+    cursor: pointer;
+
+    &:disabled {
+      opacity: .65;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.reminderFormRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+}
+
+.emailReminderToggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border: 1px solid #dbeafe;
+  border-radius: 9px;
+  background: #eff6ff;
+  cursor: pointer;
+
+  > input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  > span:last-child {
+    min-width: 0;
+  }
+
+  strong,
+  small {
+    display: block;
+  }
+
+  strong {
+    color: #1e3a8a;
+    font-size: 11px;
+  }
+
+  small {
+    margin-top: 2px;
+    color: #64748b;
+    font-size: 9.5px;
+    line-height: 1.45;
+  }
+}
+
+.reminderSwitch {
+  position: relative;
+  width: 34px;
+  height: 19px;
+  flex: 0 0 34px;
+  border-radius: 999px;
+  background: #cbd5e1;
+  transition: background .2s ease;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, .2);
+    transition: transform .2s ease;
+  }
+}
+
+.emailReminderToggle input:checked + .reminderSwitch {
+  background: #2563eb;
+
+  &::after {
+    transform: translateX(15px);
+  }
+}
+
+.reminderList {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.reminderItem {
+  padding: 11px;
+  border: 1px solid #e2e8f0;
+  border-left: 3px solid #3b82f6;
+  border-radius: 10px;
+  background: #fff;
+
+  > p {
+    margin: 7px 0;
+    color: #64748b;
+    font-size: 10.5px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+  }
+}
+
+.reminderOverdue {
+  border-color: #fecaca;
+  border-left-color: #dc2626;
+  background: #fffafa;
+
+  time {
+    color: #dc2626 !important;
+    font-weight: 750;
+  }
+}
+
+.reminderDone {
+  border-left-color: #94a3b8;
+  background: #f8fafc;
+  opacity: .72;
+
+  strong {
+    text-decoration: line-through;
+  }
+}
+
+.reminderItemTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+
+  strong,
+  span {
+    display: block;
+  }
+
+  strong {
+    color: #111827;
+    font-size: 11.5px;
+  }
+
+  span {
+    margin-top: 3px;
+    color: #94a3b8;
+    font-size: 9.5px;
+  }
+
+  time {
+    flex: 0 0 auto;
+    color: #64748b;
+    font-size: 9.5px;
+  }
+}
+
+.reminderEmailOption {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 3px;
+  color: #64748b;
+  font-size: 9.5px;
+  cursor: pointer;
+
+  input {
+    accent-color: #2563eb;
+  }
+
+  &:has(input:checked) {
+    color: #2563eb;
+    font-weight: 750;
+  }
+}
+
+.reminderActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 9px;
+
+  button {
+    min-height: 30px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 0 9px;
+    border: 1px solid #dce2ea;
+    border-radius: 7px;
+    background: #fff;
+    color: #475569;
+    font: inherit;
+    font-size: 9.5px;
+    font-weight: 750;
+    cursor: pointer;
+
+    &:hover {
+      border-color: #93c5fd;
+      color: #2563eb;
+    }
+  }
+
+  .reminderDeleteBtn {
+    margin-left: auto;
+    color: #dc2626;
+
+    &:hover {
+      border-color: #fca5a5;
+      background: #fef2f2;
+      color: #b91c1c;
+    }
   }
 }
 
@@ -715,5 +989,15 @@
     button {
       width: 100%;
     }
+  }
+
+  .reminderFormRow,
+  .reminderItemTop {
+    grid-template-columns: 1fr;
+    display: grid;
+  }
+
+  .reminderActions .reminderDeleteBtn {
+    margin-left: 0;
   }
 }

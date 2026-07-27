@@ -294,6 +294,12 @@ Khi khách hàng chọn một dịch vụ, hệ thống chuyển đến trang ch
 - Có timeline chăm sóc riêng cho từng khách hàng.
 - Tự ghi nhật ký khi tiếp nhận khách hàng và khi chuyển giai đoạn.
 - Cho phép Admin thêm thủ công nhật ký cuộc gọi, email, báo giá, cuộc hẹn hoặc ghi chú.
+- Tạo lịch hẹn và nhắc việc trực tiếp trong hồ sơ khách hàng.
+- Quản lý loại công việc, mức ưu tiên, thời gian nhắc và ghi chú.
+- Đánh dấu hoàn thành, huỷ, mở lại hoặc xoá lịch hẹn.
+- Hiển thị lịch quá hạn và việc cần làm trên Dashboard.
+- Hiển thị badge số việc cần chú ý tại menu CRM.
+- Có công tắc lưu lựa chọn nhắc qua email cho từng lịch hẹn; việc gửi tự động sẽ được kích hoạt khi bổ sung cron job.
 
 ### 6.11. Quản lý văn phòng và chi nhánh
 
@@ -401,6 +407,7 @@ Các migration chính:
 | `008_mini_crm_fields.sql` | Ghi chú và hành động CRM |
 | `009_blog_categories.sql` | Danh mục tin tức động |
 | `010_crm_pipeline.sql` | Pipeline và nhật ký chăm sóc khách hàng |
+| `011_crm_reminders.sql` | Lịch hẹn, nhắc việc và cấu hình nhắc email CRM |
 
 ### 7.4. Email
 

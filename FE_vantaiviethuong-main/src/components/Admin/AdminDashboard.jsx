@@ -3,10 +3,10 @@ import { useEffect, useState } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import { useNavigate } from 'react-router-dom'
 import {
-  Building2, ChevronRight, Columns3, FileText, HelpCircle, History, Home,
+  BellRing, Building2, CalendarClock, ChevronRight, Columns3, FileText, HelpCircle, History, Home,
   Info, Newspaper, Phone, Truck,
 } from 'lucide-react'
-import { contactApi, faqApi } from '../../services/api'
+import { contactApi, crmApi, faqApi } from '../../services/api'
 import styles from './AdminDashboard.module.scss'
 
 const cards = [
@@ -18,7 +18,7 @@ const cards = [
   { icon: Newspaper, label: 'Tin tức / Blog', desc: 'Đăng và chỉnh sửa bài viết', color: '#d97706', to: '/admin/blogs' },
   { icon: Building2, label: 'Văn phòng & Chi nhánh', desc: 'Thêm, sửa, xóa địa điểm trên trang khách hàng', color: '#0f766e', to: '/admin/branches' },
   { icon: Phone, label: 'Liên hệ', desc: 'Xem yêu cầu từ khách hàng', color: '#059669', to: '/admin/contacts' },
-  { icon: Columns3, label: 'CRM khách hàng', desc: 'Pipeline và nhật ký chăm sóc khách hàng', color: '#2563eb', to: '/admin/crm' },
+  { icon: Columns3, label: 'CRM Liên Hệ khách hàng', desc: 'Pipeline và nhật ký chăm sóc khách hàng', color: '#2563eb', to: '/admin/crm' },
   { icon: History, label: 'Lịch sử chỉnh sửa', desc: 'Theo dõi các nội dung đã được admin thêm, sửa hoặc xóa', color: '#475569', to: '/admin/history' },
 ]
 
@@ -27,13 +27,19 @@ export default function AdminDashboard() {
   const navigate = useNavigate()
   const [newContacts, setNewContacts] = useState(0)
   const [pendingFaq, setPendingFaq] = useState(0)
+  const [reminderStats, setReminderStats] = useState({
+    attention_count: 0,
+    overdue_count: 0,
+    today_count: 0,
+    items: [],
+  })
 
   useEffect(() => {
     let alive = true
 
     const loadNotificationStats = async () => {
-      const [contactResult, faqResult] = await Promise.allSettled([
-        contactApi.getStats(), faqApi.getStats(),
+      const [contactResult, faqResult, reminderResult] = await Promise.allSettled([
+        contactApi.getStats(), faqApi.getStats(), crmApi.getReminderStats(),
       ])
       if (!alive) return
       if (contactResult.status === 'fulfilled') {
@@ -41,6 +47,9 @@ export default function AdminDashboard() {
       }
       if (faqResult.status === 'fulfilled') {
         setPendingFaq(Number(faqResult.value?.data?.pending_count) || 0)
+      }
+      if (reminderResult.status === 'fulfilled') {
+        setReminderStats(current => ({ ...current, ...(reminderResult.value?.data || {}) }))
       }
     }
 
@@ -65,6 +74,47 @@ export default function AdminDashboard() {
         </div>
       </div>
 
+      <section className={styles.reminderWidget}>
+        <div className={styles.reminderWidgetHeader}>
+          <div>
+            <span className={styles.reminderWidgetIcon}><BellRing size={17} /></span>
+            <div>
+              <h3>Việc cần làm</h3>
+              <p>
+                {reminderStats.overdue_count > 0
+                  ? `${reminderStats.overdue_count} lịch đã quá hạn`
+                  : `${reminderStats.today_count} lịch hẹn hôm nay`}
+              </p>
+            </div>
+          </div>
+          <button type="button" onClick={() => navigate('/admin/crm')}>
+            Xem CRM <ChevronRight size={14} />
+          </button>
+        </div>
+
+        {reminderStats.items?.length ? (
+          <div className={styles.reminderWidgetList}>
+            {reminderStats.items.slice(0, 4).map(item => {
+              const overdue = new Date(item.remind_at).getTime() < Date.now()
+              return (
+                <button type="button" key={item.id} onClick={() => navigate('/admin/crm')}>
+                  <span className={`${styles.reminderTimeIcon} ${overdue ? styles.reminderTimeOverdue : ''}`}>
+                    <CalendarClock size={15} />
+                  </span>
+                  <span>
+                    <strong>{item.title}</strong>
+                    <small>{item.full_name} · {new Date(item.remind_at).toLocaleString('vi-VN')}</small>
+                  </span>
+                  {overdue && <em>Quá hạn</em>}
+                </button>
+              )
+            })}
+          </div>
+        ) : (
+          <p className={styles.reminderWidgetEmpty}>Không có lịch hẹn nào đang chờ xử lý.</p>
+        )}
+      </section>
+
       <div className={styles.sectionLabel}>Quản lý nội dung</div>
 
       <div className={styles.grid}>
@@ -88,6 +138,11 @@ export default function AdminDashboard() {
                   )}
                   {c.to === '/admin/faq' && pendingFaq > 0 && (
                     <span className={styles.cardBadge}>{pendingFaq > 99 ? '99+' : `${pendingFaq} mới`}</span>
+                  )}
+                  {c.to === '/admin/crm' && reminderStats.attention_count > 0 && (
+                    <span className={styles.cardBadge}>
+                      {reminderStats.attention_count > 99 ? '99+' : `${reminderStats.attention_count} việc`}
+                    </span>
                   )}
                 </div>
                 <div className={styles.cardDesc}>{c.desc}</div>
