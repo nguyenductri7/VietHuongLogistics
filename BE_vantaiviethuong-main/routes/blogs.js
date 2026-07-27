@@ -1,6 +1,18 @@
 const express = require('express');
 const router = express.Router();
-const { getBlogCategories, getBlogs, getBlog, createBlog, updateBlog, deleteBlog, uploadContentImage } = require('../controllers/blogController');
+const {
+  getBlogCategories,
+  getAdminBlogCategories,
+  createBlogCategory,
+  updateBlogCategory,
+  deleteBlogCategory,
+  getBlogs,
+  getBlog,
+  createBlog,
+  updateBlog,
+  deleteBlog,
+  uploadContentImage,
+} = require('../controllers/blogController');
 const { authMiddleware } = require('../middleware/auth');
 const { uploadBlog, uploadBlogContent } = require('../config/cloudinary');
 
@@ -13,6 +25,11 @@ router.get('/categories', getBlogCategories);
 
 // ========== ADMIN ROUTES ==========
 // GET /api/admin/blogs (với filter đầy đủ)
+router.get('/admin/categories', authMiddleware, getAdminBlogCategories);
+router.post('/admin/categories', authMiddleware, createBlogCategory);
+router.put('/admin/categories/:id', authMiddleware, updateBlogCategory);
+router.delete('/admin/categories/:id', authMiddleware, deleteBlogCategory);
+
 router.get('/admin/list', authMiddleware, (req, res, next) => {
   req.user = req.user; // đã auth
   next();

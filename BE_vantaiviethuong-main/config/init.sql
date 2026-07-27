@@ -46,6 +46,17 @@ CREATE TABLE IF NOT EXISTS blogs (
   INDEX idx_published_at (published_at)
 );
 
+CREATE TABLE IF NOT EXISTS blog_categories (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(100) NOT NULL UNIQUE,
+  slug VARCHAR(120) NOT NULL UNIQUE,
+  sort_order INT DEFAULT 0,
+  is_active TINYINT(1) DEFAULT 1,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_blog_categories_active_order (is_active, sort_order)
+);
+
 -- ================================================
 -- BẢNG CÀI ĐẶT WEBSITE
 -- ================================================

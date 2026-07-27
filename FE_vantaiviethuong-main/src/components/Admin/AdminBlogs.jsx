@@ -1,5 +1,5 @@
 // src/components/Admin/AdminBlogs.jsx
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Newspaper, Plus, Search, Image as ImageIcon, Star,
@@ -27,7 +27,11 @@ export default function AdminBlogs() {
   const [statusFilter, setStatusFilter] = useState('')
   const [page, setPage]         = useState(1)
   const [pagination, setPagination] = useState({})
-  const [categoryOptions, setCategoryOptions] = useState(DEFAULT_BLOG_CATEGORIES)
+  const [categoryRecords, setCategoryRecords] = useState([])
+  const [categoryForm, setCategoryForm] = useState({ name: '', sort_order: 0, is_active: true })
+  const [editingCategory, setEditingCategory] = useState(null)
+  const [savingCategory, setSavingCategory] = useState(false)
+  const [deletingCategory, setDeletingCategory] = useState(null)
 
   // view: 'list' | 'form'  — thay cho modal cũ
   const [view, setView]         = useState('list')
@@ -44,6 +48,14 @@ export default function AdminBlogs() {
   const [thumbnail, setThumbnail] = useState(null)
   const [preview, setPreview]     = useState('')
   const fileRef = useRef()
+  const categoryOptions = useMemo(() => {
+    const activeCategories = categoryRecords
+      .filter(category => category.is_active !== 0)
+      .map(category => category.name)
+      .filter(Boolean)
+
+    return activeCategories.length ? activeCategories : DEFAULT_BLOG_CATEGORIES
+  }, [categoryRecords])
 
   // ── Load danh sách ──────────────────────────────────────────
   const fetchBlogs = async () => {
@@ -64,13 +76,36 @@ export default function AdminBlogs() {
   }
 
   useEffect(() => { fetchBlogs() }, [page, statusFilter])
-  useEffect(() => {
-    blogApi.getCategories()
-      .then((res) => {
-        if (Array.isArray(res.data) && res.data.length) setCategoryOptions(res.data)
-      })
-      .catch(() => {})
-  }, [])
+
+  const fetchCategories = async () => {
+    try {
+      const res = await blogApi.adminCategories()
+      if (Array.isArray(res.data)) setCategoryRecords(res.data)
+    } catch (err) {
+      try {
+        const fallback = await blogApi.getCategories()
+        if (Array.isArray(fallback.data)) {
+          setCategoryRecords(fallback.data.map((name, index) => ({
+            id: `fallback-${index}`,
+            name,
+            sort_order: index + 1,
+            is_active: 1,
+            post_count: 0,
+          })))
+        }
+      } catch {
+        setCategoryRecords(DEFAULT_BLOG_CATEGORIES.map((name, index) => ({
+          id: `default-${index}`,
+          name,
+          sort_order: index + 1,
+          is_active: 1,
+          post_count: 0,
+        })))
+      }
+    }
+  }
+
+  useEffect(() => { fetchCategories() }, [])
   useEffect(() => {
     const t = setTimeout(() => { setPage(1); fetchBlogs() }, 400)
     return () => clearTimeout(t)
@@ -81,7 +116,7 @@ export default function AdminBlogs() {
   // ── Mở trang tạo / sửa ─────────────────────────────────────
   const openCreate = () => {
     setEditing(null)
-    setForm({ title: '', excerpt: '', content: '', category: DEFAULT_BLOG_CATEGORY, tags: '', status: 'draft', is_featured: false })
+    setForm({ title: '', excerpt: '', content: '', category: categoryOptions[0] || DEFAULT_BLOG_CATEGORY, tags: '', status: 'draft', is_featured: false })
     setThumbnail(null)
     setPreview('')
     setView('form')
@@ -163,6 +198,65 @@ export default function AdminBlogs() {
       fetchBlogs()
     } catch (err) {
       showToast(err.message, 'error')
+    }
+  }
+
+  const resetCategoryForm = () => {
+    setEditingCategory(null)
+    setCategoryForm({ name: '', sort_order: 0, is_active: true })
+  }
+
+  const startEditCategory = (category) => {
+    setEditingCategory(category)
+    setCategoryForm({
+      name: category.name || '',
+      sort_order: Number(category.sort_order) || 0,
+      is_active: category.is_active !== 0,
+    })
+  }
+
+  const handleCategorySubmit = async (event) => {
+    event.preventDefault()
+    if (!categoryForm.name.trim()) {
+      showToast('Tên danh mục không được để trống.', 'error')
+      return
+    }
+
+    setSavingCategory(true)
+    try {
+      const payload = {
+        name: categoryForm.name.trim(),
+        sort_order: Number(categoryForm.sort_order) || 0,
+        is_active: categoryForm.is_active,
+      }
+
+      if (editingCategory) {
+        await blogApi.updateCategory(editingCategory.id, payload)
+        showToast('Đã cập nhật danh mục tin tức.')
+      } else {
+        await blogApi.createCategory(payload)
+        showToast('Đã thêm danh mục tin tức.')
+      }
+
+      resetCategoryForm()
+      await fetchCategories()
+      await fetchBlogs()
+    } catch (err) {
+      showToast(err.message || 'Không thể lưu danh mục tin tức.', 'error')
+    } finally {
+      setSavingCategory(false)
+    }
+  }
+
+  const handleDeleteCategory = async () => {
+    if (!deletingCategory) return
+    try {
+      await blogApi.deleteCategory(deletingCategory.id)
+      showToast('Đã xoá danh mục tin tức.')
+      setDeletingCategory(null)
+      await fetchCategories()
+    } catch (err) {
+      showToast(err.message || 'Không thể xoá danh mục tin tức.', 'error')
     }
   }
 
@@ -323,6 +417,70 @@ export default function AdminBlogs() {
         </button>
       </div>
 
+      <section className={styles.categoryManager}>
+        <div className={styles.categoryHead}>
+          <div>
+            <h2>Danh mục tin tức</h2>
+            <p>Thêm, sửa hoặc ẩn danh mục dùng khi đăng bài viết.</p>
+          </div>
+        </div>
+
+        <form className={styles.categoryForm} onSubmit={handleCategorySubmit}>
+          <input
+            type="text"
+            value={categoryForm.name}
+            onChange={e => setCategoryForm(f => ({ ...f, name: e.target.value }))}
+            placeholder="Tên danh mục mới..."
+          />
+          <input
+            type="number"
+            value={categoryForm.sort_order}
+            onChange={e => setCategoryForm(f => ({ ...f, sort_order: e.target.value }))}
+            placeholder="Thứ tự"
+          />
+          <label className={styles.categoryCheck}>
+            <input
+              type="checkbox"
+              checked={categoryForm.is_active}
+              onChange={e => setCategoryForm(f => ({ ...f, is_active: e.target.checked }))}
+            />
+            Hiển thị
+          </label>
+          <button type="submit" className={styles.categorySaveBtn} disabled={savingCategory}>
+            {savingCategory
+              ? <><Loader2 size={14} className={styles.spinIcon} /> Đang lưu</>
+              : <><Save size={14} /> {editingCategory ? 'Cập nhật' : 'Thêm danh mục'}</>
+            }
+          </button>
+          {editingCategory && (
+            <button type="button" className={styles.categoryCancelBtn} onClick={resetCategoryForm}>
+              Huỷ sửa
+            </button>
+          )}
+        </form>
+
+        <div className={styles.categoryList}>
+          {categoryRecords.map(category => (
+            <div className={styles.categoryItem} key={category.id}>
+              <div>
+                <strong>{category.name}</strong>
+                <span>
+                  Thứ tự: {category.sort_order || 0} · {Number(category.post_count) || 0} bài · {category.is_active === 0 ? 'Đang ẩn' : 'Đang hiện'}
+                </span>
+              </div>
+              <div className={styles.categoryActions}>
+                <button type="button" onClick={() => startEditCategory(category)}>
+                  <Pencil size={13} /> Sửa
+                </button>
+                <button type="button" className={styles.categoryDeleteBtn} onClick={() => setDeletingCategory(category)}>
+                  <Trash2 size={13} /> Xoá
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* Filters */}
       <div className={styles.filters}>
         <div className={styles.searchWrap}>
@@ -444,6 +602,23 @@ export default function AdminBlogs() {
             <div className={styles.confirmActions}>
               <button className={styles.cancelBtn} onClick={() => setDeleting(null)}>Hủy</button>
               <button className={styles.deleteConfirmBtn} onClick={handleDelete}>Xóa vĩnh viễn</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {deletingCategory && (
+        <div className={styles.overlay} onClick={() => setDeletingCategory(null)}>
+          <div className={styles.confirmModal} onClick={e => e.stopPropagation()}>
+            <div className={styles.confirmIcon}><Trash size={28} /></div>
+            <h3>Xoá danh mục tin tức?</h3>
+            <p>
+              Danh mục <strong>"{deletingCategory.name}"</strong> sẽ bị xoá.
+              Nếu đang có bài viết dùng danh mục này, hệ thống sẽ chặn xoá để tránh mất dữ liệu.
+            </p>
+            <div className={styles.confirmActions}>
+              <button className={styles.cancelBtn} onClick={() => setDeletingCategory(null)}>Huỷ</button>
+              <button className={styles.deleteConfirmBtn} onClick={handleDeleteCategory}>Xoá danh mục</button>
             </div>
           </div>
         </div>

@@ -4,8 +4,168 @@ const { BLOG_CATEGORIES, DEFAULT_BLOG_CATEGORY } = require('../config/blogCatego
 const { sanitizeLegacyLocalized } = require('../utils/cmsSanitizer');
 const { recordAdminAudit } = require('../services/adminAuditService');
 
-const getBlogCategories = (req, res) => {
-  res.json({ success: true, data: BLOG_CATEGORIES });
+function createCategorySlug(name) {
+  return String(name || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/g, 'd')
+    .replace(/[^a-z0-9\s-]/g, '')
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-');
+}
+
+const getBlogCategories = async (req, res) => {
+  try {
+    const [rows] = await pool.query(
+      'SELECT name FROM blog_categories WHERE is_active = 1 ORDER BY sort_order ASC, id ASC'
+    );
+    const categories = rows.length ? rows.map(row => row.name) : BLOG_CATEGORIES;
+    res.json({ success: true, data: categories });
+  } catch (err) {
+    console.error('getBlogCategories error:', err);
+    res.json({ success: true, data: BLOG_CATEGORIES });
+  }
+};
+
+const getAdminBlogCategories = async (req, res) => {
+  try {
+    const [rows] = await pool.query(
+      `SELECT c.*, COUNT(b.id) AS post_count
+       FROM blog_categories c
+       LEFT JOIN blogs b ON b.category = c.name
+       GROUP BY c.id
+       ORDER BY c.sort_order ASC, c.id ASC`
+    );
+    res.json({ success: true, data: rows });
+  } catch (err) {
+    console.error('getAdminBlogCategories error:', err);
+    res.status(500).json({ success: false, message: 'Không thể tải danh mục tin tức.' });
+  }
+};
+
+const createBlogCategory = async (req, res) => {
+  try {
+    const name = String(req.body.name || '').trim();
+    const sortOrder = Number(req.body.sort_order) || 0;
+    const isActive = req.body.is_active === false || req.body.is_active === '0' ? 0 : 1;
+
+    if (!name) {
+      return res.status(400).json({ success: false, message: 'Tên danh mục không được để trống.' });
+    }
+
+    let slug = createCategorySlug(name);
+    if (!slug) slug = `danh-muc-${Date.now()}`;
+
+    const [result] = await pool.query(
+      'INSERT INTO blog_categories (name, slug, sort_order, is_active) VALUES (?, ?, ?, ?)',
+      [name, slug, sortOrder, isActive]
+    );
+
+    const [created] = await pool.query('SELECT * FROM blog_categories WHERE id = ?', [result.insertId]);
+    await recordAdminAudit({
+      module: 'blogs', action: 'create', entityType: 'blog_category', entityId: result.insertId,
+      summary: `Tạo danh mục tin tức: ${name}`, after: created[0], userId: req.user?.id,
+    });
+
+    res.status(201).json({ success: true, message: 'Đã thêm danh mục tin tức.', data: created[0] });
+  } catch (err) {
+    console.error('createBlogCategory error:', err);
+    if (err.code === 'ER_DUP_ENTRY') {
+      return res.status(409).json({ success: false, message: 'Danh mục này đã tồn tại.' });
+    }
+    res.status(500).json({ success: false, message: 'Không thể thêm danh mục tin tức.' });
+  }
+};
+
+const updateBlogCategory = async (req, res) => {
+  const connection = await pool.getConnection();
+  try {
+    const id = Number(req.params.id);
+    const name = String(req.body.name || '').trim();
+    const sortOrder = Number(req.body.sort_order) || 0;
+    const isActive = req.body.is_active === false || req.body.is_active === '0' ? 0 : 1;
+
+    if (!Number.isInteger(id) || id <= 0) {
+      return res.status(400).json({ success: false, message: 'Mã danh mục không hợp lệ.' });
+    }
+    if (!name) {
+      return res.status(400).json({ success: false, message: 'Tên danh mục không được để trống.' });
+    }
+
+    await connection.beginTransaction();
+    const [beforeRows] = await connection.query('SELECT * FROM blog_categories WHERE id = ?', [id]);
+    if (!beforeRows.length) {
+      await connection.rollback();
+      return res.status(404).json({ success: false, message: 'Không tìm thấy danh mục tin tức.' });
+    }
+
+    const before = beforeRows[0];
+    let slug = createCategorySlug(name);
+    if (!slug) slug = `danh-muc-${id}`;
+
+    await connection.query(
+      'UPDATE blog_categories SET name = ?, slug = ?, sort_order = ?, is_active = ? WHERE id = ?',
+      [name, slug, sortOrder, isActive, id]
+    );
+
+    if (before.name !== name) {
+      await connection.query('UPDATE blogs SET category = ? WHERE category = ?', [name, before.name]);
+    }
+
+    const [afterRows] = await connection.query('SELECT * FROM blog_categories WHERE id = ?', [id]);
+    await connection.commit();
+
+    await recordAdminAudit({
+      module: 'blogs', action: 'update', entityType: 'blog_category', entityId: id,
+      summary: `Cập nhật danh mục tin tức: ${name}`, before, after: afterRows[0], userId: req.user?.id,
+    });
+
+    res.json({ success: true, message: 'Đã cập nhật danh mục tin tức.', data: afterRows[0] });
+  } catch (err) {
+    await connection.rollback().catch(() => {});
+    console.error('updateBlogCategory error:', err);
+    if (err.code === 'ER_DUP_ENTRY') {
+      return res.status(409).json({ success: false, message: 'Danh mục này đã tồn tại.' });
+    }
+    res.status(500).json({ success: false, message: 'Không thể cập nhật danh mục tin tức.' });
+  } finally {
+    connection.release();
+  }
+};
+
+const deleteBlogCategory = async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id) || id <= 0) {
+      return res.status(400).json({ success: false, message: 'Mã danh mục không hợp lệ.' });
+    }
+
+    const [rows] = await pool.query('SELECT * FROM blog_categories WHERE id = ?', [id]);
+    if (!rows.length) {
+      return res.status(404).json({ success: false, message: 'Không tìm thấy danh mục tin tức.' });
+    }
+
+    const [usedRows] = await pool.query('SELECT COUNT(*) AS total FROM blogs WHERE category = ?', [rows[0].name]);
+    if (Number(usedRows[0].total) > 0) {
+      return res.status(400).json({
+        success: false,
+        message: `Không thể xoá vì đang có ${usedRows[0].total} bài viết dùng danh mục này.`,
+      });
+    }
+
+    await pool.query('DELETE FROM blog_categories WHERE id = ?', [id]);
+    await recordAdminAudit({
+      module: 'blogs', action: 'delete', entityType: 'blog_category', entityId: id,
+      summary: `Xóa danh mục tin tức: ${rows[0].name}`, before: rows[0], userId: req.user?.id,
+    });
+
+    res.json({ success: true, message: 'Đã xoá danh mục tin tức.' });
+  } catch (err) {
+    console.error('deleteBlogCategory error:', err);
+    res.status(500).json({ success: false, message: 'Không thể xoá danh mục tin tức.' });
+  }
 };
 
 // Tạo slug từ tiêu đề
@@ -324,4 +484,16 @@ const uploadContentImage = async (req, res) => {
     res.status(500).json({ success: false, message: 'Lỗi server.' });
   }
 };
-module.exports = { getBlogCategories, getBlogs, getBlog, createBlog, updateBlog, deleteBlog, uploadContentImage };
+module.exports = {
+  getBlogCategories,
+  getAdminBlogCategories,
+  createBlogCategory,
+  updateBlogCategory,
+  deleteBlogCategory,
+  getBlogs,
+  getBlog,
+  createBlog,
+  updateBlog,
+  deleteBlog,
+  uploadContentImage,
+};
