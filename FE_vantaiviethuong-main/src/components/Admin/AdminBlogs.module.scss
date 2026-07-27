@@ -71,7 +71,7 @@
 // ─── Filters ─────────────────────────────────────────────────
 .categoryManager {
   margin-bottom: 22px;
-  padding: 18px;
+  padding: 16px 18px;
   border: 1px solid $gray-100;
   border-radius: 16px;
   background: rgba($black, 0.015);
@@ -98,12 +98,105 @@
   }
 }
 
+.categoryManageBtn {
+  min-height: 40px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 10px;
+  background: $red;
+  color: #fff;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 800;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  box-shadow: 0 10px 22px rgba($red, .16);
+
+  &:hover {
+    transform: translateY(-1px);
+  }
+}
+
+.categoryChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+
+  span {
+    display: inline-flex;
+    align-items: center;
+    min-height: 28px;
+    padding: 0 10px;
+    border-radius: 999px;
+    background: rgba($red, .07);
+    color: $red;
+    font-size: 12px;
+    font-weight: 700;
+  }
+}
+
+.categoryModal {
+  width: min(860px, 100%);
+  max-height: min(86vh, 780px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  border-radius: 20px;
+  background: $white;
+  box-shadow: 0 24px 70px rgba($black, .2);
+}
+
+.categoryModalHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 22px 24px 18px;
+  border-bottom: 1px solid $gray-100;
+
+  h3 {
+    margin: 0 0 5px;
+    font-family: $font-display;
+    font-size: 20px;
+    color: $black;
+  }
+
+  p {
+    margin: 0;
+    color: $gray-600;
+    font-size: 13px;
+  }
+}
+
+.modalCloseBtn {
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 10px;
+  background: rgba($black, .04);
+  color: $gray-600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    background: rgba($red, .08);
+    color: $red;
+  }
+}
+
 .categoryForm {
   display: grid;
-  grid-template-columns: minmax(220px, 1fr) 110px auto auto auto;
+  grid-template-columns: minmax(240px, 1fr) 120px auto auto;
   gap: 10px;
-  align-items: center;
-  margin-bottom: 14px;
+  align-items: end;
+  padding: 18px 24px;
+  margin-bottom: 0;
+  border-bottom: 1px solid $gray-100;
 
   input[type="text"],
   input[type="number"] {
@@ -127,6 +220,17 @@
   }
 }
 
+.categoryField {
+  display: grid;
+  gap: 7px;
+
+  label {
+    color: $black;
+    font-size: 12.5px;
+    font-weight: 800;
+  }
+}
+
 .categoryCheck {
   display: inline-flex;
   align-items: center;
@@ -135,8 +239,15 @@
   font-size: 13px;
   font-weight: 600;
   white-space: nowrap;
+  min-height: 40px;
 
   input { accent-color: $red; }
+}
+
+.categoryModalActions {
+  display: inline-flex;
+  justify-content: flex-end;
+  gap: 8px;
 }
 
 .categorySaveBtn,
@@ -174,6 +285,8 @@
 .categoryList {
   display: grid;
   gap: 10px;
+  padding: 18px 24px 24px;
+  overflow: auto;
 }
 
 .categoryItem {
