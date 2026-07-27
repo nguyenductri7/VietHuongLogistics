@@ -12,6 +12,14 @@ const PIPELINE_STAGES = [
 
 const STAGE_KEYS = new Set(PIPELINE_STAGES.map(stage => stage.key));
 const STAGE_LABELS = Object.fromEntries(PIPELINE_STAGES.map(stage => [stage.key, stage.label]));
+const CONTACT_STATUS_BY_STAGE = {
+  new_lead: 'new',
+  called: 'read',
+  quoting: 'replied',
+  negotiating: 'replied',
+  contracted: 'replied',
+  completed: 'replied',
+};
 
 function normalizeIds(value) {
   if (!Array.isArray(value)) return [];
@@ -93,9 +101,10 @@ const moveContact = async (req, res) => {
 
     const before = rows[0];
     const previousStage = STAGE_KEYS.has(before.pipeline_stage) ? before.pipeline_stage : 'new_lead';
+    const syncedContactStatus = CONTACT_STATUS_BY_STAGE[toStage];
     await connection.query(
-      'UPDATE contact_messages SET pipeline_stage = ? WHERE id = ?',
-      [toStage, contactId],
+      'UPDATE contact_messages SET pipeline_stage = ?, status = ? WHERE id = ?',
+      [toStage, syncedContactStatus, contactId],
     );
 
     if (sourceStage && sourceStage !== toStage) {
@@ -113,7 +122,7 @@ const moveContact = async (req, res) => {
         [
           contactId,
           `Chuyển sang ${STAGE_LABELS[toStage]}`,
-          `Khách hàng được chuyển từ “${STAGE_LABELS[previousStage]}” sang “${STAGE_LABELS[toStage]}”.`,
+          `Khách hàng được chuyển từ “${STAGE_LABELS[previousStage]}” sang “${STAGE_LABELS[toStage]}”; trạng thái liên hệ được đồng bộ thành “${syncedContactStatus}”.`,
           previousStage,
           toStage,
           req.user?.id || null,

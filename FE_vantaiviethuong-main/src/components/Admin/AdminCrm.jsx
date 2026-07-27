@@ -272,6 +272,7 @@ export default function AdminCrm() {
         source_ids: source.map(contact => contact.id),
         destination_ids: destinationWithPositions.map(contact => contact.id),
       })
+      window.dispatchEvent(new Event('vh-admin-notifications-refresh'))
       if (sourceStage !== targetStage) {
         const stageLabel = stages.find(stage => stage.key === targetStage)?.label || targetStage
         showToast(`Đã chuyển khách hàng sang “${stageLabel}”.`)
