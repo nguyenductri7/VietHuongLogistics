@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import {
-  Building2, FileText, HelpCircle, Home, Info, LayoutDashboard,
+  Building2, Columns3, FileText, HelpCircle, Home, Info, LayoutDashboard,
   History, LogOut, Newspaper, PanelLeftClose, PanelLeftOpen, Phone, Truck,
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
@@ -19,6 +19,7 @@ const navItems = [
   { icon: Newspaper, label: 'Tin tức', to: '/admin/blogs' },
   { icon: Building2, label: 'Chi nhánh', to: '/admin/branches' },
   { icon: Phone, label: 'Liên hệ', to: '/admin/contacts' },
+  { icon: Columns3, label: 'CRM khách hàng', to: '/admin/crm' },
   { icon: History, label: 'Lịch sử chỉnh sửa', to: '/admin/history' },
 ]
 

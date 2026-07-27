@@ -15,6 +15,7 @@ const PAGE_META = {
   '/admin/blogs': { title: 'Quản lý tin tức', crumb: 'Tin tức' },
   '/admin/branches': { title: 'Văn phòng & Chi nhánh', crumb: 'Chi nhánh' },
   '/admin/contacts': { title: 'Yêu cầu liên hệ', crumb: 'Liên hệ' },
+  '/admin/crm': { title: 'CRM khách hàng', crumb: 'CRM khách hàng' },
   '/admin/profile': { title: 'Hồ sơ Admin', crumb: 'Hồ sơ' },
   '/admin/history': { title: 'Lịch sử chỉnh sửa', crumb: 'Lịch sử chỉnh sửa' },
 }

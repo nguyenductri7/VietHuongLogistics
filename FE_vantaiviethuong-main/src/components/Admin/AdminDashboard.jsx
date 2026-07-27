@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import { useNavigate } from 'react-router-dom'
 import {
-  Building2, ChevronRight, FileText, HelpCircle, History, Home,
+  Building2, ChevronRight, Columns3, FileText, HelpCircle, History, Home,
   Info, Newspaper, Phone, Truck,
 } from 'lucide-react'
 import { contactApi, faqApi } from '../../services/api'
@@ -18,6 +18,7 @@ const cards = [
   { icon: Newspaper, label: 'Tin tức / Blog', desc: 'Đăng và chỉnh sửa bài viết', color: '#d97706', to: '/admin/blogs' },
   { icon: Building2, label: 'Văn phòng & Chi nhánh', desc: 'Thêm, sửa, xóa địa điểm trên trang khách hàng', color: '#0f766e', to: '/admin/branches' },
   { icon: Phone, label: 'Liên hệ', desc: 'Xem yêu cầu từ khách hàng', color: '#059669', to: '/admin/contacts' },
+  { icon: Columns3, label: 'CRM khách hàng', desc: 'Pipeline và nhật ký chăm sóc khách hàng', color: '#2563eb', to: '/admin/crm' },
   { icon: History, label: 'Lịch sử chỉnh sửa', desc: 'Theo dõi các nội dung đã được admin thêm, sửa hoặc xóa', color: '#475569', to: '/admin/history' },
 ]
 

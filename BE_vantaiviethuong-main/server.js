@@ -51,6 +51,7 @@ app.use('/api/services-page', require('./routes/Servicespage'));
 app.use('/api/faq-inquiries', faqRoutes)
 app.use('/api/faq-content', require('./routes/Faqcontent'))
 app.use('/api/cms-revisions', require('./routes/cmsRevisions'));
+app.use('/api/crm', require('./routes/crm'));
 // Health check
 app.get('/api/health', (req, res) => {
   const databaseConnected = databaseStatus === 'connected';

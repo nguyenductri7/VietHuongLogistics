@@ -218,6 +218,24 @@ export const contactApi = {
   delete: (id) => request(`/contact/admin/${id}`, { method: 'DELETE' }),
 }
 
+export const crmApi = {
+  getPipeline: (params = {}) => {
+    const qs = new URLSearchParams(params).toString()
+    return request(`/crm/pipeline${qs ? '?' + qs : ''}`)
+  },
+  moveContact: (data) =>
+    request('/crm/pipeline/move', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+  getActivities: (contactId) => request(`/crm/contacts/${contactId}/activities`),
+  createActivity: (contactId, data) =>
+    request(`/crm/contacts/${contactId}/activities`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+}
+
 // ════════════════════════════════════════════════════════════
 // FAQ INQUIRIES / THẮC MẮC KHÁCH HÀNG
 // ════════════════════════════════════════════════════════════

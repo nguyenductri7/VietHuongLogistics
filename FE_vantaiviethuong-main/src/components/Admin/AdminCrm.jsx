@@ -1,0 +1,456 @@
+import { useEffect, useMemo, useState } from 'react'
+import {
+  DndContext,
+  DragOverlay,
+  KeyboardSensor,
+  PointerSensor,
+  closestCorners,
+  useDroppable,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core'
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
+import {
+  Building2, Clock3, GripVertical, History, Loader2, Mail,
+  MessageSquareText, Phone, Plus, RefreshCw, Search, UserRound, X,
+} from 'lucide-react'
+import { crmApi } from '../../services/api'
+import { useAdminToast } from './AdminToast'
+import styles from './AdminCrm.module.scss'
+
+const FALLBACK_STAGES = [
+  { key: 'new_lead', label: 'Khách mới', color: '#64748b' },
+  { key: 'called', label: 'Đã gọi', color: '#3b82f6' },
+  { key: 'quoting', label: 'Đang báo giá', color: '#f59e0b' },
+  { key: 'negotiating', label: 'Đang thương lượng', color: '#8b5cf6' },
+  { key: 'contracted', label: 'Đã ký hợp đồng', color: '#10b981' },
+  { key: 'completed', label: 'Hoàn thành', color: '#059669' },
+]
+
+const ACTIVITY_TYPES = [
+  { value: 'note', label: 'Ghi chú' },
+  { value: 'call', label: 'Cuộc gọi' },
+  { value: 'email', label: 'Email' },
+  { value: 'quote', label: 'Báo giá' },
+  { value: 'meeting', label: 'Cuộc hẹn' },
+]
+
+function formatDate(value) {
+  if (!value) return '—'
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return '—'
+  return date.toLocaleString('vi-VN', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
+
+function ContactCardContent({ contact, compact = false }) {
+  return (
+    <>
+      <div className={styles.cardTop}>
+        <span className={styles.avatar}>{contact.full_name?.trim()?.[0]?.toUpperCase() || '?'}</span>
+        <div className={styles.cardIdentity}>
+          <strong>{contact.full_name || 'Khách hàng'}</strong>
+          <span>{contact.company || 'Khách hàng cá nhân'}</span>
+        </div>
+      </div>
+      {!compact && (
+        <>
+          <div className={styles.cardContacts}>
+            {contact.phone && <span><Phone size={12} /> {contact.phone}</span>}
+            {contact.email && <span><Mail size={12} /> {contact.email}</span>}
+          </div>
+          <p className={styles.cardMessage}>{contact.message || 'Chưa có nội dung yêu cầu.'}</p>
+          <div className={styles.cardFooter}>
+            <span><Clock3 size={12} /> {formatDate(contact.created_at)}</span>
+            <span className={styles.detailHint}>Xem chi tiết</span>
+          </div>
+        </>
+      )}
+    </>
+  )
+}
+
+function SortableContactCard({ contact, onOpen }) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
+    id: `contact-${contact.id}`,
+    data: { type: 'contact', stage: contact.pipeline_stage, contactId: contact.id },
+  })
+
+  return (
+    <article
+      ref={setNodeRef}
+      className={`${styles.contactCard} ${isDragging ? styles.dragging : ''}`}
+      style={{ transform: CSS.Transform.toString(transform), transition }}
+      onClick={() => onOpen(contact)}
+    >
+      <button
+        type="button"
+        className={styles.dragHandle}
+        aria-label={`Kéo ${contact.full_name}`}
+        onClick={event => event.stopPropagation()}
+        {...attributes}
+        {...listeners}
+      >
+        <GripVertical size={15} />
+      </button>
+      <ContactCardContent contact={contact} />
+    </article>
+  )
+}
+
+function PipelineColumn({ stage, contacts, onOpen }) {
+  const { setNodeRef, isOver } = useDroppable({
+    id: `stage-${stage.key}`,
+    data: { type: 'stage', stage: stage.key },
+  })
+
+  return (
+    <section className={`${styles.column} ${isOver ? styles.columnOver : ''}`}>
+      <header className={styles.columnHeader}>
+        <div>
+          <span className={styles.stageDot} style={{ background: stage.color }} />
+          <strong>{stage.label}</strong>
+        </div>
+        <span className={styles.columnCount}>{contacts.length}</span>
+      </header>
+      <div ref={setNodeRef} className={styles.columnBody}>
+        <SortableContext
+          items={contacts.map(contact => `contact-${contact.id}`)}
+          strategy={verticalListSortingStrategy}
+        >
+          {contacts.map(contact => (
+            <SortableContactCard key={contact.id} contact={contact} onOpen={onOpen} />
+          ))}
+        </SortableContext>
+        {contacts.length === 0 && (
+          <div className={styles.emptyColumn}>Kéo khách hàng vào đây</div>
+        )}
+      </div>
+    </section>
+  )
+}
+
+export default function AdminCrm() {
+  const { showToast } = useAdminToast()
+  const [stages, setStages] = useState(FALLBACK_STAGES)
+  const [contacts, setContacts] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [moving, setMoving] = useState(false)
+  const [search, setSearch] = useState('')
+  const [activeContact, setActiveContact] = useState(null)
+  const [selectedContact, setSelectedContact] = useState(null)
+  const [activities, setActivities] = useState([])
+  const [activitiesLoading, setActivitiesLoading] = useState(false)
+  const [savingActivity, setSavingActivity] = useState(false)
+  const [activityForm, setActivityForm] = useState({
+    activity_type: 'note',
+    title: '',
+    description: '',
+  })
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  )
+
+  const loadPipeline = async ({ silent = false } = {}) => {
+    if (!silent) setLoading(true)
+    try {
+      const response = await crmApi.getPipeline(search.trim() ? { search: search.trim() } : {})
+      setStages(response.stages?.length ? response.stages : FALLBACK_STAGES)
+      setContacts(response.data || [])
+    } catch (error) {
+      if (!silent) showToast(error.message || 'Không thể tải pipeline khách hàng.', 'error')
+    } finally {
+      if (!silent) setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => loadPipeline(), search ? 300 : 0)
+    return () => window.clearTimeout(timer)
+  }, [search])
+
+  const contactsByStage = useMemo(() => Object.fromEntries(
+    stages.map(stage => [
+      stage.key,
+      contacts
+        .filter(contact => contact.pipeline_stage === stage.key)
+        .sort((a, b) => (Number(a.pipeline_position) || 0) - (Number(b.pipeline_position) || 0)),
+    ]),
+  ), [contacts, stages])
+
+  const loadActivities = async (contact) => {
+    setSelectedContact(contact)
+    setActivities([])
+    setActivitiesLoading(true)
+    try {
+      const response = await crmApi.getActivities(contact.id)
+      setActivities(response.data || [])
+    } catch (error) {
+      showToast(error.message || 'Không thể tải nhật ký chăm sóc.', 'error')
+    } finally {
+      setActivitiesLoading(false)
+    }
+  }
+
+  const handleDragStart = ({ active }) => {
+    const contactId = Number(active.data.current?.contactId)
+    setActiveContact(contacts.find(contact => contact.id === contactId) || null)
+  }
+
+  const handleDragCancel = () => setActiveContact(null)
+
+  const handleDragEnd = async ({ active, over }) => {
+    setActiveContact(null)
+    if (!over || moving) return
+
+    const contactId = Number(active.data.current?.contactId)
+    const currentContact = contacts.find(contact => contact.id === contactId)
+    if (!currentContact) return
+
+    const targetStage = over.data.current?.stage
+      || contacts.find(contact => `contact-${contact.id}` === String(over.id))?.pipeline_stage
+    if (!stages.some(stage => stage.key === targetStage)) return
+
+    const previousContacts = contacts
+    const sourceStage = currentContact.pipeline_stage
+    const withoutActive = contacts.filter(contact => contact.id !== contactId)
+    const destination = withoutActive.filter(contact => contact.pipeline_stage === targetStage)
+    const overContactId = String(over.id).startsWith('contact-')
+      ? Number(String(over.id).replace('contact-', ''))
+      : null
+    const targetIndex = overContactId
+      ? Math.max(0, destination.findIndex(contact => contact.id === overContactId))
+      : destination.length
+
+    const movedContact = { ...currentContact, pipeline_stage: targetStage }
+    destination.splice(targetIndex < 0 ? destination.length : targetIndex, 0, movedContact)
+    const destinationWithPositions = destination.map((contact, index) => ({
+      ...contact,
+      pipeline_position: index + 1,
+    }))
+    const source = sourceStage === targetStage
+      ? []
+      : withoutActive
+          .filter(contact => contact.pipeline_stage === sourceStage)
+          .map((contact, index) => ({ ...contact, pipeline_position: index + 1 }))
+    const unaffected = withoutActive.filter(contact => (
+      contact.pipeline_stage !== targetStage
+      && (sourceStage === targetStage || contact.pipeline_stage !== sourceStage)
+    ))
+    const nextContacts = [...unaffected, ...source, ...destinationWithPositions]
+
+    setContacts(nextContacts)
+    setMoving(true)
+    try {
+      await crmApi.moveContact({
+        contact_id: contactId,
+        source_stage: sourceStage,
+        to_stage: targetStage,
+        source_ids: source.map(contact => contact.id),
+        destination_ids: destinationWithPositions.map(contact => contact.id),
+      })
+      if (sourceStage !== targetStage) {
+        const stageLabel = stages.find(stage => stage.key === targetStage)?.label || targetStage
+        showToast(`Đã chuyển khách hàng sang “${stageLabel}”.`)
+      }
+    } catch (error) {
+      setContacts(previousContacts)
+      showToast(error.message || 'Không thể di chuyển khách hàng.', 'error')
+    } finally {
+      setMoving(false)
+    }
+  }
+
+  const handleAddActivity = async (event) => {
+    event.preventDefault()
+    if (!selectedContact || !activityForm.title.trim()) {
+      showToast('Vui lòng nhập nội dung nhật ký.', 'error')
+      return
+    }
+
+    setSavingActivity(true)
+    try {
+      const response = await crmApi.createActivity(selectedContact.id, {
+        ...activityForm,
+        title: activityForm.title.trim(),
+        description: activityForm.description.trim(),
+      })
+      setActivities(current => [response.data, ...current])
+      setActivityForm({ activity_type: 'note', title: '', description: '' })
+      showToast('Đã thêm nhật ký chăm sóc.')
+    } catch (error) {
+      showToast(error.message || 'Không thể thêm nhật ký.', 'error')
+    } finally {
+      setSavingActivity(false)
+    }
+  }
+
+  return (
+    <div className={styles.page}>
+      <div className={styles.toolbar}>
+        <div>
+          <h2>Pipeline khách hàng</h2>
+          <p>Kéo thả khách hàng qua từng giai đoạn chăm sóc.</p>
+        </div>
+        <div className={styles.toolbarActions}>
+          <label className={styles.searchBox}>
+            <Search size={15} />
+            <input
+              value={search}
+              onChange={event => setSearch(event.target.value)}
+              placeholder="Tìm tên, SĐT, email..."
+            />
+            {search && (
+              <button type="button" onClick={() => setSearch('')} aria-label="Xoá tìm kiếm">
+                <X size={13} />
+              </button>
+            )}
+          </label>
+          <button type="button" className={styles.refreshBtn} onClick={() => loadPipeline()} disabled={loading}>
+            <RefreshCw size={15} /> Làm mới
+          </button>
+        </div>
+      </div>
+
+      {loading ? (
+        <div className={styles.loading}>
+          <Loader2 size={20} className={styles.spin} /> Đang tải pipeline...
+        </div>
+      ) : (
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCorners}
+          onDragStart={handleDragStart}
+          onDragCancel={handleDragCancel}
+          onDragEnd={handleDragEnd}
+        >
+          <div className={styles.board}>
+            {stages.map(stage => (
+              <PipelineColumn
+                key={stage.key}
+                stage={stage}
+                contacts={contactsByStage[stage.key] || []}
+                onOpen={loadActivities}
+              />
+            ))}
+          </div>
+          <DragOverlay>
+            {activeContact ? (
+              <div className={`${styles.contactCard} ${styles.overlayCard}`}>
+                <ContactCardContent contact={activeContact} compact />
+              </div>
+            ) : null}
+          </DragOverlay>
+        </DndContext>
+      )}
+
+      {selectedContact && (
+        <div className={styles.drawerOverlay} onClick={() => setSelectedContact(null)}>
+          <aside className={styles.drawer} onClick={event => event.stopPropagation()}>
+            <header className={styles.drawerHeader}>
+              <div>
+                <span>Hồ sơ khách hàng</span>
+                <h3>{selectedContact.full_name}</h3>
+              </div>
+              <button type="button" onClick={() => setSelectedContact(null)} aria-label="Đóng">
+                <X size={18} />
+              </button>
+            </header>
+
+            <div className={styles.drawerBody}>
+              <section className={styles.customerSummary}>
+                <div><UserRound size={15} /><span>{selectedContact.full_name}</span></div>
+                {selectedContact.company && <div><Building2 size={15} /><span>{selectedContact.company}</span></div>}
+                {selectedContact.phone && <div><Phone size={15} /><a href={`tel:${selectedContact.phone}`}>{selectedContact.phone}</a></div>}
+                {selectedContact.email && <div><Mail size={15} /><a href={`mailto:${selectedContact.email}`}>{selectedContact.email}</a></div>}
+                <div><MessageSquareText size={15} /><span>{selectedContact.message || 'Chưa có nội dung yêu cầu.'}</span></div>
+              </section>
+
+              <form className={styles.activityForm} onSubmit={handleAddActivity}>
+                <div className={styles.sectionTitle}>
+                  <Plus size={15} />
+                  <strong>Thêm nhật ký chăm sóc</strong>
+                </div>
+                <div className={styles.activityFormRow}>
+                  <select
+                    value={activityForm.activity_type}
+                    onChange={event => setActivityForm(form => ({ ...form, activity_type: event.target.value }))}
+                  >
+                    {ACTIVITY_TYPES.map(type => (
+                      <option key={type.value} value={type.value}>{type.label}</option>
+                    ))}
+                  </select>
+                  <input
+                    value={activityForm.title}
+                    onChange={event => setActivityForm(form => ({ ...form, title: event.target.value }))}
+                    placeholder="VD: Khách yêu cầu báo giá"
+                  />
+                </div>
+                <textarea
+                  rows={3}
+                  value={activityForm.description}
+                  onChange={event => setActivityForm(form => ({ ...form, description: event.target.value }))}
+                  placeholder="Thông tin chi tiết, kết quả trao đổi, bước tiếp theo..."
+                />
+                <button type="submit" disabled={savingActivity}>
+                  {savingActivity ? <Loader2 size={14} className={styles.spin} /> : <Plus size={14} />}
+                  {savingActivity ? 'Đang lưu...' : 'Thêm vào nhật ký'}
+                </button>
+              </form>
+
+              <section className={styles.timelineSection}>
+                <div className={styles.sectionTitle}>
+                  <History size={15} />
+                  <strong>Nhật ký chăm sóc</strong>
+                </div>
+                {activitiesLoading ? (
+                  <div className={styles.timelineLoading}><Loader2 size={16} className={styles.spin} /> Đang tải...</div>
+                ) : activities.length === 0 ? (
+                  <p className={styles.emptyTimeline}>Chưa có hoạt động chăm sóc nào.</p>
+                ) : (
+                  <div className={styles.timeline}>
+                    {activities.map(activity => (
+                      <article key={activity.id} className={styles.timelineItem}>
+                        <span className={styles.timelineDot} />
+                        <div>
+                          <div className={styles.timelineMeta}>
+                            <strong>{activity.title}</strong>
+                            <time>{formatDate(activity.created_at)}</time>
+                          </div>
+                          {activity.description && <p>{activity.description}</p>}
+                          <span className={styles.timelineAuthor}>
+                            {activity.created_by_name || activity.created_by_username || 'Hệ thống'}
+                          </span>
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+                )}
+              </section>
+            </div>
+          </aside>
+        </div>
+      )}
+    </div>
+  )
+}

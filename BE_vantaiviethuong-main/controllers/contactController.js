@@ -40,6 +40,16 @@ const submitContact = async (req, res) => {
       [contact.full_name, contact.email, contact.phone, contact.company, contact.message]
     );
 
+    try {
+      await pool.query(
+        `INSERT INTO crm_activities (contact_id, activity_type, title, description)
+         VALUES (?, 'created', 'Tiếp nhận khách hàng', 'Khách hàng gửi yêu cầu liên hệ từ website.')`,
+        [result.insertId]
+      );
+    } catch (activityError) {
+      console.warn('[CRM] Không thể tạo nhật ký tiếp nhận:', activityError.message);
+    }
+
     let emailNotificationSent = false;
     try {
       emailNotificationSent = await sendContactNotification({
