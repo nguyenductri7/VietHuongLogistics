@@ -229,11 +229,11 @@ function normalizeReviews(reviews = []) {
   return source.map((review, index) => {
     const fallback = DEFAULT_HOME.partners_section.reviews[index % DEFAULT_HOME.partners_section.reviews.length]
     return {
-    ...fallback,
-    ...(review || {}),
-    avatar_url: review?.avatar_url || review?.avatar || review?.image_url || fallback.avatar_url || '',
-    id: review?.id || `${Date.now()}-${index}`,
-  }
+      ...fallback,
+      ...(review || {}),
+      avatar_url: review?.avatar_url || review?.avatar || review?.image_url || fallback.avatar_url || '',
+      id: review?.id || `${Date.now()}-${index}`,
+    }
   })
 }
 
@@ -488,387 +488,387 @@ export default function AdminHome() {
         </div>
       ) : (
         <>
-        <div className={styles.layout}>
-          <nav className={styles.tabs}>
-            {SECTIONS.map(section => {
-              const Icon = section.icon
-              const enabled = isSectionEnabled(section)
-              return (
-                <button
-                  key={section.key}
-                  className={`${styles.tab} ${activeTab === section.key ? styles.tabActive : ''}`}
-                  onClick={() => setActiveTab(section.key)}
-                >
-                  <span className={styles.sectionIcon}><Icon size={17} strokeWidth={1.8} /></span>
-                  <span className={styles.sectionText}>
-                    <strong>{section.label}</strong>
-                  </span>
-                  <span className={`${styles.stateDot} ${enabled ? styles.stateOn : styles.stateOff}`} />
-                </button>
-              )
-            })}
-          </nav>
+          <div className={styles.layout}>
+            <nav className={styles.tabs}>
+              {SECTIONS.map(section => {
+                const Icon = section.icon
+                const enabled = isSectionEnabled(section)
+                return (
+                  <button
+                    key={section.key}
+                    className={`${styles.tab} ${activeTab === section.key ? styles.tabActive : ''}`}
+                    onClick={() => setActiveTab(section.key)}
+                  >
+                    <span className={styles.sectionIcon}><Icon size={17} strokeWidth={1.8} /></span>
+                    <span className={styles.sectionText}>
+                      <strong>{section.label}</strong>
+                    </span>
+                    <span className={`${styles.stateDot} ${enabled ? styles.stateOn : styles.stateOff}`} />
+                  </button>
+                )
+              })}
+            </nav>
 
-          <div className={styles.fields}>
-            <div className={styles.editorHeader}>
-              <div>
-                <h2 className={styles.sectionTitle}>{currentSection.label}</h2>
+            <div className={styles.fields}>
+              <div className={styles.editorHeader}>
+                <div>
+                  <h2 className={styles.sectionTitle}>{currentSection.label}</h2>
+                </div>
               </div>
-            </div>
 
-            {currentSection.fields.map(field => {
-              const value = home[activeDataKey]?.[field.key]
+              {currentSection.fields.map(field => {
+                const value = home[activeDataKey]?.[field.key]
 
-              return (
-                <div key={field.key} className={styles.field}>
-                  <label className={styles.label}>{field.label}</label>
+                return (
+                  <div key={field.key} className={styles.field}>
+                    <label className={styles.label}>{field.label}</label>
 
-                  {field.type === 'textarea' ? (
-                    <textarea
-                      className={styles.textarea}
-                      rows={field.key === 'offices_text' ? 8 : 4}
-                      value={value || ''}
-                      onChange={e => handleChange(activeDataKey, field.key, e.target.value)}
-                    />
-                  ) : field.type === 'image_upload' || field.type === 'video_upload' ? (
-                    <div style={{ display: 'grid', gap: 10 }}>
-                      {value && (
-                        <div
-                          style={{
-                            border: '1px solid #E5E7EB',
-                            borderRadius: 12,
-                            overflow: 'hidden',
-                            background: '#F9FAFB',
-                            maxWidth: 420,
-                          }}
-                        >
-                          {field.type === 'video_upload' ? (
-                            <video
-                              src={resolveApiMediaUrl(value)}
-                              controls
-                              muted
-                              style={{ display: 'block', width: '100%', maxHeight: 220, objectFit: 'cover' }}
-                            />
-                          ) : (
-                            <img
-                              src={resolveApiMediaUrl(value)}
-                              alt={field.label}
-                              style={{ display: 'block', width: '100%', maxHeight: 220, objectFit: 'cover' }}
-                            />
-                          )}
-                        </div>
-                      )}
+                    {field.type === 'textarea' ? (
+                      <textarea
+                        className={styles.textarea}
+                        rows={field.key === 'offices_text' ? 8 : 4}
+                        value={value || ''}
+                        onChange={e => handleChange(activeDataKey, field.key, e.target.value)}
+                      />
+                    ) : field.type === 'image_upload' || field.type === 'video_upload' ? (
+                      <div style={{ display: 'grid', gap: 10 }}>
+                        {value && (
+                          <div
+                            style={{
+                              border: '1px solid #E5E7EB',
+                              borderRadius: 12,
+                              overflow: 'hidden',
+                              background: '#F9FAFB',
+                              maxWidth: 420,
+                            }}
+                          >
+                            {field.type === 'video_upload' ? (
+                              <video
+                                src={resolveApiMediaUrl(value)}
+                                controls
+                                muted
+                                style={{ display: 'block', width: '100%', maxHeight: 220, objectFit: 'cover' }}
+                              />
+                            ) : (
+                              <img
+                                src={resolveApiMediaUrl(value)}
+                                alt={field.label}
+                                style={{ display: 'block', width: '100%', maxHeight: 220, objectFit: 'cover' }}
+                              />
+                            )}
+                          </div>
+                        )}
 
-                      <label className={styles.changeImgBtn} style={{ width: 'fit-content' }}>
-                        {uploadingField === field.key
-                          ? <><Loader2 size={14} className={styles.spinner} /> Đang upload...</>
-                          : <><Upload size={14} /> Chọn {field.type === 'video_upload' ? 'video' : 'ảnh'}</>
-                        }
+                        <label className={styles.changeImgBtn} style={{ width: 'fit-content' }}>
+                          {uploadingField === field.key
+                            ? <><Loader2 size={14} className={styles.spinner} /> Đang upload...</>
+                            : <><Upload size={14} /> Chọn {field.type === 'video_upload' ? 'video' : 'ảnh'}</>
+                          }
+                          <input
+                            hidden
+                            type="file"
+                            accept={field.type === 'video_upload' ? 'video/mp4,video/webm,video/quicktime' : 'image/*'}
+                            disabled={uploadingField === field.key}
+                            onChange={e => handleHeroMediaUpload(field.key, e.target.files?.[0])}
+                          />
+                        </label>
+
                         <input
-                          hidden
-                          type="file"
-                          accept={field.type === 'video_upload' ? 'video/mp4,video/webm,video/quicktime' : 'image/*'}
-                          disabled={uploadingField === field.key}
-                          onChange={e => handleHeroMediaUpload(field.key, e.target.files?.[0])}
+                          className={styles.input}
+                          type="text"
+                          value={value || ''}
+                          placeholder="URL sau khi upload hoặc dán link thủ công"
+                          onChange={e => handleChange(activeDataKey, field.key, e.target.value)}
                         />
+                      </div>
+                    ) : field.type === 'checkbox' ? (
+                      <label style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#4B5563', fontSize: 14 }}>
+                        <input
+                          type="checkbox"
+                          checked={Boolean(value)}
+                          onChange={e => handleChange(activeDataKey, field.key, e.target.checked)}
+                        />
+                        Bật
                       </label>
-
+                    ) : (
                       <input
                         className={styles.input}
                         type="text"
                         value={value || ''}
-                        placeholder="URL sau khi upload hoặc dán link thủ công"
                         onChange={e => handleChange(activeDataKey, field.key, e.target.value)}
                       />
-                    </div>
-                  ) : field.type === 'checkbox' ? (
-                    <label style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#4B5563', fontSize: 14 }}>
-                      <input
-                        type="checkbox"
-                        checked={Boolean(value)}
-                        onChange={e => handleChange(activeDataKey, field.key, e.target.checked)}
-                      />
-                      Bật
-                    </label>
-                  ) : (
-                    <input
-                      className={styles.input}
-                      type="text"
-                      value={value || ''}
-                      onChange={e => handleChange(activeDataKey, field.key, e.target.value)}
-                    />
-                  )}
+                    )}
 
-                  {field.helper && (
-                    <small style={{ color: '#6B7280', fontSize: 12 }}>{field.helper}</small>
+                    {field.helper && (
+                      <small style={{ color: '#6B7280', fontSize: 12 }}>{field.helper}</small>
+                    )}
+                  </div>
+                )
+              })}
+
+              {activeTab === 'partners_section' && (
+                <div className={styles.sectionAddon}>
+                  <h3 style={{ margin: '0 0 14px', fontSize: 15, color: '#111827' }}>
+                    Logo công ty đối tác
+                  </h3>
+
+                  <form onSubmit={handleCreatePartner} className={styles.partnerForm}>
+                    <div className={styles.field} style={{ marginBottom: 0 }}>
+                      <label className={styles.label}>Tên công ty</label>
+                      <input
+                        className={styles.input}
+                        value={partnerForm.name}
+                        onChange={e => setPartnerForm(prev => ({ ...prev, name: e.target.value }))}
+                        placeholder="VD: Maersk"
+                      />
+                    </div>
+
+                    <div className={styles.field} style={{ marginBottom: 0 }}>
+                      <label className={styles.label}>Website</label>
+                      <input
+                        className={styles.input}
+                        value={partnerForm.website_url}
+                        onChange={e => setPartnerForm(prev => ({ ...prev, website_url: e.target.value }))}
+                        placeholder="https://..."
+                      />
+                    </div>
+
+                    <div className={styles.field} style={{ marginBottom: 0 }}>
+                      <label className={styles.label}>Thứ tự</label>
+                      <input
+                        className={styles.input}
+                        type="number"
+                        value={partnerForm.sort_order}
+                        onChange={e => setPartnerForm(prev => ({ ...prev, sort_order: e.target.value }))}
+                        placeholder="0"
+                      />
+                    </div>
+
+                    <div className={styles.field} style={{ marginBottom: 0 }}>
+                      <label className={styles.label}>Logo</label>
+                      <input
+                        className={styles.input}
+                        type="file"
+                        accept="image/*"
+                        onChange={e => setPartnerForm(prev => ({ ...prev, logo: e.target.files?.[0] || null }))}
+                      />
+                    </div>
+
+                    <button className={styles.saveBtn} type="submit" disabled={partnerSaving}>
+                      {partnerSaving
+                        ? <><Loader2 size={14} className={styles.spinner} /> Đang thêm</>
+                        : <><Plus size={14} /> Thêm</>
+                      }
+                    </button>
+                  </form>
+
+                  {partnerLoading ? (
+                    <div className={styles.loadingBox} style={{ padding: '18px 0' }}>
+                      <Loader2 size={16} className={styles.spinner} /> Đang tải đối tác...
+                    </div>
+                  ) : (
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 12 }}>
+                      {partners.map(partner => (
+                        <div
+                          key={partner.id}
+                          style={{
+                            border: '1px solid #E5E7EB',
+                            borderRadius: 12,
+                            background: '#F9FAFB',
+                            padding: 12,
+                          }}
+                        >
+                          <div
+                            style={{
+                              height: 88,
+                              borderRadius: 10,
+                              background: '#fff',
+                              border: '1px solid #E5E7EB',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              marginBottom: 10,
+                              overflow: 'hidden',
+                            }}
+                          >
+                            {partner.logo_url ? (
+                              <img src={resolveApiMediaUrl(partner.logo_url)} alt={partner.name} style={{ maxWidth: '82%', maxHeight: '70%', objectFit: 'contain' }} />
+                            ) : (
+                              <Camera size={26} color="#9CA3AF" />
+                            )}
+                          </div>
+
+                          <div style={{ fontWeight: 700, color: '#111827', fontSize: 14 }}>{partner.name}</div>
+                          <div style={{ color: '#6B7280', fontSize: 12, marginTop: 3 }}>
+                            Thứ tự: {partner.sort_order ?? 0} · {partner.is_active ? 'Đang hiện' : 'Đang ẩn'}
+                          </div>
+
+                          <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+                            <button
+                              type="button"
+                              className={styles.changeImgBtn}
+                              onClick={() => handleTogglePartner(partner)}
+                            >
+                              {partner.is_active ? <EyeOff size={13} /> : <Eye size={13} />}
+                              {partner.is_active ? 'Ẩn' : 'Hiện'}
+                            </button>
+                            <button
+                              type="button"
+                              className={styles.changeImgBtn}
+                              onClick={() => setDeletePartnerTarget(partner)}
+                            >
+                              <Trash2 size={13} /> Xóa
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   )}
                 </div>
-              )
-            })}
+              )}
 
-            {activeTab === 'partners_section' && (
-              <div className={styles.sectionAddon}>
-                <h3 style={{ margin: '0 0 14px', fontSize: 15, color: '#111827' }}>
-                  Logo công ty đối tác
-                </h3>
-
-                <form onSubmit={handleCreatePartner} className={styles.partnerForm}>
-                  <div className={styles.field} style={{ marginBottom: 0 }}>
-                    <label className={styles.label}>Tên công ty</label>
-                    <input
-                      className={styles.input}
-                      value={partnerForm.name}
-                      onChange={e => setPartnerForm(prev => ({ ...prev, name: e.target.value }))}
-                      placeholder="VD: Maersk"
-                    />
+              {activeTab === 'testimonials_section' && (
+                <div className={styles.sectionAddon}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 8 }}>
+                    <h3 style={{ margin: 0, fontSize: 15, color: '#111827' }}>
+                      Đánh giá khách hàng trên trang chủ
+                    </h3>
+                    <button type="button" className={styles.saveBtn} onClick={handleAddReview}>
+                      <Plus size={14} /> Thêm đánh giá
+                    </button>
                   </div>
+                  <p style={{ margin: '0 0 16px', color: '#6B7280', fontSize: 13 }}>
+                    Các nội dung này sẽ hiển thị trong cụm thẻ đánh giá bên dưới logo đối tác.
+                  </p>
 
-                  <div className={styles.field} style={{ marginBottom: 0 }}>
-                    <label className={styles.label}>Website</label>
-                    <input
-                      className={styles.input}
-                      value={partnerForm.website_url}
-                      onChange={e => setPartnerForm(prev => ({ ...prev, website_url: e.target.value }))}
-                      placeholder="https://..."
-                    />
-                  </div>
+                  {normalizeReviews(home.partners_section?.reviews).length === 0 && (
+                    <div style={{ border: '1px dashed #D1D5DB', borderRadius: 12, padding: 18, color: '#6B7280', fontSize: 14, marginBottom: 14 }}>
+                      Chưa có đánh giá nào. Bấm “Thêm đánh giá” để tạo đánh giá đầu tiên.
+                    </div>
+                  )}
 
-                  <div className={styles.field} style={{ marginBottom: 0 }}>
-                    <label className={styles.label}>Thứ tự</label>
-                    <input
-                      className={styles.input}
-                      type="number"
-                      value={partnerForm.sort_order}
-                      onChange={e => setPartnerForm(prev => ({ ...prev, sort_order: e.target.value }))}
-                      placeholder="0"
-                    />
-                  </div>
-
-                  <div className={styles.field} style={{ marginBottom: 0 }}>
-                    <label className={styles.label}>Logo</label>
-                    <input
-                      className={styles.input}
-                      type="file"
-                      accept="image/*"
-                      onChange={e => setPartnerForm(prev => ({ ...prev, logo: e.target.files?.[0] || null }))}
-                    />
-                  </div>
-
-                  <button className={styles.saveBtn} type="submit" disabled={partnerSaving}>
-                    {partnerSaving
-                      ? <><Loader2 size={14} className={styles.spinner} /> Đang thêm</>
-                      : <><Plus size={14} /> Thêm</>
-                    }
-                  </button>
-                </form>
-
-                {partnerLoading ? (
-                  <div className={styles.loadingBox} style={{ padding: '18px 0' }}>
-                    <Loader2 size={16} className={styles.spinner} /> Đang tải đối tác...
-                  </div>
-                ) : (
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 12 }}>
-                    {partners.map(partner => (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 14 }}>
+                    {normalizeReviews(home.partners_section?.reviews).map((review, index) => (
                       <div
-                        key={partner.id}
+                        key={index}
                         style={{
                           border: '1px solid #E5E7EB',
                           borderRadius: 12,
-                          background: '#F9FAFB',
-                          padding: 12,
+                          background: '#fff',
+                          padding: 14,
                         }}
                       >
-                        <div
-                          style={{
-                            height: 88,
-                            borderRadius: 10,
-                            background: '#fff',
-                            border: '1px solid #E5E7EB',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            marginBottom: 10,
-                            overflow: 'hidden',
-                          }}
-                        >
-                          {partner.logo_url ? (
-                            <img src={resolveApiMediaUrl(partner.logo_url)} alt={partner.name} style={{ maxWidth: '82%', maxHeight: '70%', objectFit: 'contain' }} />
-                          ) : (
-                            <Camera size={26} color="#9CA3AF" />
-                          )}
-                        </div>
-
-                        <div style={{ fontWeight: 700, color: '#111827', fontSize: 14 }}>{partner.name}</div>
-                        <div style={{ color: '#6B7280', fontSize: 12, marginTop: 3 }}>
-                          Thứ tự: {partner.sort_order ?? 0} · {partner.is_active ? 'Đang hiện' : 'Đang ẩn'}
-                        </div>
-
-                        <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginBottom: 12 }}>
+                          <div style={{ fontWeight: 700, color: '#111827', fontSize: 14 }}>
+                            Đánh giá #{index + 1}
+                          </div>
                           <button
                             type="button"
                             className={styles.changeImgBtn}
-                            onClick={() => handleTogglePartner(partner)}
-                          >
-                            {partner.is_active ? <EyeOff size={13} /> : <Eye size={13} />}
-                            {partner.is_active ? 'Ẩn' : 'Hiện'}
-                          </button>
-                          <button
-                            type="button"
-                            className={styles.changeImgBtn}
-                            onClick={() => setDeletePartnerTarget(partner)}
+                            onClick={() => handleDeleteReview(index)}
                           >
                             <Trash2 size={13} /> Xóa
                           </button>
                         </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: '80px 1fr', gap: 10 }}>
+                          <div className={styles.field} style={{ marginBottom: 0 }}>
+                            <label className={styles.label}>Chữ tắt</label>
+                            <input
+                              className={styles.input}
+                              value={review.initials || ''}
+                              maxLength={3}
+                              onChange={e => handleReviewChange(index, 'initials', e.target.value.toUpperCase())}
+                              placeholder="TQ"
+                            />
+                          </div>
+
+                          <div className={styles.field} style={{ marginBottom: 0 }}>
+                            <label className={styles.label}>Tên khách hàng</label>
+                            <input
+                              className={styles.input}
+                              value={review.name || ''}
+                              onChange={e => handleReviewChange(index, 'name', e.target.value)}
+                              placeholder="Tên khách hàng"
+                            />
+                          </div>
+                        </div>
+
+                        <div className={styles.field} style={{ marginTop: 10 }}>
+                          <label className={styles.label}>Công ty / chức vụ</label>
+                          <input
+                            className={styles.input}
+                            value={review.company || ''}
+                            onChange={e => handleReviewChange(index, 'company', e.target.value)}
+                            placeholder="VD: CEO — ABC Logistics"
+                          />
+                        </div>
+
+                        <div className={styles.field} style={{ marginTop: 10 }}>
+                          <label className={styles.label}>Ảnh khách hàng</label>
+                          <div className={styles.reviewAvatarUploader}>
+                            <div className={styles.reviewAvatarPreview}>
+                              {review.avatar_url ? (
+                                <img src={resolveApiMediaUrl(review.avatar_url)} alt={review.name || `Khách hàng ${index + 1}`} />
+                              ) : (
+                                <span>{review.initials || 'KH'}</span>
+                              )}
+                            </div>
+
+                            <div className={styles.reviewAvatarActions}>
+                              <label className={styles.changeImgBtn}>
+                                {uploadingField === `review-avatar-${index}`
+                                  ? <><Loader2 size={14} className={styles.spinner} /> Đang upload...</>
+                                  : <><Upload size={14} /> Chọn ảnh</>
+                                }
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  disabled={uploadingField === `review-avatar-${index}`}
+                                  onChange={e => handleReviewAvatarUpload(index, e.target.files?.[0])}
+                                  style={{ display: 'none' }}
+                                />
+                              </label>
+
+                              {review.avatar_url && (
+                                <button
+                                  type="button"
+                                  className={styles.changeImgBtn}
+                                  onClick={() => handleReviewChange(index, 'avatar_url', '')}
+                                >
+                                  <Trash2 size={13} /> Xóa ảnh
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className={styles.field} style={{ marginBottom: 0 }}>
+                          <label className={styles.label}>Nội dung đánh giá</label>
+                          <textarea
+                            className={styles.textarea}
+                            rows={4}
+                            value={review.quote || ''}
+                            onChange={e => handleReviewChange(index, 'quote', e.target.value)}
+                            placeholder="Nhập nội dung đánh giá..."
+                          />
+                        </div>
                       </div>
                     ))}
                   </div>
-                )}
-              </div>
-            )}
-
-            {activeTab === 'testimonials_section' && (
-              <div className={styles.sectionAddon}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 8 }}>
-                  <h3 style={{ margin: 0, fontSize: 15, color: '#111827' }}>
-                    Đánh giá khách hàng trên trang chủ
-                  </h3>
-                  <button type="button" className={styles.saveBtn} onClick={handleAddReview}>
-                    <Plus size={14} /> Thêm đánh giá
-                  </button>
                 </div>
-                <p style={{ margin: '0 0 16px', color: '#6B7280', fontSize: 13 }}>
-                  Các nội dung này sẽ hiển thị trong cụm thẻ đánh giá bên dưới logo đối tác.
-                </p>
+              )}
 
-                {normalizeReviews(home.partners_section?.reviews).length === 0 && (
-                  <div style={{ border: '1px dashed #D1D5DB', borderRadius: 12, padding: 18, color: '#6B7280', fontSize: 14, marginBottom: 14 }}>
-                    Chưa có đánh giá nào. Bấm “Thêm đánh giá” để tạo đánh giá đầu tiên.
-                  </div>
-                )}
-
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 14 }}>
-                  {normalizeReviews(home.partners_section?.reviews).map((review, index) => (
-                    <div
-                      key={index}
-                      style={{
-                        border: '1px solid #E5E7EB',
-                        borderRadius: 12,
-                        background: '#fff',
-                        padding: 14,
-                      }}
-                    >
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginBottom: 12 }}>
-                        <div style={{ fontWeight: 700, color: '#111827', fontSize: 14 }}>
-                          Đánh giá #{index + 1}
-                        </div>
-                        <button
-                          type="button"
-                          className={styles.changeImgBtn}
-                          onClick={() => handleDeleteReview(index)}
-                        >
-                          <Trash2 size={13} /> Xóa
-                        </button>
-                      </div>
-
-                      <div style={{ display: 'grid', gridTemplateColumns: '80px 1fr', gap: 10 }}>
-                        <div className={styles.field} style={{ marginBottom: 0 }}>
-                          <label className={styles.label}>Chữ tắt</label>
-                          <input
-                            className={styles.input}
-                            value={review.initials || ''}
-                            maxLength={3}
-                            onChange={e => handleReviewChange(index, 'initials', e.target.value.toUpperCase())}
-                            placeholder="TQ"
-                          />
-                        </div>
-
-                        <div className={styles.field} style={{ marginBottom: 0 }}>
-                          <label className={styles.label}>Tên khách hàng</label>
-                          <input
-                            className={styles.input}
-                            value={review.name || ''}
-                            onChange={e => handleReviewChange(index, 'name', e.target.value)}
-                            placeholder="Tên khách hàng"
-                          />
-                        </div>
-                      </div>
-
-                      <div className={styles.field} style={{ marginTop: 10 }}>
-                        <label className={styles.label}>Công ty / chức vụ</label>
-                        <input
-                          className={styles.input}
-                          value={review.company || ''}
-                          onChange={e => handleReviewChange(index, 'company', e.target.value)}
-                          placeholder="VD: CEO — ABC Logistics"
-                        />
-                      </div>
-
-                      <div className={styles.field} style={{ marginTop: 10 }}>
-                        <label className={styles.label}>Ảnh khách hàng</label>
-                        <div className={styles.reviewAvatarUploader}>
-                          <div className={styles.reviewAvatarPreview}>
-                            {review.avatar_url ? (
-                              <img src={resolveApiMediaUrl(review.avatar_url)} alt={review.name || `Khách hàng ${index + 1}`} />
-                            ) : (
-                              <span>{review.initials || 'KH'}</span>
-                            )}
-                          </div>
-
-                          <div className={styles.reviewAvatarActions}>
-                            <label className={styles.changeImgBtn}>
-                              {uploadingField === `review-avatar-${index}`
-                                ? <><Loader2 size={14} className={styles.spinner} /> Đang upload...</>
-                                : <><Upload size={14} /> Chọn ảnh</>
-                              }
-                              <input
-                                type="file"
-                                accept="image/*"
-                                disabled={uploadingField === `review-avatar-${index}`}
-                                onChange={e => handleReviewAvatarUpload(index, e.target.files?.[0])}
-                                style={{ display: 'none' }}
-                              />
-                            </label>
-
-                            {review.avatar_url && (
-                              <button
-                                type="button"
-                                className={styles.changeImgBtn}
-                                onClick={() => handleReviewChange(index, 'avatar_url', '')}
-                              >
-                                <Trash2 size={13} /> Xóa ảnh
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className={styles.field} style={{ marginBottom: 0 }}>
-                        <label className={styles.label}>Nội dung đánh giá</label>
-                        <textarea
-                          className={styles.textarea}
-                          rows={4}
-                          value={review.quote || ''}
-                          onChange={e => handleReviewChange(index, 'quote', e.target.value)}
-                          placeholder="Nhập nội dung đánh giá..."
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
+              <div className={styles.saveRow}>
+                <button className={styles.saveBtn} onClick={handleSave} disabled={saving}>
+                  {saving
+                    ? <><Loader2 size={15} className={styles.spinner} /> Đang lưu...</>
+                    : <><Save size={15} /> Lưu section</>
+                  }
+                </button>
               </div>
-            )}
-
-            <div className={styles.saveRow}>
-              <button className={styles.saveBtn} onClick={handleSave} disabled={saving}>
-                {saving
-                  ? <><Loader2 size={15} className={styles.spinner} /> Đang xuất bản...</>
-                  : <><Save size={15} /> Xuất bản section</>
-                }
-              </button>
             </div>
           </div>
-        </div>
         </>
       )}
 
