@@ -86,7 +86,7 @@ export default function AdminBlogs() {
         const fallback = await blogApi.getCategories()
         if (Array.isArray(fallback.data)) {
           setCategoryRecords(fallback.data.map((name, index) => ({
-            id: `fallback-${index}`,
+            id: name,
             name,
             sort_order: index + 1,
             is_active: 1,
@@ -95,7 +95,7 @@ export default function AdminBlogs() {
         }
       } catch {
         setCategoryRecords(DEFAULT_BLOG_CATEGORIES.map((name, index) => ({
-          id: `default-${index}`,
+          id: name,
           name,
           sort_order: index + 1,
           is_active: 1,

@@ -106,8 +106,8 @@ export const blogApi = {
   createCategory: (data) =>
     request('/blogs/admin/categories', { method: 'POST', body: JSON.stringify(data) }),
   updateCategory: (id, data) =>
-    request(`/blogs/admin/categories/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
-  deleteCategory: (id) => request(`/blogs/admin/categories/${id}`, { method: 'DELETE' }),
+    request(`/blogs/admin/categories/${encodeURIComponent(id)}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteCategory: (id) => request(`/blogs/admin/categories/${encodeURIComponent(id)}`, { method: 'DELETE' }),
 
   adminList: (params = {}) => {
     const qs = new URLSearchParams(params).toString()

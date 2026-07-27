@@ -16,6 +16,15 @@ function createCategorySlug(name) {
     .replace(/-+/g, '-');
 }
 
+function getCategoryLookup(identifier) {
+  const raw = String(identifier || '').trim();
+  const numericId = Number(raw);
+  if (Number.isInteger(numericId) && numericId > 0) {
+    return { where: 'id = ?', value: numericId };
+  }
+  return { where: 'name = ?', value: raw };
+}
+
 const getBlogCategories = async (req, res) => {
   try {
     const [rows] = await pool.query(
@@ -82,12 +91,12 @@ const createBlogCategory = async (req, res) => {
 const updateBlogCategory = async (req, res) => {
   const connection = await pool.getConnection();
   try {
-    const id = Number(req.params.id);
+    const lookup = getCategoryLookup(req.params.id);
     const name = String(req.body.name || '').trim();
     const sortOrder = Number(req.body.sort_order) || 0;
     const isActive = req.body.is_active === false || req.body.is_active === '0' ? 0 : 1;
 
-    if (!Number.isInteger(id) || id <= 0) {
+    if (!lookup.value) {
       return res.status(400).json({ success: false, message: 'Mã danh mục không hợp lệ.' });
     }
     if (!name) {
@@ -95,7 +104,7 @@ const updateBlogCategory = async (req, res) => {
     }
 
     await connection.beginTransaction();
-    const [beforeRows] = await connection.query('SELECT * FROM blog_categories WHERE id = ?', [id]);
+    const [beforeRows] = await connection.query(`SELECT * FROM blog_categories WHERE ${lookup.where}`, [lookup.value]);
     if (!beforeRows.length) {
       await connection.rollback();
       return res.status(404).json({ success: false, message: 'Không tìm thấy danh mục tin tức.' });
@@ -103,22 +112,22 @@ const updateBlogCategory = async (req, res) => {
 
     const before = beforeRows[0];
     let slug = createCategorySlug(name);
-    if (!slug) slug = `danh-muc-${id}`;
+    if (!slug) slug = `danh-muc-${before.id}`;
 
     await connection.query(
       'UPDATE blog_categories SET name = ?, slug = ?, sort_order = ?, is_active = ? WHERE id = ?',
-      [name, slug, sortOrder, isActive, id]
+      [name, slug, sortOrder, isActive, before.id]
     );
 
     if (before.name !== name) {
       await connection.query('UPDATE blogs SET category = ? WHERE category = ?', [name, before.name]);
     }
 
-    const [afterRows] = await connection.query('SELECT * FROM blog_categories WHERE id = ?', [id]);
+    const [afterRows] = await connection.query('SELECT * FROM blog_categories WHERE id = ?', [before.id]);
     await connection.commit();
 
     await recordAdminAudit({
-      module: 'blogs', action: 'update', entityType: 'blog_category', entityId: id,
+      module: 'blogs', action: 'update', entityType: 'blog_category', entityId: before.id,
       summary: `Cập nhật danh mục tin tức: ${name}`, before, after: afterRows[0], userId: req.user?.id,
     });
 
@@ -137,12 +146,12 @@ const updateBlogCategory = async (req, res) => {
 
 const deleteBlogCategory = async (req, res) => {
   try {
-    const id = Number(req.params.id);
-    if (!Number.isInteger(id) || id <= 0) {
+    const lookup = getCategoryLookup(req.params.id);
+    if (!lookup.value) {
       return res.status(400).json({ success: false, message: 'Mã danh mục không hợp lệ.' });
     }
 
-    const [rows] = await pool.query('SELECT * FROM blog_categories WHERE id = ?', [id]);
+    const [rows] = await pool.query(`SELECT * FROM blog_categories WHERE ${lookup.where}`, [lookup.value]);
     if (!rows.length) {
       return res.status(404).json({ success: false, message: 'Không tìm thấy danh mục tin tức.' });
     }
@@ -155,9 +164,9 @@ const deleteBlogCategory = async (req, res) => {
       });
     }
 
-    await pool.query('DELETE FROM blog_categories WHERE id = ?', [id]);
+    await pool.query('DELETE FROM blog_categories WHERE id = ?', [rows[0].id]);
     await recordAdminAudit({
-      module: 'blogs', action: 'delete', entityType: 'blog_category', entityId: id,
+      module: 'blogs', action: 'delete', entityType: 'blog_category', entityId: rows[0].id,
       summary: `Xóa danh mục tin tức: ${rows[0].name}`, before: rows[0], userId: req.user?.id,
     });
 
