@@ -1,7 +1,7 @@
 import { Fragment, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
-  ArrowLeft, CheckCircle2, ChevronDown, ChevronLeft,
+  ArrowLeft, CheckCircle2, ChevronDown, ChevronLeft, Columns3,
   ChevronRight, ChevronUp, Clock, Loader2, Mail, MessageSquare,
   Phone, RefreshCw, Search, Trash, Trash2, UserRound, X,
 } from 'lucide-react'
@@ -23,15 +23,6 @@ const EMPTY_STATS = {
   replied_count: 0,
   archived_count: 0,
 }
-
-const CRM_ACTIONS = [
-  { value: 'called', label: 'Đã gọi' },
-  { value: 'emailed', label: 'Đã gửi mail' },
-  { value: 'missed_call', label: 'Khách không nghe máy' },
-  { value: 'closed', label: 'Đã chốt' },
-]
-
-const CRM_ACTION_LABEL = CRM_ACTIONS.reduce((acc, item) => ({ ...acc, [item.value]: item.label }), {})
 
 const getGmailComposeUrl = ({ to, subject = '', body = '' }) => {
   const params = new URLSearchParams({
@@ -111,26 +102,6 @@ const fetchData = async ({ silent = false } = {}) => {
       showToast('Đã cập nhật trạng thái.')
     } catch (error) {
       showToast(error.message || 'Không thể cập nhật trạng thái.', 'error')
-    } finally {
-      setUpdating(null)
-    }
-  }
-
-  const updateLocalContact = (id, patch) => {
-    setContacts(current => current.map(item => item.id === id ? { ...item, ...patch } : item))
-  }
-
-  const saveCrm = async (item, action = item.last_action || '') => {
-    setUpdating(item.id)
-    try {
-      const res = await contactApi.updateCrm(item.id, {
-        admin_note: item.admin_note || '',
-        last_action: action,
-      })
-      updateLocalContact(item.id, res.data || { ...item, last_action: action })
-      showToast('Đã lưu thông tin xử lý.')
-    } catch (error) {
-      showToast(error.message || 'Không thể lưu thông tin xử lý.', 'error')
     } finally {
       setUpdating(null)
     }
@@ -323,43 +294,17 @@ const fetchData = async ({ silent = false } = {}) => {
                             </p>
                             <p className={styles.expandedLabel} style={{ marginTop: 14 }}>Nội dung yêu cầu</p>
                             <p className={styles.expandedText} style={{ whiteSpace: 'pre-wrap' }}>{item.message}</p>
-                            {item.last_action ? (
-                              <p className={styles.expandedText}>
-                                Xử lý gần nhất: {CRM_ACTION_LABEL[item.last_action] || item.last_action}
-                                {item.last_action_at ? ` - ${formatDate(item.last_action_at)}` : ''}
-                              </p>
-                            ) : null}
-                            <p className={styles.expandedLabel} style={{ marginTop: 14 }}>CRM nội bộ</p>
-                            <div className={styles.crmPanel} onClick={event => event.stopPropagation()}>
-                              <div className={styles.crmActions}>
-                                {CRM_ACTIONS.map(action => (
-                                  <button
-                                    key={action.value}
-                                    type="button"
-                                    className={`${styles.crmActionBtn} ${item.last_action === action.value ? styles.crmActionActive : ''}`}
-                                    disabled={updating === item.id}
-                                    onClick={() => saveCrm(item, item.last_action === action.value ? '' : action.value)}
-                                  >
-                                    {action.label}
-                                  </button>
-                                ))}
-                              </div>
-                              <textarea
-                                className={styles.crmNote}
-                                rows={3}
-                                placeholder="Ghi chú nội bộ: đã gọi lúc nào, khách yêu cầu gì, bước tiếp theo..."
-                                value={item.admin_note || ''}
-                                onChange={event => updateLocalContact(item.id, { admin_note: event.target.value })}
-                              />
-                              <button
-                                type="button"
-                                className={styles.replyLink}
-                                disabled={updating === item.id}
-                                onClick={() => saveCrm(item)}
-                              >
-                                Lưu ghi chú
-                              </button>
-                            </div>
+                            <button
+                              type="button"
+                              className={styles.replyLink}
+                              style={{ marginTop: 14 }}
+                              onClick={event => {
+                                event.stopPropagation()
+                                navigate('/admin/crm')
+                              }}
+                            >
+                              <Columns3 size={14} /> Quản lý khách hàng trong CRM
+                            </button>
                           </div>
                         </td>
                       </tr>
