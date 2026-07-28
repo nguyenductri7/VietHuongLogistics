@@ -14,12 +14,12 @@ const navItems = [
   { icon: Home, label: 'Trang chủ', to: '/admin/home' },
   { icon: Info, label: 'Giới thiệu', to: '/admin/about' },
   { icon: Truck, label: 'Dịch vụ', to: '/admin/services' },
-  { icon: HelpCircle, label: 'Giải đáp', to: '/admin/faq' },
   { icon: FileText, label: 'Nội dung FAQ', to: '/admin/faq-content' },
   { icon: Newspaper, label: 'Tin tức', to: '/admin/blogs' },
   { icon: Building2, label: 'Chi nhánh', to: '/admin/branches' },
+  { icon: HelpCircle, label: 'Giải đáp', to: '/admin/faq' },
   { icon: Phone, label: 'Liên hệ', to: '/admin/contacts' },
-  { icon: Columns3, label: 'CRM Liên Hệ khách hàng', to: '/admin/crm' },
+  { icon: Columns3, label: 'CRM Liên Hệ', to: '/admin/crm' },
   { icon: History, label: 'Lịch sử chỉnh sửa', to: '/admin/history' },
 ]
 
