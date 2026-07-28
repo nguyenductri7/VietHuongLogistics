@@ -74,7 +74,46 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      <section className={styles.reminderWidget}>
+
+
+      <div className={styles.sectionLabel}>Quản lý nội dung</div>
+
+      <div className={styles.grid}>
+        {cards.map((c) => {
+          const Icon = c.icon
+          return (
+            <button
+              key={c.to}
+              className={styles.card}
+              onClick={() => navigate(c.to)}
+              style={{ '--accent': c.color }}
+            >
+              <div className={styles.cardIconWrap} style={{ background: `${c.color}14` }}>
+                <Icon size={22} color={c.color} strokeWidth={1.8} />
+              </div>
+              <div className={styles.cardContent}>
+                <div className={styles.cardLabel}>
+                  {c.label}
+                  {c.to === '/admin/contacts' && newContacts > 0 && (
+                    <span className={styles.cardBadge}>{newContacts > 99 ? '99+' : `${newContacts} mới`}</span>
+                  )}
+                  {c.to === '/admin/faq' && pendingFaq > 0 && (
+                    <span className={styles.cardBadge}>{pendingFaq > 99 ? '99+' : `${pendingFaq} mới`}</span>
+                  )}
+                  {c.to === '/admin/crm' && reminderStats.attention_count > 0 && (
+                    <span className={styles.cardBadge}>
+                      {reminderStats.attention_count > 99 ? '99+' : `${reminderStats.attention_count} việc`}
+                    </span>
+                  )}
+                </div>
+                <div className={styles.cardDesc}>{c.desc}</div>
+              </div>
+              <ChevronRight size={16} className={styles.cardArrow} />
+            </button>
+          )
+        })}
+      </div>
+            <section className={styles.reminderWidget}>
         <div className={styles.reminderWidgetHeader}>
           <div>
             <span className={styles.reminderWidgetIcon}><BellRing size={17} /></span>
@@ -114,44 +153,6 @@ export default function AdminDashboard() {
           <p className={styles.reminderWidgetEmpty}>Không có lịch hẹn nào đang chờ xử lý.</p>
         )}
       </section>
-
-      <div className={styles.sectionLabel}>Quản lý nội dung</div>
-
-      <div className={styles.grid}>
-        {cards.map((c) => {
-          const Icon = c.icon
-          return (
-            <button
-              key={c.to}
-              className={styles.card}
-              onClick={() => navigate(c.to)}
-              style={{ '--accent': c.color }}
-            >
-              <div className={styles.cardIconWrap} style={{ background: `${c.color}14` }}>
-                <Icon size={22} color={c.color} strokeWidth={1.8} />
-              </div>
-              <div className={styles.cardContent}>
-                <div className={styles.cardLabel}>
-                  {c.label}
-                  {c.to === '/admin/contacts' && newContacts > 0 && (
-                    <span className={styles.cardBadge}>{newContacts > 99 ? '99+' : `${newContacts} mới`}</span>
-                  )}
-                  {c.to === '/admin/faq' && pendingFaq > 0 && (
-                    <span className={styles.cardBadge}>{pendingFaq > 99 ? '99+' : `${pendingFaq} mới`}</span>
-                  )}
-                  {c.to === '/admin/crm' && reminderStats.attention_count > 0 && (
-                    <span className={styles.cardBadge}>
-                      {reminderStats.attention_count > 99 ? '99+' : `${reminderStats.attention_count} việc`}
-                    </span>
-                  )}
-                </div>
-                <div className={styles.cardDesc}>{c.desc}</div>
-              </div>
-              <ChevronRight size={16} className={styles.cardArrow} />
-            </button>
-          )
-        })}
-      </div>
     </div>
   )
 }
