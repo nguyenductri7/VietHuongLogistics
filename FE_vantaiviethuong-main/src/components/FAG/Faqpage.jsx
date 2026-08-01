@@ -7,6 +7,7 @@ import { ChevronDown, Phone, MessageCircle, CheckCircle2 } from 'lucide-react'
 import { Helmet } from 'react-helmet-async'
 import { faqApi, faqContentApi } from '../../services/api'   // ← import faqApi + faqContentApi
 import styles from './Faqpage.module.scss'
+import Seo from '../Seo/Seo'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -106,6 +107,11 @@ export default function FaqPage() {
         <title>Giải Đáp Thắc Mắc | Việt Hương Logistics</title>
         <meta name="description" content="Tổng hợp câu hỏi thường gặp về dịch vụ vận chuyển, báo giá, thủ tục hải quan và theo dõi hàng hóa." />
       </Helmet>
+      <Seo
+        path="/giai-dap"
+        title="Giải đáp thắc mắc | Việt Hương Logistics"
+        description="Tổng hợp câu hỏi thường gặp về dịch vụ vận chuyển, báo giá, thủ tục hải quan và theo dõi hàng hóa."
+      />
 
       <main ref={pageRef} className={styles.page}>
 

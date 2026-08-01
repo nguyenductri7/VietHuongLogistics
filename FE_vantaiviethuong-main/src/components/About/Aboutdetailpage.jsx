@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import styles from './Aboutdetailpage.module.scss'
 import { aboutPageApi } from '../../services/api'
+import Seo from '../Seo/Seo'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -309,6 +310,12 @@ export default function AboutDetailPage() {
 
   return (
     <main className={styles.page}>
+      <Seo
+        path="/ve-chung-toi"
+        title="Về chúng tôi | Việt Hương Logistics"
+        description="Tìm hiểu về Việt Hương Logistics, hành trình phát triển, năng lực vận tải và các giá trị cốt lõi của doanh nghiệp."
+        image={hero.bg_image}
+      />
 
       {/* ══════════ HERO */}
       <section ref={heroRef} className={styles.hero}>

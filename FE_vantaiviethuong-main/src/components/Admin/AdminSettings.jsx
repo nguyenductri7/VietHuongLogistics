@@ -179,7 +179,7 @@ export default function AdminSettings() {
                       className={styles.imagePreview}
                       onClick={() => fileRefs.current[field.imageKey]?.click()}
                     >
-                      {uploading[field.imageKey] ? (
+                      {uploading[field.imageKey] ? (                  
                         <div className={styles.uploadingOverlay}>
                           <Loader2 size={22} className={styles.spinner} />
                           <span>Đang upload...</span>

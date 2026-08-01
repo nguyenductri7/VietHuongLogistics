@@ -113,7 +113,7 @@ export default function AdminDashboard() {
           )
         })}
       </div>
-            <section className={styles.reminderWidget}>
+      <section className={styles.reminderWidget}>
         <div className={styles.reminderWidgetHeader}>
           <div>
             <span className={styles.reminderWidgetIcon}><BellRing size={17} /></span>

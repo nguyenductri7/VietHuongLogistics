@@ -36,6 +36,7 @@ import AdminBranches from './components/Admin/AdminBranches'
 import AdminProfile from './components/Admin/AdminProfile'
 import AdminCmsHistory from './components/Admin/AdminCmsHistory'
 import AdminCrm from './components/Admin/AdminCrm'
+import Seo, { SITE_URL } from './components/Seo/Seo'
 gsap.registerPlugin(ScrollTrigger)
 
 // ─── Helpers ─────────────────────────────────────────────────
@@ -73,6 +74,19 @@ function HomePage() {
   }, [skipVideo])
   return (
     <FadePage>
+      <Seo
+        path="/"
+        title="Việt Hương Logistics | Vận tải và Logistics toàn quốc"
+        description="Việt Hương Logistics cung cấp dịch vụ vận chuyển nội địa, quốc tế, logistics kho bãi và chuyển phát nhanh."
+        structuredData={{
+          '@context': 'https://schema.org',
+          '@type': 'WebSite',
+          '@id': `${SITE_URL}/#website`,
+          url: `${SITE_URL}/`,
+          name: 'Việt Hương Logistics',
+          inLanguage: 'vi-VN',
+        }}
+      />
       <Helmet>
         <title>Vận Tải Việt Hương | Logistics & Vận Chuyển Hàng Hóa Toàn Quốc</title>
         <meta name="description" content="Việt Hương - Đơn vị vận tải hàng đầu Việt Nam." />
@@ -142,23 +156,26 @@ function AppInner() {
 
   if (isAdminArea) {
     return (
-      <Routes>
-        <Route path="/login" element={<AdminLogin />} />
-        <Route path="/admin" element={adminPage(<AdminDashboard />)} />
-        <Route path="/admin/home" element={adminPage(<AdminHome />)} />
-        <Route path="/admin/about" element={adminPage(<AdminAbout />)} />
-        <Route path="/admin/services" element={adminPage(<AdminServices />)} />
-        <Route path="/admin/faq" element={adminPage(<AdminFaq />)} />
-        <Route path="/admin/faq-content" element={adminPage(<AdminFaqContent />)} />
-        <Route path="/admin/blogs" element={adminPage(<AdminBlogs />)} />
-        <Route path="/admin/contacts" element={adminPage(<AdminContacts />)} />
-        <Route path="/admin/crm" element={adminPage(<AdminCrm />)} />
-        <Route path="/admin/branches" element={adminPage(<AdminBranches />)} />
-        <Route path="/admin/profile" element={adminPage(<AdminProfile />)} />
-        <Route path="/admin/history" element={adminPage(<AdminCmsHistory />)} />
-        <Route path="/admin/settings" element={<Navigate to="/admin/home" replace />} />
-        <Route path="/admin/*" element={adminPage(<AdminDashboard />)} />
-      </Routes>
+      <>
+        <Seo title="Trang quản trị | Việt Hương Logistics" noindex />
+        <Routes>
+          <Route path="/login" element={<AdminLogin />} />
+          <Route path="/admin" element={adminPage(<AdminDashboard />)} />
+          <Route path="/admin/home" element={adminPage(<AdminHome />)} />
+          <Route path="/admin/about" element={adminPage(<AdminAbout />)} />
+          <Route path="/admin/services" element={adminPage(<AdminServices />)} />
+          <Route path="/admin/faq" element={adminPage(<AdminFaq />)} />
+          <Route path="/admin/faq-content" element={adminPage(<AdminFaqContent />)} />
+          <Route path="/admin/blogs" element={adminPage(<AdminBlogs />)} />
+          <Route path="/admin/contacts" element={adminPage(<AdminContacts />)} />
+          <Route path="/admin/crm" element={adminPage(<AdminCrm />)} />
+          <Route path="/admin/branches" element={adminPage(<AdminBranches />)} />
+          <Route path="/admin/profile" element={adminPage(<AdminProfile />)} />
+          <Route path="/admin/history" element={adminPage(<AdminCmsHistory />)} />
+          <Route path="/admin/settings" element={<Navigate to="/admin/home" replace />} />
+          <Route path="/admin/*" element={adminPage(<AdminDashboard />)} />
+        </Routes>
+      </>
     )
   }
 

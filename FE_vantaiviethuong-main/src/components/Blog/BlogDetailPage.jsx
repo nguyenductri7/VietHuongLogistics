@@ -7,6 +7,7 @@ import { BLOG_DEFAULT_IMAGE, getFallbackPost, getFallbackRelated } from './blogF
 import { readTimeFromPost } from './blogReadTime'
 import { formatBlogDate, getBlogDateValue } from './blogDate'
 import styles from './BlogDetailPage.module.scss'
+import Seo, { SITE_URL } from '../Seo/Seo'
 
 // Gradient mặc định khi bài viết không có thumbnail_url (đồng bộ với BlogPage.jsx)
 const FALLBACK_GRADIENTS = [
@@ -152,6 +153,34 @@ export default function BlogDetailPage() {
         <title>{post.title} | Việt Hương Logistics</title>
         <meta name="description" content={post.excerpt} />
       </Helmet>
+      <Seo
+        path={`/tin-tuc/${post.slug || post.id}`}
+        title={`${post.title} | Việt Hương Logistics`}
+        description={post.excerpt || `Bài viết ${post.title} từ Việt Hương Logistics.`}
+        image={heroImage}
+        type="article"
+        publishedTime={post.published_at || post.created_at}
+        modifiedTime={post.updated_at}
+        structuredData={{
+          '@context': 'https://schema.org',
+          '@type': 'BlogPosting',
+          headline: post.title,
+          description: post.excerpt || undefined,
+          image: heroImage,
+          datePublished: post.published_at || post.created_at,
+          dateModified: post.updated_at || post.published_at || post.created_at,
+          mainEntityOfPage: `${SITE_URL}/tin-tuc/${post.slug || post.id}`,
+          author: {
+            '@type': 'Organization',
+            name: post.author || 'Việt Hương Logistics',
+          },
+          publisher: {
+            '@type': 'Organization',
+            '@id': `${SITE_URL}/#organization`,
+            name: 'Việt Hương Logistics',
+          },
+        }}
+      />
 
       <main ref={pageRef} className={styles.page}>
         {/* Back breadcrumb */}

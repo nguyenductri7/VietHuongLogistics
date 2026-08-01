@@ -22,6 +22,7 @@ import {
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import s from './ServicesDetailPage.module.scss';
+import Seo from '../Seo/Seo';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -776,6 +777,11 @@ export default function ServicesSections() {
 
   return (
     <>
+      <Seo
+        path="/dich-vu"
+        title="Dịch vụ vận tải và Logistics | Việt Hương Logistics"
+        description="Khám phá dịch vụ vận chuyển nội địa, quốc tế, logistics kho bãi và chuyển phát nhanh của Việt Hương Logistics."
+      />
       <ServicesBanner  bannerData={pageData?.banner} />
       <ServiceTimeline services={services || TIMELINE_SERVICES} />
       <ProcessStepper  stepsData={pageData?.process_steps || PROCESS_STEPS} />

@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "node scripts/generate-sitemap.mjs && vite build",
     "optimize:truck": "gltf-transform optimize public/models/truck.glb public/models/truck-optimized.glb --compress meshopt --simplify true --simplify-ratio 0.35 --simplify-error 0.001 --texture-compress false",
     "preview": "vite preview"
   },

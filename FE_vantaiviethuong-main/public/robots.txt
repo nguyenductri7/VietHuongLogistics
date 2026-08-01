@@ -1,4 +1,6 @@
 User-agent: *
 Allow: /
+Disallow: /admin/
+Disallow: /login
 
-Sitemap: https://vantaiviethuong.com/sitemap.xml
+Sitemap: https://viethuonglogistics.com/sitemap.xml

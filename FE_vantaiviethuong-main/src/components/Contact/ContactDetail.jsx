@@ -3,6 +3,7 @@ import { MapPin, Mail, Phone, Building2, ChevronRight, Star } from 'lucide-react
 import { Helmet } from 'react-helmet-async'
 import { branchApi } from '../../services/api'
 import styles from './ContactDetail.module.scss'
+import Seo from '../Seo/Seo'
 
 // ── Trụ sở chính ─────────────────────────────────────────────
 const HEADQUARTER = {
@@ -223,6 +224,11 @@ export default function ContactDetail() {
         <title>Văn Phòng & Chi Nhánh Việt Hương Logistics</title>
         <meta name="description" content="Liên hệ Vận Tải Việt Hương. Chi nhánh tại Đà Nẵng, Hải Phòng, TP. HCM. Hotline: 0905.386.888." />
       </Helmet>
+      <Seo
+        path="/chi-nhanh"
+        title="Văn phòng và chi nhánh | Việt Hương Logistics"
+        description="Thông tin văn phòng, chi nhánh và kênh liên hệ của Việt Hương Logistics. Hotline: 0905.386.888."
+      />
 
       <div className={styles.page}>
 

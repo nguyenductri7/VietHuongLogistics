@@ -12,6 +12,7 @@ import { contactApi } from '../../services/api';
 import { TIMELINE_SERVICES } from './ServicesDetailPage';
 import { normalizeServiceDetail } from './serviceDetailDefaults';
 import s from './ServiceDetailPage.module.scss';
+import Seo, { SITE_URL } from '../Seo/Seo';
 
 const API_BASE = import.meta.env.VITE_API_URL || ''
 
@@ -55,6 +56,28 @@ export default function ServiceDetailPage() {
 
   return (
     <>
+      <Seo
+        path={`/dich-vu/${service.slug || service.id}`}
+        title={`${service.title} | Việt Hương Logistics`}
+        description={service.description || service.desc || service.subtitle}
+        image={service.image}
+        structuredData={{
+          '@context': 'https://schema.org',
+          '@type': 'Service',
+          name: service.title,
+          description: service.description || service.desc || service.subtitle,
+          url: `${SITE_URL}/dich-vu/${service.slug || service.id}`,
+          provider: {
+            '@type': 'Organization',
+            '@id': `${SITE_URL}/#organization`,
+            name: 'Việt Hương Logistics',
+          },
+          areaServed: {
+            '@type': 'Country',
+            name: 'Vietnam',
+          },
+        }}
+      />
       <ServiceDetailHero service={service} />
       <ServiceDetailContent service={service} allServices={allServices} />
       <ServiceDetailCTA service={service} />

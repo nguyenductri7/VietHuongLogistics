@@ -9,6 +9,7 @@ import { ALL_BLOG_CATEGORIES, DEFAULT_BLOG_CATEGORIES } from './blogCategories'
 import { readTimeFromPost } from './blogReadTime'
 import { formatBlogDate, getBlogDateValue } from './blogDate'
 import styles from './BlogPage.module.scss'
+import Seo from '../Seo/Seo'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -155,6 +156,11 @@ export default function BlogPage() {
         <title>Tin Tức | Vận Tải Việt Hương</title>
         <meta name="description" content="Cập nhật tin tức, xu hướng và phân tích mới nhất về ngành logistics và vận tải Việt Nam." />
       </Helmet>
+      <Seo
+        path="/tin-tuc"
+        title="Tin tức vận tải và Logistics | Việt Hương Logistics"
+        description="Cập nhật tin tức, xu hướng và phân tích mới nhất về ngành logistics và vận tải Việt Nam."
+      />
 
       <main ref={sectionRef} className={styles.page}>
         {/* Hero */}
