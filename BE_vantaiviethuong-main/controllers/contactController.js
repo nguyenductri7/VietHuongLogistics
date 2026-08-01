@@ -2,6 +2,27 @@ const { pool } = require('../config/database');
 const { sendContactNotification } = require('../services/emailService');
 const { recordAdminAudit } = require('../services/adminAuditService');
 
+const CRM_STAGE_LABELS = {
+  new_lead: 'Khách mới',
+  called: 'Đã gọi',
+  quoting: 'Đang báo giá',
+  negotiating: 'Đang thương lượng',
+  contracted: 'Đã ký hợp đồng',
+  completed: 'Hoàn thành',
+};
+
+const REPLIED_STAGES = new Set(['quoting', 'negotiating', 'contracted', 'completed']);
+
+function pipelineStageForContactStatus(status, currentStage) {
+  if (status === 'new') return 'new_lead';
+  if (status === 'read') return 'called';
+  if (status === 'archived') return 'completed';
+  if (status === 'replied') {
+    return REPLIED_STAGES.has(currentStage) ? currentStage : 'quoting';
+  }
+  return currentStage || 'new_lead';
+}
+
 // POST /api/contact - Frontend gửi form liên hệ
 const submitContact = async (req, res) => {
   try {
@@ -114,6 +135,7 @@ const getContacts = async (req, res) => {
 
 // PUT /api/admin/contacts/:id/status
 const updateContactStatus = async (req, res) => {
+  const connection = await pool.getConnection();
   try {
     const { id } = req.params;
     const { status } = req.body;
@@ -123,20 +145,73 @@ const updateContactStatus = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Trạng thái không hợp lệ.' });
     }
 
-    const [beforeRows] = await pool.query('SELECT * FROM contact_messages WHERE id = ?', [id]);
+    await connection.beginTransaction();
+    const [beforeRows] = await connection.query(
+      'SELECT * FROM contact_messages WHERE id = ? FOR UPDATE',
+      [id],
+    );
     if (!beforeRows.length) {
+      await connection.rollback();
       return res.status(404).json({ success: false, message: 'Không tìm thấy liên hệ.' });
     }
-    await pool.query('UPDATE contact_messages SET status = ? WHERE id = ?', [status, id]);
-    const [afterRows] = await pool.query('SELECT * FROM contact_messages WHERE id = ?', [id]);
+
+    const before = beforeRows[0];
+    const previousStage = CRM_STAGE_LABELS[before.pipeline_stage] ? before.pipeline_stage : 'new_lead';
+    const nextStage = pipelineStageForContactStatus(status, previousStage);
+
+    let pipelinePosition = before.pipeline_position;
+    if (nextStage !== previousStage) {
+      const [positionRows] = await connection.query(
+        `SELECT COALESCE(MAX(pipeline_position), 0) + 1 AS next_position
+         FROM contact_messages
+         WHERE pipeline_stage = ?`,
+        [nextStage],
+      );
+      pipelinePosition = positionRows[0]?.next_position || 1;
+    }
+
+    await connection.query(
+      `UPDATE contact_messages
+       SET status = ?, pipeline_stage = ?, pipeline_position = ?
+       WHERE id = ?`,
+      [status, nextStage, pipelinePosition, id],
+    );
+
+    if (nextStage !== previousStage) {
+      await connection.query(
+        `INSERT INTO crm_activities
+          (contact_id, activity_type, title, description, from_stage, to_stage, created_by)
+         VALUES (?, 'stage_changed', ?, ?, ?, ?, ?)`,
+        [
+          id,
+          `Chuyển sang ${CRM_STAGE_LABELS[nextStage]}`,
+          `Giai đoạn CRM được đồng bộ khi trạng thái liên hệ đổi sang “${status}”.`,
+          previousStage,
+          nextStage,
+          req.user?.id || null,
+        ],
+      );
+    }
+
+    const [afterRows] = await connection.query('SELECT * FROM contact_messages WHERE id = ?', [id]);
+    await connection.commit();
+
     await recordAdminAudit({
       module: 'contacts', action: 'status', entityType: 'contact', entityId: id,
-      summary: `Cập nhật trạng thái liên hệ của ${beforeRows[0].full_name}`,
-      before: beforeRows[0], after: afterRows[0], userId: req.user?.id,
+      summary: `Cập nhật trạng thái liên hệ của ${before.full_name}`,
+      before, after: afterRows[0], userId: req.user?.id,
     });
-    res.json({ success: true, message: 'Cập nhật trạng thái thành công!' });
+    res.json({
+      success: true,
+      message: 'Cập nhật trạng thái và CRM thành công!',
+      data: afterRows[0],
+    });
   } catch (err) {
+    await connection.rollback();
+    console.error('updateContactStatus error:', err);
     res.status(500).json({ success: false, message: 'Lỗi server.' });
+  } finally {
+    connection.release();
   }
 };
 

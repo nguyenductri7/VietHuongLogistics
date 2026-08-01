@@ -94,11 +94,15 @@ const fetchData = async ({ silent = false } = {}) => {
   const changeStatus = async (id, status) => {
     setUpdating(id)
     try {
-      await contactApi.updateStatus(id, status)
-      setContacts(current => current.map(item => item.id === id ? { ...item, status } : item))
+      const response = await contactApi.updateStatus(id, status)
+      setContacts(current => current.map(item => (
+        item.id === id ? { ...item, ...(response.data || {}), status } : item
+      )))
       const statsRes = await contactApi.getStats()
       setStats({ ...EMPTY_STATS, ...(statsRes.data || {}) })
       window.dispatchEvent(new Event('vh-admin-notifications-refresh'))
+      localStorage.setItem('vh-crm-refresh', String(Date.now()))
+      window.dispatchEvent(new Event('vh-crm-refresh'))
       showToast('Đã cập nhật trạng thái.')
     } catch (error) {
       showToast(error.message || 'Không thể cập nhật trạng thái.', 'error')

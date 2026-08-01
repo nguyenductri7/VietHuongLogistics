@@ -29,6 +29,13 @@ function telHref(phone = '') {
   return digits ? `tel:${digits}` : '#'
 }
 
+function externalHref(url = '') {
+  const value = String(url).trim()
+  if (!value) return null
+  if (/^https?:\/\//i.test(value)) return value
+  return `https://${value.replace(/^\/+/, '')}`
+}
+
 export default function FooterCms() {
   const [footer, setFooter] = useState(DEFAULT_FOOTER)
 
@@ -61,6 +68,12 @@ export default function FooterCms() {
       .filter(Boolean))],
     [footer.email, footer.email_secondary],
   )
+  const socialLinks = useMemo(() => ({
+    facebook: externalHref(footer.facebook_url),
+    youtube: externalHref(footer.youtube_url),
+    instagram: externalHref(footer.instagram_url),
+    zalo: externalHref(footer.zalo_url),
+  }), [footer.facebook_url, footer.youtube_url, footer.instagram_url, footer.zalo_url])
 
   return (
     <footer className={styles.footer} role="contentinfo">
@@ -71,19 +84,19 @@ export default function FooterCms() {
           <p className={styles.taxCode}>Mã số thuế: {footer.tax_code}</p>
 
           <div className={styles.socials}>
-            <a href={footer.facebook_url || '#'} aria-label="Facebook" target="_blank" rel="noopener noreferrer" className={styles.socials__facebook}>
+            <a href={socialLinks.facebook || undefined} aria-label="Facebook" title="Mở Facebook" target="_blank" rel="noopener noreferrer" className={styles.socials__facebook}>
               <svg viewBox="0 0 24 24" fill="currentColor">
                 <path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z" />
               </svg>
             </a>
 
-            <a href={footer.youtube_url || '#'} aria-label="YouTube" target="_blank" rel="noopener noreferrer" className={styles.socials__youtube}>
+            <a href={socialLinks.youtube || undefined} aria-label="YouTube" title="Mở YouTube" target="_blank" rel="noopener noreferrer" className={styles.socials__youtube}>
               <svg viewBox="0 0 24 24" fill="currentColor">
                 <path d="M22.54 6.42a2.78 2.78 0 00-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46a2.78 2.78 0 00-1.95 1.96A29 29 0 001 12a29 29 0 00.46 5.58A2.78 2.78 0 003.41 19.6C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 001.95-1.95A29 29 0 0023 12a29 29 0 00-.46-5.58zM9.75 15.02V8.98L15.5 12l-5.75 3.02z" />
               </svg>
             </a>
 
-            <a href={footer.instagram_url || '#'} aria-label="Instagram" target="_blank" rel="noopener noreferrer" className={styles.socials__instagram}>
+            <a href={socialLinks.instagram || undefined} aria-label="Instagram" title="Mở Instagram" target="_blank" rel="noopener noreferrer" className={styles.socials__instagram}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <rect x="2" y="2" width="20" height="20" rx="5" />
                 <path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z" />
@@ -91,7 +104,7 @@ export default function FooterCms() {
               </svg>
             </a>
 
-            <a href={footer.zalo_url || '#'} aria-label="Zalo" target="_blank" rel="noopener noreferrer" className={styles.socials__zalo}>
+            <a href={socialLinks.zalo || undefined} aria-label="Zalo" title="Mở Zalo" target="_blank" rel="noopener noreferrer" className={styles.socials__zalo}>
               <svg viewBox="0 0 48 48" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                 <path d="M24 4C13 4 4 13 4 24c0 5.5 2.2 10.5 5.8 14.1L8 44l6.2-1.6A19.8 19.8 0 0024 44c11 0 20-9 20-20S35 4 24 4zm9.8 27.4l-2.4.2c-.9 0-1.5-.3-2-.8-.5-.5-2.2-2.3-2.2-2.3s-4.7 2.1-7.5-2.5c-1.3-2.1-1-4.5.7-6.1.4-.4.7-.2.9.1l1.4 2c.2.3.1.6-.1.8-.7.6-.9 1.5-.5 2.3.6 1.2 2 1.6 3.2 1 .4-.2.7-.1.9.2l1.3 1.9c.2.3.1.6-.2.8-.3.2-.6.3-.9.4 1 1.2 2 2.4 2 2.4.4.4.9.6 1.5.5l2.1-.2c.4 0 .6.3.5.6l-.7 1.3c-.1.3-.4.4-.6.4h-.4z" />
               </svg>

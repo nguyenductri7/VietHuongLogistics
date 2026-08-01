@@ -287,6 +287,7 @@ export const faqApi = {
 // ════════════════════════════════════════════════════════════
 export const faqContentApi = {
   getAll: () => request('/faq-content'),
+  getAdminAll: () => request('/faq-content/admin/all'),
 
   getCategories: () => request('/faq-content/admin/categories'),
   createCategory: (data) =>

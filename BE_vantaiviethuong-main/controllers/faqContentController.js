@@ -34,6 +34,28 @@ const getPublicContent = async (req, res) => {
   }
 }
 
+// GET /api/faq-content/admin/all - all categories and items, including hidden ones
+const getAdminContent = async (req, res) => {
+  try {
+    const [categories] = await pool.query(
+      'SELECT * FROM faq_categories ORDER BY sort_order ASC'
+    )
+    const [items] = await pool.query(
+      'SELECT * FROM faq_items ORDER BY category_id ASC, sort_order ASC'
+    )
+
+    const result = categories.map(category => ({
+      ...category,
+      items: items.filter(item => item.category_id === category.id),
+    }))
+
+    return res.json(sanitizeLegacyLocalized(result))
+  } catch (err) {
+    console.error('[FAQ-CONTENT] getAdminContent error:', err)
+    return res.status(500).json({ message: 'Lỗi tải dữ liệu.' })
+  }
+}
+
 // ═══════════════════════════════════════════════════════════════
 //  ADMIN — CATEGORIES
 // ═══════════════════════════════════════════════════════════════
@@ -222,7 +244,7 @@ const deleteItem = async (req, res) => {
 }
 
 module.exports = {
-  getPublicContent,
+  getPublicContent, getAdminContent,
   getCategories, createCategory, updateCategory, deleteCategory,
   getItems, createItem, updateItem, deleteItem,
 }

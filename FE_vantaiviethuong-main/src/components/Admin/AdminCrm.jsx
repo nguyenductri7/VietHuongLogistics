@@ -220,6 +220,28 @@ export default function AdminCrm() {
     return () => window.clearTimeout(timer)
   }, [search])
 
+  useEffect(() => {
+    const refreshPipeline = () => loadPipeline({ silent: true })
+    const handleStorage = event => {
+      if (event.key === 'vh-crm-refresh') refreshPipeline()
+    }
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') refreshPipeline()
+    }
+
+    window.addEventListener('vh-crm-refresh', refreshPipeline)
+    window.addEventListener('storage', handleStorage)
+    window.addEventListener('focus', refreshPipeline)
+    document.addEventListener('visibilitychange', handleVisibility)
+
+    return () => {
+      window.removeEventListener('vh-crm-refresh', refreshPipeline)
+      window.removeEventListener('storage', handleStorage)
+      window.removeEventListener('focus', refreshPipeline)
+      document.removeEventListener('visibilitychange', handleVisibility)
+    }
+  }, [search])
+
   const contactsByStage = useMemo(() => Object.fromEntries(
     stages.map(stage => [
       stage.key,

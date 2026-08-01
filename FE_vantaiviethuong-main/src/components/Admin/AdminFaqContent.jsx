@@ -200,8 +200,15 @@ export default function AdminFaqContent() {
   const fetchCategories = async () => {
     setLoading(true)
     try {
-      const rows = await faqContentApi.getCategories()
-      setCategories(rows)
+      const rows = await faqContentApi.getAdminAll()
+      const nextCategories = Array.isArray(rows) ? rows : []
+      setCategories(nextCategories.map(({ items, ...category }) => category))
+      setItemsMap(Object.fromEntries(
+        nextCategories.map(category => [
+          category.id,
+          Array.isArray(category.items) ? category.items : [],
+        ]),
+      ))
     } catch (err) {
       showToast(err.message || 'Lỗi tải danh mục', 'error')
       if (err.message?.includes('Token')) { logout(); navigate('/login') }
@@ -212,20 +219,10 @@ export default function AdminFaqContent() {
 
   useEffect(() => { fetchCategories() }, [])
 
-  // ── Toggle expand category → load items ─────────────────────
-  const toggleCat = async (catId) => {
+  // Câu hỏi đã được tải sẵn; thao tác này chỉ mở hoặc thu gọn danh mục.
+  const toggleCat = (catId) => {
     if (expandedCat === catId) { setExpandedCat(null); return }
     setExpandedCat(catId)
-    if (itemsMap[catId]) return   // đã có cache
-    setLoadingItems(catId)
-    try {
-      const rows = await faqContentApi.getItems(catId)
-      setItemsMap(p => ({ ...p, [catId]: rows }))
-    } catch (err) {
-      showToast(err.message || 'Lỗi tải câu hỏi', 'error')
-    } finally {
-      setLoadingItems(null)
-    }
   }
 
   // ── Reload items của 1 category ─────────────────────────────
@@ -361,7 +358,7 @@ export default function AdminFaqContent() {
                     <span className={styles.catLabel}>{cat.label}</span>
                     <span className={styles.catKey}>{cat.key}</span>
                     <span className={styles.catCount}>
-                      {items.length > 0 ? `${items.length} câu hỏi` : 'Chưa tải'}
+                      {`${items.length} câu hỏi`}
                     </span>
                     {!cat.is_active && (
                       <span className={styles.hiddenBadge}>Đang ẩn</span>

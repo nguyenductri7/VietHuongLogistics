@@ -65,6 +65,9 @@
   gap: 8px;
   flex-wrap: wrap;
   margin-top: 4px;
+  position: relative;
+  z-index: 2;
+  pointer-events: auto;
 
   a {
     width: 36px;
@@ -74,6 +77,10 @@
     align-items: center;
     justify-content: center;
     transition: transform 0.2s, opacity 0.2s;
+    position: relative;
+    z-index: 1;
+    pointer-events: auto;
+    cursor: pointer;
 
     svg { width: 20px; height: 20px; }
 
