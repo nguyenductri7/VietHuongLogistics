@@ -5,6 +5,15 @@ const DEFAULT_EMAIL_LOGO_PATH = '/static/email/logo-email.png';
 
 let warnedMissingConfig = false;
 
+function parseRecipientEmails(value) {
+  return [...new Set(
+    String(value || '')
+      .split(/[,;\n]+/)
+      .map((email) => email.trim())
+      .filter(Boolean)
+  )];
+}
+
 function escapeHtml(value = '') {
   return String(value)
     .replace(/&/g, '&amp;')
@@ -111,10 +120,10 @@ function renderEmailTemplate({ eyebrow, title, description, reference, rows, mes
 
 function getMailConfig() {
   const apiKey = String(process.env.RESEND_API_KEY || '').trim();
-  const to = String(process.env.NOTIFICATION_EMAIL || DEFAULT_RECIPIENT).trim();
+  const to = parseRecipientEmails(process.env.NOTIFICATION_EMAIL || DEFAULT_RECIPIENT);
   const from = String(process.env.RESEND_FROM_EMAIL || DEFAULT_FROM).trim();
 
-  if (!apiKey || !to || !from) {
+  if (!apiKey || to.length === 0 || !from) {
     if (!warnedMissingConfig) {
       console.warn('[MAIL] Chưa cấu hình RESEND_API_KEY; bỏ qua thông báo email.');
       warnedMissingConfig = true;
@@ -131,7 +140,7 @@ async function sendMail({ subject, text, html, replyTo }) {
 
   const payload = {
     from: config.from,
-    to: [config.to],
+    to: config.to,
     subject,
     text,
     html,
