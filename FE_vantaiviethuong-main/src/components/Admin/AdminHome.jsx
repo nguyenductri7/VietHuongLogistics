@@ -87,7 +87,8 @@ const DEFAULT_HOME = {
     tax_code: '0402058419',
     address: '58 Phước Lý 9 – Phường Hòa Khánh – TP. Đà Nẵng',
     hotline: '0905.386.888',
-    email: 'info@vantaiviethuong.com',
+    email: 'info@viethuonglogistics.com',
+    email_secondary: 'xnkdn.info@viethuongceramics.com',
     facebook_url: 'https://facebook.com',
     youtube_url: 'https://youtube.com',
     instagram_url: 'https://instagram.com',
@@ -181,7 +182,8 @@ const SECTIONS = [
       { key: 'tax_code', label: 'Mã số thuế', type: 'text' },
       { key: 'address', label: 'Trụ sở chính', type: 'textarea' },
       { key: 'hotline', label: 'Hotline', type: 'text' },
-      { key: 'email', label: 'Email', type: 'text' },
+      { key: 'email', label: 'Email công ty 1', type: 'email' },
+      { key: 'email_secondary', label: 'Email công ty 2', type: 'email' },
       { key: 'facebook_url', label: 'Facebook', type: 'text' },
       { key: 'youtube_url', label: 'YouTube', type: 'text' },
       { key: 'instagram_url', label: 'Instagram', type: 'text' },
@@ -593,7 +595,7 @@ export default function AdminHome() {
                     ) : (
                       <input
                         className={styles.input}
-                        type="text"
+                        type={field.type === 'email' ? 'email' : 'text'}
                         value={value || ''}
                         onChange={e => handleChange(activeDataKey, field.key, e.target.value)}
                       />

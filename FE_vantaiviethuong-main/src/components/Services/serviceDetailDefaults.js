@@ -8,7 +8,8 @@ export const GENERIC_SERVICE_DETAIL = {
   form_title_prefix: 'Đặt Lịch',
   form_description: 'Tư vấn miễn phí · Báo giá trong 30 phút · Không ràng buộc',
   hotline: '0905 386 888',
-  email: 'info@vantaiviethuong.com',
+  email: 'info@viethuonglogistics.com',
+  email_secondary: 'xnkdn.info@viethuongceramics.com',
   highlights: [],
   features: [],
   audiences: [

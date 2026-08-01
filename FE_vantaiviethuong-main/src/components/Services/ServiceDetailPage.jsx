@@ -399,6 +399,10 @@ const ServiceDetailContent = ({ service, allServices = TIMELINE_SERVICES }) => {
    ════════════════════════════════════════════════════════════ */
 const ServiceDetailCTA = ({ service }) => {
   const detail = normalizeServiceDetail(service.detail_content, service.slug || service.id);
+  const contactEmails = [...new Set([detail.email, detail.email_secondary]
+    .flatMap(value => String(value || '').split(/[,;\n]+/))
+    .map(value => value.trim())
+    .filter(Boolean))];
   const sectionRef = useRef(null);
   const [form, setForm] = React.useState({
     name: '', phone: '', email: '', cargo: '', note: '',
@@ -481,9 +485,11 @@ const ServiceDetailCTA = ({ service }) => {
                 <a href={`tel:${String(detail.hotline || '').replace(/\s/g, '')}`} className={s.ctaContactItem}>
                   <Phone size={15} /> {detail.hotline}
                 </a>
-                <a href={`mailto:${detail.email || ''}`} className={s.ctaContactItem}>
-                  <Mail size={15} /> {detail.email}
-                </a>
+                {contactEmails.map(email => (
+                  <a key={email} href={`mailto:${email}`} className={s.ctaContactItem}>
+                    <Mail size={15} /> {email}
+                  </a>
+                ))}
               </div>
             </div>
 

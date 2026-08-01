@@ -48,7 +48,8 @@ const DEFAULT_PAGE = {
     items: [
       { icon_key: 'MapPin', label: 'Trụ sở chính', value: '58 Phước Lý 9, Phường Hòa Khánh, TP. Đà Nẵng' },
       { icon_key: 'Phone', label: 'Hotline 24/7', value: '0905 386 888' },
-      { icon_key: 'Mail', label: 'Email', value: 'info@vantaiviethuong.com' },
+      { icon_key: 'Mail', label: 'Email Logistics', value: 'info@viethuonglogistics.com' },
+      { icon_key: 'Mail', label: 'Email Xuất nhập khẩu', value: 'xnkdn.info@viethuongceramics.com' },
       { icon_key: 'Clock', label: 'Giờ làm việc', value: 'Thứ 2 – Thứ 7: 8:00 – 17:00' },
     ],
   },
@@ -440,9 +441,27 @@ const loadAll = useCallback(() => {
           uploading={uploadingKey === 'contact_info.left_image'}
           onUpload={file => uploadImageFile(file, 'contact_info.left_image', url => updatePageField('contact_info.left_image', url))} />
 
+        <div className={styles.detailGroupHeader}>
+          <h5>Danh sách thông tin liên hệ</h5>
+          <button type="button" className={styles.inlineAddBtn} onClick={() => updatePageField(
+            'contact_info.items',
+            [...page.contact_info.items, { icon_key: 'Mail', label: 'Email', value: '' }],
+          )}>
+            <Plus size={14} /> Thêm thông tin
+          </button>
+        </div>
+
         {page.contact_info.items.map((info, i) => (
           <div key={i} className={styles.itemBlock}>
-            <p className={styles.itemLabel}>Thông tin #{i + 1}</p>
+            <div className={styles.detailGroupHeader}>
+              <p className={styles.itemLabel}>Thông tin #{i + 1}</p>
+              <button type="button" className={styles.inlineDeleteBtn} title="Xóa thông tin" onClick={() => updatePageField(
+                'contact_info.items',
+                page.contact_info.items.filter((_, index) => index !== i),
+              )}>
+                <Trash2 size={15} />
+              </button>
+            </div>
             <div className={styles.row}>
               <SelectField label="Icon" value={info.icon_key}
                 options={ICON_OPTIONS}
@@ -695,8 +714,12 @@ const loadAll = useCallback(() => {
                 </div>
                 <TextAreaField label="Mô tả biểu mẫu" value={formData.detail_content.form_description}
                   onChange={v => setFormData(p => ({ ...p, detail_content: { ...p.detail_content, form_description: v } }))} />
-                <TextField label="Email liên hệ" value={formData.detail_content.email}
-                  onChange={v => setFormData(p => ({ ...p, detail_content: { ...p.detail_content, email: v } }))} />
+                <div className={styles.row}>
+                  <TextField label="Email liên hệ 1" value={formData.detail_content.email}
+                    onChange={v => setFormData(p => ({ ...p, detail_content: { ...p.detail_content, email: v } }))} />
+                  <TextField label="Email liên hệ 2" value={formData.detail_content.email_secondary}
+                    onChange={v => setFormData(p => ({ ...p, detail_content: { ...p.detail_content, email_secondary: v } }))} />
+                </div>
               </div>
 
               <div className={styles.modalActions}>

@@ -9,7 +9,8 @@ const DEFAULT_FOOTER = {
   tax_code: '0402058419',
   address: '58 Phước Lý 9 – Phường Hòa Khánh – TP. Đà Nẵng',
   hotline: '0905.386.888',
-  email: 'info@vantaiviethuong.com',
+  email: 'info@viethuonglogistics.com',
+  email_secondary: 'xnkdn.info@viethuongceramics.com',
   facebook_url: 'https://facebook.com',
   youtube_url: 'https://youtube.com',
   instagram_url: 'https://instagram.com',
@@ -53,6 +54,13 @@ export default function FooterCms() {
     () => (Array.isArray(footer.offices) && footer.offices.length ? footer.offices : DEFAULT_FOOTER.offices),
     [footer.offices],
   )
+  const emails = useMemo(
+    () => [...new Set([footer.email, footer.email_secondary]
+      .flatMap(value => String(value || '').split(/[,;\n]+/))
+      .map(value => value.trim())
+      .filter(Boolean))],
+    [footer.email, footer.email_secondary],
+  )
 
   return (
     <footer className={styles.footer} role="contentinfo">
@@ -89,7 +97,7 @@ export default function FooterCms() {
               </svg>
             </a>
 
-            <a href={`mailto:${footer.email}`} aria-label="Gmail" className={styles.socials__gmail}>
+            <a href={`mailto:${emails.join(',')}`} aria-label="Gửi email" className={styles.socials__gmail}>
               <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path d="M2 6C2 4.9 2.9 4 4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6z" fill="#e57e7e" />
                 <path d="M2 6l10 7 10-7" stroke="#EA4335" strokeWidth="2.2" fill="none" strokeLinecap="round" />
@@ -105,7 +113,14 @@ export default function FooterCms() {
             <p>{footer.address}</p>
           </div>
           <p>Hotline: <a href={telHref(footer.hotline)} className={styles.hotline}>{footer.hotline}</a></p>
-          <p>Email: <a href={`mailto:${footer.email}`} className={styles.emailLink}>{footer.email}</a></p>
+          <p>
+            Email:{emails.map((email, index) => (
+              <span key={email}>
+                {index > 0 ? <br /> : ' '}
+                <a href={`mailto:${email}`} className={styles.emailLink}>{email}</a>
+              </span>
+            ))}
+          </p>
         </div>
 
         <div className={styles.officeCol}>

@@ -590,7 +590,9 @@ export const ContactSection = ({ contactData }) => {
                     <span className={s.contactInfoIcon}>{item.icon || ICON_MAP[item.icon_key] || <MapPin size={15} />}</span>
                     <span className={s.contactInfoText}>
                       <strong>{item.label}</strong>
-                      {item.value}
+                      {item.icon_key === 'Mail' ? (
+                        <a href={`mailto:${item.value}`}>{item.value}</a>
+                      ) : item.value}
                     </span>
                   </li>
                 ))}

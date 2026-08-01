@@ -26,7 +26,8 @@ const DEFAULT_SERVICES_PAGE = {
     items: [
       { icon_key: 'MapPin', label: 'Trụ sở chính', value: '58 Phước Lý 9, Phường Hòa Khánh, TP. Đà Nẵng' },
       { icon_key: 'Phone', label: 'Hotline 24/7', value: '0905 386 888' },
-      { icon_key: 'Mail', label: 'Email', value: 'info@vantaiviethuong.com' },
+      { icon_key: 'Mail', label: 'Email Logistics', value: 'info@viethuonglogistics.com' },
+      { icon_key: 'Mail', label: 'Email Xuất nhập khẩu', value: 'xnkdn.info@viethuongceramics.com' },
       { icon_key: 'Clock', label: 'Giờ làm việc', value: 'Thứ 2 – Thứ 7: 8:00 – 17:00' },
     ],
   },
